@@ -1,0 +1,7 @@
+.hive
+.env
+.collections
+.venv
+.ansible
+gcp_credential.json
+secrets.yml
