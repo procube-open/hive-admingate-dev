@@ -1,0 +1,213 @@
+---
+- name: install supervisord
+  block:
+    - name: install epel-release
+      ansible.builtin.dnf:
+        name: epel-release
+        state: present
+
+    - name: install supervisor package
+      ansible.builtin.dnf:
+        name: supervisor
+        state: present
+
+- name: setup python3
+  yum:
+    name:
+    - python3
+    - python3-setuptools
+
+- name: make virtual env for provisioning tools
+  pip:
+    name:
+    - pip
+    virtualenv: /root/prov
+    virtualenv_command: /bin/python3 -m venv
+    state: latest
+- name: install python modules for provisioning tools
+  pip:
+    name:
+    - ansible-core
+    - jxmlease
+    - requests
+    - connexion<3
+    - swagger-ui-bundle
+    - python_dateutil
+    - openpyxl
+    - cryptography
+    - dictdiffer==0.8.1
+    - PyMySQL==0.10.1
+    - lxml
+    - boto3
+    virtualenv: /root/prov
+  environment:
+    LANG: "en_US.UTF-8"
+- name: prepare ansible directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  loop:
+  - /etc/ansible/hosts/group_vars
+  - /root/.ssh
+- name: prepare aws directory for boto3
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  loop:
+  - /root/.aws
+- name: Create archive of playbooks directory locally
+  shell: "tar -c -z -f /tmp/files.tar.gz playbooks templates task_executer"
+  args:
+    chdir: "{{ role_path }}/files"
+  delegate_to: localhost
+- name: Extract playbooks archive on remote server
+  unarchive:
+    src: /tmp/files.tar.gz
+    dest: /root/
+- name: install files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+  - src: plugins
+    dest: /root/.ansible/
+  - src: ansible.cfg
+    dest: /etc/ansible
+  - src: hosts
+    dest: /etc/ansible/ 
+  - src: task-executer.ini
+    dest: /etc/supervisord.d/
+  - src: TenantProvisioningMessage.js
+    dest: /usr/local/NetSoarer/IDManager/BindBroker/messagetable/
+  # - src: "{{ saml_certs_dir }}"
+  #   dest: /root/
+  - src: ssh_config
+    dest: /root/.ssh/config
+  - src: idpw
+    dest: /root/
+- name: install file with mode
+  copy:
+    src: passwordChange.sh
+    dest: /root/
+    mode: 0755
+- name: install group variable definition
+  copy:
+    dest: "/etc/ansible/hosts/group_vars/all.yml"
+    content: "{{ all_vars | to_nice_yaml(indent=2) }}"
+# - name: install files for boto3
+#   template:
+#     src: "{{ item.src }}"
+#     dest: "{{ item.dest }}"
+#     owner: root
+#     group: root
+#     mode: 0600
+#   loop:
+#   - src: aws_config.conf.j2
+#     dest: /root/.aws/config
+#   - src: aws_credentials.conf.j2
+#     dest: /root/.aws/credentials
+- name: active virtualenv on .bashrc
+  lineinfile:
+    path: /root/.bashrc
+    line: source /root/prov/bin/activate
+- name: setup certificate for docker-client
+  include_tasks:
+    file: cert.yml
+  vars:
+    CN: idm
+    hive_safe_ca_dir: "{{ hive_context_dir }}/ca"
+    cert_dir: /root/cert
+    cert_dir_local: "{{ hive_context_dir }}/ca"
+    sub_prefix: "/DC={{ hive_name.split('.') | reverse | join('/DC=') }}/"
+- name: setup docker client
+  include_tasks:
+    file: docker-client.yml
+  vars:
+    home_dir: /root
+    venv: /root/prov
+    CN: idm
+    hive_safe_ca_dir: "{{ hive_context_dir }}/ca"
+    cert_dir_local: "{{ hive_context_dir }}/ca"
+    cert_dir: /root/cert
+- name: install ansible collections
+  shell: /root/prov/bin/ansible-galaxy collection install -r /root/task_executer/requirements.yml
+  register: register_ansible_galaxy_result
+  until: not register_ansible_galaxy_result.failed
+  retries: 3
+  delay: 10
+  args:
+    creates: /root/.ansible/collections/ansible_collections/ansible/posix
+  environment:
+    ANSIBLE_COLLECTIONS_ON_ANSIBLE_VERSION_MISMATCH: "ignore"
+- name: Install python module for admin-gate.
+  pip:
+    name:
+      - paramiko
+      - ansible-pylibssh
+      - passlib
+      - ncclient
+      - pexpect
+      - pywinrm
+      - pan-python
+      - pan-os-python
+  vars:
+    ansible_python_interpreter: /root/prov/bin/python
+- name: Setup Supercronic with Supervisor for password change
+  block:
+    - name: Download Supercronic binary from GitHub
+      ansible.builtin.get_url:
+        url: "https://github.com/aptible/supercronic/releases/download/v0.2.33/supercronic-linux-amd64"
+        dest: /usr/local/bin/supercronic
+        mode: '0755'
+
+    - name: Ensure crontab directory exists
+      ansible.builtin.file:
+        path: /etc/cron.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create crontab file for password change
+      ansible.builtin.copy:
+        dest: /etc/cron.d/password_change
+        mode: '0644'
+        content: |
+          # 毎日午前1時に実行 (末尾の空行を維持してください)
+          0 1 * * * /root/passwordChange.sh
+          
+
+    - name: Create Supervisor configuration for Supercronic
+      ansible.builtin.copy:
+        dest: /etc/supervisord.d/supercronic.ini
+        mode: '0644'
+        content: |
+          [program:supercronic]
+          command=/usr/local/bin/supercronic /etc/cron.d/password_change
+          autostart=true
+          autorestart=true
+          user=root
+          stdout_logfile=/dev/stdout
+          stdout_logfile_maxbytes=0
+          stderr_logfile=/dev/stderr
+          stderr_logfile_maxbytes=0
+
+    # すでにプレイブック内でタスク実行用のiniファイルを配置されているため、
+    # 最後に supervisorctl で supercronic プロセスを開始・登録します
+    - name: Ensure Supercronic is running under Supervisor
+      community.general.supervisorctl:
+        name: supercronic
+        state: present
+- name: install files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+  - src: telnet_aoi.py
+    dest: /root/.ansible/collections/ansible_collections/ansible/netcommon/plugins/action/

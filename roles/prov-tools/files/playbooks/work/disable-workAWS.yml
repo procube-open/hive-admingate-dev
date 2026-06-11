@@ -1,0 +1,8 @@
+---
+# 作業ロールの信頼ポリシーを変更（Principalセクションに存在しないエンティティを指定）して、誰も引き受けられないようにする
+- name: Disabled a role.
+  aws_iam_disableRole:
+    roleName: "{{ aws_iam_role_prefix ~ id }}"
+    resourceTagKey: "{{ aws_iam_role_resourcetag_key | default('ManagedBy') }}"
+    resourceTagDisabledValue: "{{ aws_iam_role_resourcetag_value_disabled | default('AdminGateDisabled') }}"
+  register: result_disabledRole

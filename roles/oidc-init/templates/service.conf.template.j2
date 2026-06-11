@@ -1,0 +1,57 @@
+{% for proxy in ( labels.webgate.proxies | unique(attribute='target_port') ) %}
+upstream {{ labels.published_name }}_{{ proxy.target_port }}_upstream {
+    zone backend_zone 64k;
+    server {{ service_name }}:{{ proxy.target_port }} resolve;
+    keepalive 60;
+}
+{% endfor %}
+
+server {
+    listen 80;
+    listen 443 ssl;
+
+    server_name {{ labels.published_name }}.{{ domain }};
+{% for proxy in labels.webgate.proxies %}
+    location {{ proxy.pathPattern | default("/") }} {
+{% if not (proxy.disableAuthentication is defined and proxy.disableAuthentication) %}
+        include /etc/nginx/conflib/oidc-proxy.conf;
+{% endif %}
+        proxy_pass http://{{ labels.published_name }}_{{ proxy.target_port }}_upstream;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Request-ID $request_id;
+{% if proxy.useWebSocket is defined and proxy.useWebSocket%}
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+{% endif %}
+{% if proxy.addRemoteUserHeader is defined and proxy.addRemoteUserHeader %}
+        proxy_set_header HTTP_REMOTEUSER $oidc_user;
+{% endif %}
+{% if proxy.addRemoteGroupHeader is defined and proxy.addRemoteGroupHeader %}
+        proxy_set_header HTTP_REMOTEGROUP $oidc_role1;
+{% endif %}
+{% if proxy.addGrafanaRoleHeader is defined and proxy.addGrafanaRoleHeader %}
+        proxy_set_header X-WEBAUTH-NAME $oidc_user;
+        proxy_set_header X-WEBAUTH-ROLE $oidc_role2;
+{% endif %}
+    }
+{% endfor %}
+
+    ssl_prefer_server_ciphers  on;
+    ssl_protocols TLSv1.2;
+    ssl_ciphers  'ECDH !aNULL !eNULL !SSLv2 !DH !RC4 !3DES';
+    ssl_certificate /var/acme/data/{{ labels.published_name }}.{{ domain }}-fullchain.crt;
+    ssl_certificate_key /var/acme/data/{{ labels.published_name }}.{{ domain }}_server.key;
+    ssl_verify_client off;
+    
+    access_log syslog:server={{ syslog_server_address }},facility=local7,tag={{ labels.published_name | regex_replace('-', '_') }},severity=info json;
+    access_log /var/log/nginx/access.{{ labels.published_name }}.log json;
+{% if not (labels.disableAuthPath is defined and labels.disableAuthPath) %}
+    include /etc/nginx/conflib/oidc-server.conf;
+{% endif %}
+}

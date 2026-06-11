@@ -1,0 +1,181 @@
+- name: Provisioning to user account.
+  hosts: users
+  gather_facts: false
+  serial: 1
+  vars:
+    ansible_connection: local
+    ansible_python_interpreter: /root/prov/bin/python
+    idp_url: "http://idp:8080"
+    admin_user: "admin"
+    admin_password: "admin"
+    realm: "webgate"
+    realm_role_access_aws: "awsuser"
+  
+  tasks:
+    - name: Set Grafana Role
+      set_fact:
+        grafanaRole: "{{ 'Admin' if idmRole == 'IDM_ADMIN' else 'Viewer' }}" 
+    - name: Create user in Keycloak
+      community.general.keycloak_user:
+        auth_keycloak_url: "{{ idp_url }}"
+        auth_realm: master
+        auth_username: "{{ admin_user }}"
+        auth_password: "{{ admin_password }}"
+        realm: "{{ realm }}"
+        username: "{{ uid }}"
+        firstName: "{{ cn }}"
+        lastName: "{{ sn }}"
+        email: "{{ email }}"
+        enabled: true
+        emailVerified: false
+        required_actions: "{{ 
+          ['UPDATE_PASSWORD', 'CONFIGURE_TOTP', 'sync_data_config'] if userPassword is defined and userPassword != '' 
+          else ['UPDATE_PASSWORD', 'CONFIGURE_TOTP']
+          }}"
+        attributes:
+          - name: IDMRole
+            values:
+              - "{{ idmRole }}"
+            state: present
+          - name: GrafanaRole
+            values:
+              - "{{ grafanaRole }}"
+            state: present
+          - name: team
+            values:
+              - "::{{ team | join(':') }}::"
+            state: present
+        state: present
+      when: prov_operation == 'add'
+    - name: Modify user attributes
+      community.general.keycloak_user:
+        auth_keycloak_url: "{{ idp_url }}"
+        auth_realm: master
+        auth_username: "{{ admin_user }}"
+        auth_password: "{{ admin_password }}"
+        realm: "{{ realm }}"
+        username: "{{ uid }}"
+        firstName: "{{ cn }}"
+        lastName: "{{ sn }}"
+        email: "{{ email }}"
+        enabled: true
+        emailVerified: false
+        required_actions: "{{ 
+          ['UPDATE_PASSWORD', 'CONFIGURE_TOTP', 'sync_data_config'] if userPassword is defined and userPassword != '' 
+          else omit
+          }}"
+        attributes:
+          - name: IDMRole
+            values:
+              - "{{ idmRole }}"
+            state: present
+          - name: GrafanaRole
+            values:
+              - "{{ grafanaRole }}"
+            state: present
+          - name: team
+            values:
+              - "::{{ team | join(':') }}::"
+            state: present
+        state: present
+      when: prov_operation == 'modify'
+    - name: Mapping realmRole to user in Keycloak
+      community.general.keycloak_user_rolemapping:
+        auth_keycloak_url: "{{ idp_url }}"
+        auth_realm: master
+        auth_username: "{{ admin_user }}"
+        auth_password: "{{ admin_password }}"
+        realm: "{{ realm }}"
+        target_username: "{{ uid }}"
+        roles:
+          - name: "{{ realm_role_access_aws }}"
+        state: present
+      when: prov_operation == 'add' or prov_operation == 'modify'
+    - name: Update user password
+      block:
+        - name: Get Keycloak token
+          uri:
+            url: "{{ idp_url }}/realms/master/protocol/openid-connect/token"
+            method: POST
+            headers:
+              Content-Type: "application/x-www-form-urlencoded"
+            body: "grant_type=password&client_id=admin-cli&username={{ admin_user }}&password={{ admin_password }}"
+            body_format: form-urlencoded
+            return_content: yes
+          register: keycloak_token_response
+        - name: Set Keycloak token
+          set_fact:
+            keycloak_token: "{{ keycloak_token_response.json.access_token }}"
+        - name: Get user ID
+          uri:
+            url: "{{ idp_url }}/admin/realms/{{ realm }}/users/"
+            method: GET
+            headers:
+              Authorization: "Bearer {{ keycloak_token }}"
+              Content-Type: "application/json"
+            return_content: yes
+          register: keycloak_users_response
+        - name: Find user ID
+          set_fact:
+            target_user: "{{ keycloak_users_response.json | selectattr('username', 'equalto', uid) | list | first }}"
+        - name: Set user ID
+          set_fact:
+            user_id: "{{ target_user.id }}"
+        - name: Extract argon2 hash information
+          set_fact:
+            argon2_info: "{{ userPassword | regex_findall('^\\{ARGON2\\}\\$argon2(?P<type>\\w+)\\$v=(?P<version>\\d+)\\$m=(?P<memory>\\d+),t=(?P<iterations>\\d+),p=(?P<parallelism>\\d+)\\$(?P<salt>[^\\$]+)\\$(?P<hash>.+)$') }}"
+        - name: Set argon2 data
+          set_fact:
+            argon2_hashLength: "32"
+            argon2_type: "{{ argon2_info[0][0] }}"
+            argon2_version: "1.3"
+            argon2_memory: "{{ argon2_info[0][2] }}"
+            argon2_iterations: "{{ argon2_info[0][3] }}"
+            argon2_parallelism: "{{ argon2_info[0][4] }}"
+            argon2_salt: "{{ argon2_info[0][5] }}=="
+            argon2_hash: "{{ argon2_info[0][6] }}="
+        - name: Set password data
+          set_fact:
+            credential_data: 
+              hashIterations: "{{ argon2_iterations }}"
+              algorithm: "argon2"
+              additionalParameters: 
+                hashLength: ["{{ argon2_hashLength }}"]
+                memory: ["{{ argon2_memory }}"]
+                type: ["{{ argon2_type }}"]
+                version: ["{{ argon2_version }}"]
+                parallelism: ["{{ argon2_parallelism }}"]
+            secret_data:
+              value: "{{ argon2_hash }}"
+              salt: "{{ argon2_salt }}"
+        - name: Set password data
+          set_fact:
+            password_data:
+              credentials:
+                - type: "password"
+                  credentialData: "{{ credential_data | to_json }}"
+                  secretData: "{{ secret_data | to_json }}"
+        - debug:
+            var: password_data
+        - name: Update user password
+          uri:
+            url: "{{ idp_url }}/admin/realms/{{ realm }}/users/{{ user_id }}"
+            method: PUT
+            headers:
+              Authorization: "Bearer {{ keycloak_token }}"
+              Content-Type: "application/json"
+            body: "{{ password_data | to_json }}"
+            body_format: json
+            status_code: 204
+          register: keycloak_update_response
+      when: (prov_operation == 'add' or prov_operation == 'modify') and userPassword is defined and userPassword != ''
+    - name: Delete user in Keycloak
+      community.general.keycloak_user:
+        auth_keycloak_url: "{{ idp_url }}"
+        auth_realm: master
+        auth_username: "{{ admin_user }}"
+        auth_password: "{{ admin_password }}"
+        realm: "{{ realm }}"
+        username: "{{ uid }}"
+        state: absent
+      when: prov_operation == 'delete'

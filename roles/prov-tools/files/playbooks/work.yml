@@ -1,0 +1,30 @@
+---
+- name: Provisioning to work.
+  hosts: works
+  gather_facts: false
+  serial: 1
+  vars_files:
+    - ./vars/aws.yml
+  vars:
+    ansible_connection: local
+    ansible_python_interpreter: /root/prov/bin/python
+    username: guacadmin
+    password: guacadmin
+
+  tasks:
+  - name: Register work.
+    include_tasks:
+      file: work/register-work.yml
+    when: status == "approved" and (connections is defined or connectionGroups is defined)
+  - name: Register work for AWS IAM.
+    include_tasks:
+      file: work/register-workAWS.yml
+    when: status == "approved" and iamPolicies is defined
+  - name: Disable work.
+    include_tasks:
+      file: work/disable-work.yml
+    when: status == "disabled" and (connections is defined or connectionGroups is defined)
+  - name: Disable work for AWS IAM.
+    include_tasks:
+      file: work/disable-workAWS.yml
+    when: status == "disabled" and iamPolicies is defined

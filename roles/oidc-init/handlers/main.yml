@@ -1,0 +1,8 @@
+- name: Apply template
+  shell:
+    cmd: "/docker-entrypoint.d/20-envsubst-on-templates.sh"
+  listen: "apply_template"
+- name: Reload nginx
+  shell:
+    cmd: "nginx -s reload"
+  listen: "apply_template"

@@ -1,0 +1,17 @@
+---
+domain: "{{ domain }}"
+hive_stage: "{{ hive_stage }}"
+hive_name: "{{ hive_name }}"
+first_hive: "{{ groups['first_hive'] | intersect(groups[hive_stage]) | first }}"
+db_password: "{{ db_password }}"
+
+#aws_account_id: "{{ credentials.aws_account_id }}"
+#aws_role_switchonly: "{{ aws_role_switchonly }}"
+#aws_iam_role_prefix: "{{ aws_iam_role_prefix }}"
+#aws_region: "{{ aws_region }}"
+#max_attempts: "{{ boto3_max_attempts }}"
+#retry_mode: "{{ boto3_retry_mode }}"
+
+# saml_cert: "{{ saml_cert }}"
+# saml_key: "{{ saml_key }}"
+# saml_sps_wg: "{{ saml_sps_wg }}"

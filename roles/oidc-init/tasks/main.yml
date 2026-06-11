@@ -1,0 +1,20 @@
+---
+- name: Make directory
+  file:
+    path: "/etc/nginx/templates"
+    state: directory
+- name: Template resolver configuration
+  template:
+    src: "resolver.conf.template.j2"
+    dest: "/etc/nginx/templates/resolver.conf.template"
+  notify: apply_template
+- name: Template service configuration
+  template:
+    src: "service.conf.template.j2"
+    dest: "/etc/nginx/templates/{{ labels.published_name }}.conf.template"
+  loop: "{{ groups['services'] | intersect(groups[hive_stage]) }}"
+  vars:
+    labels: "{{ hostvars[item].hive_labels | default({}) }}"
+    service_name: "{{ item }}"
+  when: labels.published_name is defined and labels.webgate is defined
+  notify: apply_template

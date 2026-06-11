@@ -1,0 +1,30 @@
+---
+# 属性値を設定
+- set_fact:
+    Periods_aws: "{{ Periods | default([]) }}"
+- set_fact:
+    workUsers: "{{ workUsers | default([]) }}"
+- set_fact:
+    workUserGroups: "{{ workUserGroups | default([]) }}"
+- name: Format periods.
+  set_fact:
+    req_periods_aws: >
+      {{ req_periods_aws | default([]) + [{
+        "validFrom": item.validFrom ~ "T00:00:00+0900",
+        "validUntil": item.validUntil ~ "T23:59:59+0900",
+      }] }}
+  loop: "{{ Periods_aws }}"
+
+# 作業ロールの作成、およびIAMポリシーのアタッチ
+- name: Creates a role and attaches policies.
+  aws_iam_createRole:
+    roleName: "{{ aws_iam_role_prefix ~ id }}"
+    resourceTagKey: "{{ aws_iam_role_resourcetag_key | default('ManagedBy') }}"
+    resourceTagValue: "{{ aws_iam_role_resourcetag_value | default('AdminGate') }}"
+    workUsers: "{{ workUsers }}"
+    workUserGroups: "{{ workUserGroups }}"
+    periods: "{{ req_periods_aws }}"
+    principalArn: "{{ aws_iam_role_SwitchOnlyRoleArn }}"
+    policyArnPrefix: "{{ aws_iam_policyArn_prefix }}"
+    iamPolicies: "{{ iamPolicies | unique }}"
+  register: result_createdRole

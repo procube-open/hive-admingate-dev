@@ -1,0 +1,11 @@
+- name: read definitions
+  idm_fact:
+    host: "idm3-bindbroker"
+    interface: "{{ md_if.name }}"
+    filter: "{{ md_if.filter | default(omit) }}"
+  register: md_data
+- name: put documents for definitions
+  local_action:
+    module: template
+    src: "{{ md_if.src }}"
+    dest: "{{ hive_root_dir }}/docs/{{ md_if.dest }}"

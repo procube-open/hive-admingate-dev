@@ -1,0 +1,6 @@
+---
+#
+# None-editable values
+#
+aws_iam_policyArn_prefix: arn:aws:iam::{{ aws_account_id }}:policy/
+aws_iam_role_SwitchOnlyRoleArn: arn:aws:iam::{{ aws_account_id }}:role/{{aws_role_switchonly}}

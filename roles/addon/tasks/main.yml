@@ -1,0 +1,19 @@
+---
+- name: Create Docker client certificate directory
+  file:
+    path: "/etc/docker/certs.d/{{ ns_container_repository }}"
+    state: directory
+    mode: '0755'
+  become: true
+- name: Create NSSDC client certificate
+  copy:
+    content: "{{ credentials.nssdc_client_cert }}"
+    dest: "/etc/docker/certs.d/{{ ns_container_repository }}/client.cert"
+    mode: '0644'
+  become: true
+- name: Create NSSDC client key
+  copy:
+    content: "{{ credentials.nssdc_client_key }}"
+    dest: "/etc/docker/certs.d/{{ ns_container_repository }}/client.key"
+    mode: '0600'
+  become: true

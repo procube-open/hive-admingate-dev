@@ -1,0 +1,103 @@
+---
+plugin: hive_services
+services:
+  # MongoDB Database
+  idm3-mongodb:
+    image: mongo:7.0
+    # ports:
+    # - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: idm3
+    volumes:
+    - source: mongodb_data
+      target: /data/db
+      type: volume
+      drbd:
+        fstype: xfs
+        size: 5G
+    - source: mongodb_config
+      target: /data/configdb
+      type: volume
+      drbd:
+        fstype: xfs
+        size: 1G
+
+  # BindBroker Service
+  idm3-bindbroker:
+    image: docker-repository.procube.jp/idm-bindbroker:latest
+    environment:
+      NODE_ENV: development
+      IDM_DB_MONGO_HOST: idm3-mongodb
+      IDM_DB_MONGO_OPTION: '{"auth":{"username":"root","password":"password"},"authSource":"admin"}'
+      IDM_PROVISIONING_TOMCAT_HOST: idm3-tomcat
+
+  # Tomcat Service
+  idm3-tomcat:
+    image: docker-repository.procube.jp/idm-tomcat:latest
+    # ports:
+    # - "8080:8080"
+    environment:
+      BINDBROKER_URL: http://idm3-bindbroker:8090
+      JAVA_OPTS: -Xmx1024m -Xms512m
+      IDM3_ENDPOINT: http://idm3-bindbroker:8090/IDManager/
+
+  # Gateway Service (Apache HTTP Server)
+  idm3-gateway:
+    image: docker-repository.procube.jp/idm-gateway:latest
+    ports:
+    - "10443:9443"
+    initialize_roles:
+      # - idm-download
+      - idm-init
+    environment:
+      # 認証設定
+      AUTH_METHOD: basic
+      AUTH_REALM: NetSoarer ID Manager V3
+      # BASIC 設定
+      BASIC_AUTH_USER: admin
+      BASIC_AUTH_PASSWORD: admin
+      # バックエンドURL設定
+      WEB_BACKEND_URL: http://idm3-web:3000
+      # MongoDB設定（idm3ctlコマンド用）
+      MONGO_HOST: idm3-mongodb
+      MONGO_PORT: "27017"
+      MONGO_USERNAME: root
+      MONGO_PASSWORD: password
+      MONGO_AUTH_DB: admin
+      BINDBROKER_HOST: idm3-bindbroker
+      BINDBROKER_MANAGEMENT_PORT: "8094"
+      BINDBROKER_HMR_RESTART_ENABLED: "true"
+
+  # Web Frontend Service
+  idm3-web:
+    image: docker-repository.procube.jp/idm-web:latest
+    environment:
+      ENABLE_SANDBOX_ORIGIN_CHECK: "false"
+      NEXT_API_URL: http://idm3-bindbroker:8090/IDManager
+      NEXT_CSV_URL: http://idm3-bindbroker:8091/IDManagerCSV
+      NEXT_PDF_URL: http://idm3-tomcat:8080/PdfReport
+      NEXT_CHANGEPASSWORD_URL: http://idm3-tomcat:8080/changePassword
+      NEXT_ADPASSWORDSYNC_URL: http://idm3-tomcat:8080/ADPasswordSync
+      NEXT_MAILCONFIRM_URL: http://idm3-tomcat:8080/MailConfirm
+    labels:
+      published_name: idm3
+      webgate:
+        proxies:
+        - target_port: 3000
+          readTimeout: 7200
+          maxBodySize: 10
+          pathPattern: /
+          addRemoteUserHeader: true
+          addRemoteGroupHeader: true
+        - target_port: 3000
+          disableAuthentication: true
+          pathPattern: /changePassword
+
+  idm3-provtools:
+    image: 
+      from: almalinux:10
+      roles:
+        - prov-tools
+

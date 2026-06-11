@@ -1,0 +1,37 @@
+---
+- name: Get token of REST API.
+  uri:
+    url: "http://guacamole:8080/guacamole/api/tokens"
+    headers:
+      Content-Type: "application/x-www-form-urlencoded"
+    method: POST
+    body: 'username={{ username }}&password={{ password }}'
+    validate_certs: false
+    return_content: yes
+    status_code: 200
+  register: token
+- name: Get Works
+  uri:
+    url: "http://guacamole:8080/guacamole/api/session/data/postgresql/works"
+    headers:
+      Guacamole-Token: "{{ token.json.authToken }}"
+    method: GET
+    status_code: 200
+  register: guacamoleWorks
+- name: Filter Works
+  set_fact:
+    works: "{{ guacamoleWorks.json | dict2items | selectattr('value.idmIdentifier', 'eq', id) | map(attribute='key') | list }}"
+# - name: debug
+#   debug:
+#     msg: "{{ works | first }}"
+- name: Disable Works
+  uri: 
+    url: "http://guacamole:8080/guacamole/api/session/data/postgresql/works/{{ works | first }}"
+    headers:
+      Guacamole-Token: "{{ token.json.authToken }}"
+      Content-Type: "application/json"
+    method: PUT
+    body_format: json
+    body:
+      disabled: true
+    status_code: 204

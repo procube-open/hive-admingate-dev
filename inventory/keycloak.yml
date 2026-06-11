@@ -1,0 +1,94 @@
+---
+plugin: hive_services
+services:
+  idp:
+    image: ghcr.io/procube-open/nsag-keycloak-cr
+    # image: procube/keycloak-passwordless:0.0.21-rc.6
+    command: ["start", "--import-realm"]
+    ports:
+      - "18081:8080"
+    environment:
+      KC_DB: mysql
+      KC_DB_URL: jdbc:mysql://keycloak_db:3306/keycloak_db
+      KC_DB_USER: keycloak
+      KC_DB_PASSWORD: "{{ db_password }}"
+      KC_HOSTNAME: https://idp.{{ domain }}
+      # ブラウザ版codespacesからの接続の場合
+      # KC_HOSTNAME_ADMIN: https://{{ CODESPACE_NAME }}-18083.app.github.dev
+      KC_HOSTNAME_ADMIN: http://127.0.0.1:18081
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: "xforwarded"
+      KC_CACHE: "ispn"
+      KC_WEBGATE_REALM_FRONTEND_URL: https://idp.{{ domain }}
+      KC_WEBGATE_MAPPERS: "IDMRole GrafanaRole username"
+      OIDC_CLIENT_SECRET: "{{ credentials.oidc_client_secret }}"
+      OIDC_ACCESS_TOKEN_LIFESPAN: "600"
+      OIDC_SSO_SESSION_IDLE_TIMEOUT: "64800"
+      OIDC_SSO_SESSION_MAX_LIFESPAN: "64800"
+      OIDC_DISPLAY_NAME: "Admin Gate"
+      OIDC_DISPLAY_NAME_HTML: "Admin Gate"
+      JAVA_OPTS_KC_HEAP: "-XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30 -XX:MaxRAMPercentage=65"
+      IDMSYNC_BASE_URL: "http://idm:8090/IDManager"
+    labels:
+      published_name: idp
+      webgate:
+        proxies:
+          - target_port: 8080
+            pathPattern: /
+            disableAuthentication: true
+    # placement:
+    #   constraints:
+    #     - "node.labels.guacamole != true"
+  keycloak_db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ db_password }}"
+      MYSQL_DATABASE: keycloak_db
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: "{{ db_password }}"
+    volumes:
+      - source: keycloak_db_data
+        target: /var/lib/mysql
+        type: volume
+        drbd:
+          size: 1G
+          fstype: xfs
+  oidc:
+    image: procube/nginx-oidc
+    initialize_roles:
+      - python-aptk
+      - oidc-init
+      # dsh oidc
+      # rm -f /var/acme/data/*
+      # で削除可能
+      - oidc-acme
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      OIDC_CLIENT_ID: "webgate-web"
+      OIDC_CLIENT_SECRET: "{{ credentials.oidc_client_secret }}"
+      OIDC_SCOPE: "openid"
+      OIDC_ISSUER: https://idp.{{ domain }}/realms/webgate
+      OIDC_AUTH_ENDPOINT: https://idp.{{ domain }}/realms/webgate/protocol/openid-connect/auth
+      OIDC_LOGOUT_ENDPOINT: https://idp.{{ domain }}/realms/webgate/protocol/openid-connect/logout
+      OIDC_TOKEN_ENDPOINT: http://idp:8080/realms/webgate/protocol/openid-connect/token
+      OIDC_USER_INFO_ENDPOINT: http://idp:8080/realms/webgate/protocol/openid-connect/userinfo
+      OIDC_REDIRECT_SCHEME: https
+      OIDC_JWT_GEN_KEY: "{{ credentials.oidc_jwt_gen_key }}"
+      OIDC_USER_CLAIM: "username"
+      OIDC_ROLE1_CLAIM: "IDMRole"
+      OIDC_ROLE2_CLAIM: "GrafanaRole"
+    volumes:
+      - source: oidc_templates
+        target: /etc/nginx/templates
+        type: volume
+        drbd:
+          size: 1G
+          fstype: xfs
+      - source: oidc_acme
+        target: /var/acme
+        type: volume
+        drbd:
+          size: 500M
+          fstype: xfs
