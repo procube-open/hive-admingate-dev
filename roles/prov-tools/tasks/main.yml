@@ -198,12 +198,23 @@
           stderr_logfile=/dev/stderr
           stderr_logfile_maxbytes=0
 
+    - name: start supervisord daemon
+      ansible.builtin.command:
+        cmd: /usr/bin/supervisord -c /etc/supervisord.conf
+      args:
+        creates: /run/supervisor/supervisor.sock
+
+    - name: wait for supervisord socket
+      ansible.builtin.wait_for:
+        path: /run/supervisor/supervisor.sock
+        timeout: 30
+
     # すでにプレイブック内でタスク実行用のiniファイルを配置されているため、
     # 最後に supervisorctl で supercronic プロセスを開始・登録します
     - name: Ensure Supercronic is running under Supervisor
       community.general.supervisorctl:
         name: supercronic
-        state: present
+        state: started
 - name: install files
   copy:
     src: "{{ item.src }}"

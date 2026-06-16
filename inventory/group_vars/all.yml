@@ -4,6 +4,9 @@
 # サイトをインターネットに公開する際のドメイン。
 domain: "{{ hive_name }}.procube-demo.jp"
 # 委任先の FQDN は ns[0-2]-{{ domain }} とする（グルーレコードではなく親ドメインの直下レコードとする）
+dn_suffix: "DC={{ domain.split('.') | join(',DC=') }}"
+
+CODESPACE_NAME: "{{ lookup('env', 'CODESPACE_NAME') }}"
 
 web_vip: 192.168.0.200
 dns_mode: "global"  # global or internal
@@ -26,8 +29,8 @@ ipWhiteList: []
 pwAvailableDays: 0
 
 # DRBD 関連設定
-hive_kernel_version: "6.12.0-211.20.1.el10_2.x86_64"
-hive_drbd_download_url: "https://github.com/procube-open/drbd9-rpm/releases/download/Latests/drbd-9.2.15-v9.29.0-6.12.0-211.20.1.el10_2.x86_64.tar.gz"
+# hive_kernel_version: "6.12.0-211.20.1.el10_2.x86_64"
+# hive_drbd_download_url: "https://github.com/procube-open/drbd9-rpm/releases/download/Latests/drbd-9.2.15-v9.29.0-6.12.0-211.20.1.el10_2.x86_64.tar.gz"
 
 # MongoDB から復元するデータの定義
 restore_sequence_mongodb:

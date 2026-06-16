@@ -49,7 +49,6 @@ server {
     ssl_certificate_key /var/acme/data/{{ labels.published_name }}.{{ domain }}_server.key;
     ssl_verify_client off;
     
-    access_log syslog:server={{ syslog_server_address }},facility=local7,tag={{ labels.published_name | regex_replace('-', '_') }},severity=info json;
     access_log /var/log/nginx/access.{{ labels.published_name }}.log json;
 {% if not (labels.disableAuthPath is defined and labels.disableAuthPath) %}
     include /etc/nginx/conflib/oidc-server.conf;

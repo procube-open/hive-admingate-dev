@@ -4853,7 +4853,7 @@ phases_data:
                 type: CustomTaskExecutor
             database: Master
             displayName: 接続先作成
-            host: localhost
+            host: idm3-provtools
             ignore: false
             ignoreMultiResult: false
             ignoreZeroResult: false
@@ -4886,7 +4886,7 @@ phases_data:
                 type: CustomTaskExecutor
             database: Master
             displayName: IdP ユーザ作成
-            host: localhost
+            host: idm3-provtools
             ignore: false
             ignoreMultiResult: false
             ignoreZeroResult: false
@@ -4909,7 +4909,7 @@ phases_data:
                 type: CustomTaskExecutor
             database: Master
             displayName: ユーザー作成
-            host: localhost
+            host: idm3-provtools
             ignore: false
             ignoreMultiResult: false
             ignoreZeroResult: false
@@ -4944,7 +4944,7 @@ phases_data:
                 type: CustomTaskExecutor
             database: Master
             displayName: 作業作成
-            host: localhost
+            host: idm3-provtools
             ignore: false
             ignoreMultiResult: false
             ignoreZeroResult: false
@@ -4962,7 +4962,7 @@ phases_data:
                 type: CustomTaskExecutor
             database: Master
             displayName: ユーザ有効化
-            host: localhost
+            host: idm3-provtools
             ignore: false
             ignoreMultiResult: false
             ignoreZeroResult: false
@@ -5175,5 +5175,6 @@ phases_data:
             idmRole: IDM_ADMIN
             sn: idm
             uid: admin
-            team: administorators
+            team:
+            - administorators
             userPassword: '{{ db_password }}'

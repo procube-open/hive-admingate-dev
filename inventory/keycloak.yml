@@ -14,8 +14,8 @@ services:
       KC_DB_PASSWORD: "{{ db_password }}"
       KC_HOSTNAME: https://idp.{{ domain }}
       # ブラウザ版codespacesからの接続の場合
-      # KC_HOSTNAME_ADMIN: https://{{ CODESPACE_NAME }}-18083.app.github.dev
-      KC_HOSTNAME_ADMIN: http://127.0.0.1:18081
+      KC_HOSTNAME_ADMIN: https://{{ CODESPACE_NAME }}-18081.app.github.dev
+      # KC_HOSTNAME_ADMIN: http://127.0.0.1:18081
       KC_HTTP_ENABLED: "true"
       KC_PROXY_HEADERS: "xforwarded"
       KC_CACHE: "ispn"
@@ -28,7 +28,7 @@ services:
       OIDC_DISPLAY_NAME: "Admin Gate"
       OIDC_DISPLAY_NAME_HTML: "Admin Gate"
       JAVA_OPTS_KC_HEAP: "-XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=30 -XX:MaxRAMPercentage=65"
-      IDMSYNC_BASE_URL: "http://idm:8090/IDManager"
+      IDMSYNC_BASE_URL: "http://idm3-bindbroker:8090/IDManager"
     labels:
       published_name: idp
       webgate:
