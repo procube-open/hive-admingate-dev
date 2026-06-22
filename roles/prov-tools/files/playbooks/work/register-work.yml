@@ -94,7 +94,7 @@
     status_code: 200
 - name: Get connection list
   uri:
-    url: "http://localhost:8090/IDManager/SystemConnectionIF"
+    url: "http://idm3-bindbroker:8090/IDManager/SystemConnectionIF"
     headers:
       HTTP_SYSTEMACCOUNT: "SYSTEM"
     method: GET

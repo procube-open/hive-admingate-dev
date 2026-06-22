@@ -34,7 +34,7 @@ DOCUMENTATION = r'''
       choices: ['idm_inventory']
     host:
       description: ID Manager host name
-      default: localhost
+      default: idm3-bindbroker
     port:
       description: ID Manager port
       default: 8090

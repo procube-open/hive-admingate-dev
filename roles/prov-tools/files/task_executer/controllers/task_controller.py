@@ -17,8 +17,17 @@ import yaml
 
 from task_executer.models.request_body import RequestBody  # noqa: E501
 from task_executer.models.response_body import ResponseBody  # noqa: E501
-from distutils.util import strtobool
 # from swagger_server import util
+
+
+def strtobool(value):
+  normalized = value.strip().lower()
+  if normalized in ('y', 'yes', 't', 'true', 'on', '1'):
+    return True
+  if normalized in ('n', 'no', 'f', 'false', 'off', '0'):
+    return False
+  raise ValueError(f'invalid truth value {value!r}')
+
 
 logging.basicConfig(level=(logging.DEBUG if strtobool(os.environ.get('IDMTE_DEBUG', 'False')) else logging.INFO))
 
@@ -44,7 +53,7 @@ def safe_timestamp(isostr):
   return datetime.datetime.now()
 
 class IDMLogger:
-  def __init__(self, codebase, taskId, provSettingName, class_name, playbook, userid='IDM_STAFF_REGISTER', baseurl='http://localhost:8090/IDManager/_taskLogAppender'):
+  def __init__(self, codebase, taskId, provSettingName, class_name, playbook, userid='IDM_STAFF_REGISTER', baseurl='http://idm3-bindbroker:8090/IDManager/_taskLogAppender'):
     self.codebase = codebase
     self.logtemplate = dict(taskId=taskId, provSettingName=provSettingName)
     self.userid = userid
@@ -53,9 +62,13 @@ class IDMLogger:
 
   def _post2idm(self, data):
     headers = {'http_systemaccount': self.userid}
-    response = requests.post(self.url, headers=headers, json=data)
-    response.raise_for_status()
-    return response.json()
+    try:
+      response = requests.post(self.url, headers=headers, json=data)
+      response.raise_for_status()
+      return response.json()
+    except (requests.exceptions.RequestException, ValueError) as err:
+      logging.getLogger('AnsibleTaskExecuter').warning(f'failed to post task log to IDManager: {err}')
+      return None
 
   def _sendTaskLog(self, timestamp, level, code, context):
     log = self.logtemplate.copy()
@@ -191,6 +204,7 @@ def execute_task(body):  # noqa: E501
   if connexion.request.is_json:
     logging.getLogger(f'AnsibleTaskExecuter').debug(yaml.dump(connexion.request.get_json(), allow_unicode=True))
     result, failed_data = AnsibleExecuter(RequestBody.from_dict(connexion.request.get_json())).execute()  # noqa: E501
-    return ResponseBody(result=result, failed_data=failed_data)
+    status_code = 500 if result == 'failed' else 200
+    return ResponseBody(result=result, failed_data=failed_data).to_dict(), status_code
 
   assert False, 'request body must be json'

@@ -87,8 +87,8 @@
         auth_password: "{{ admin_password }}"
         realm: "{{ realm }}"
         target_username: "{{ uid }}"
-        roles:
-          - name: "{{ realm_role_access_aws }}"
+        # roles:
+        #   - name: "{{ realm_role_access_aws }}"
         state: present
       when: prov_operation == 'add' or prov_operation == 'modify'
     - name: Update user password

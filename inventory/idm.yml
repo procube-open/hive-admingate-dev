@@ -100,4 +100,8 @@ services:
       from: almalinux:10
       roles:
         - prov-tools
-
+    command:
+      - "/usr/bin/supervisord"
+      - "-n"
+      - "-c"
+      - "/etc/supervisord.conf"
