@@ -1,0 +1,14 @@
+[notification.webhook]
+enabled = true
+endpoint = "http://{{ core_service_name }}:8080/webhook/file/history/notify"
+# backend/.env の FILE_HISTORY_WEBHOOK_SECRET と同じ値を設定
+bearer_token = "{{ db_password }}"
+
+# Optional filters
+# event_types = ["create", "update", "delete", "rename"]
+# path_prefixes = ["/<uuid>/"]
+
+# Delivery tuning
+# workers = 4
+# buffer_size = 1024
+# max_retries = 10

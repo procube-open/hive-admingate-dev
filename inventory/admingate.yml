@@ -1,0 +1,83 @@
+---
+plugin: hive_services
+services:
+  # Guacamole: RDP/VNC/SSH gateway protocol proxy daemon
+  guacd:
+    image: docker-repository.procube.jp/admingate-guacd:latest
+    labels:
+      HIVE_MARK: guacamole
+    volumes:
+      - source: guacd_recordings
+        target: /var/lib/guacamole/recordings
+        type: volume
+        drbd:
+          size: 5G
+          fstype: xfs
+
+  # PostgreSQL: Guacamole authentication and configuration database
+  postgres:
+    image:
+      from: postgres:15
+      roles:
+        - python-aptk
+        - admingate-db
+    environment:
+      POSTGRES_USER: admingate_user
+      POSTGRES_PASSWORD: "{{ db_password }}"
+      POSTGRES_DB: admingate_app
+    volumes:
+      - source: postgres_data
+        target: /var/lib/postgresql/data
+        type: volume
+        drbd:
+          size: 1G
+          fstype: xfs
+
+  admingate-core-server:
+    image: docker-repository.procube.jp/admingate-core-server:latest
+    # guacd_recordingsの共有マウントをするために、guacdと同じnodeに配置する必要がある。
+    placement:
+      constraints:
+        - node.labels.guacamole == true
+    environment:
+      PORT: "8080"
+      ADMIN_PORT: "8081"
+      RUST_LOG: "info"
+      ADMINGATE_DATABASE_URL: "postgresql://admingate_user:{{ db_password }}@postgres:5432/admingate_app"
+      ADMINGATE_SEAWEEDFS_FILER_URL: "http://seaweedfs-filer:8888"
+      ADMINGATE_STATIC_DIR: "/app/dist"
+      FILE_HISTORY_WEBHOOK_SECRET: "{{ db_password }}"
+      ADMINGATE_AUTH_HEADER: "HTTP_REMOTEUSER"
+      ADMINGATE_TIMEZONE: "Asia/Tokyo"
+      GUACD_HOST: "guacd"
+      GUACD_PORT: "4822"
+      RECORDING_PATH: "/var/lib/guacamole/recordings"
+      TYPESCRIPT_PATH: "/var/lib/guacamole/recordings"
+      GUAC_RECORDING_PATH: "/var/lib/guacamole/recordings"
+      GUAC_TYPESCRIPT_PATH: "/var/lib/guacamole/recordings"
+      SELENIUM_GRID_URL: "http://selenium-hub:4444/wd/hub"
+      SELENIUM_BROWSER_VNC_HOST: "selenium-node-docker"
+      SELENIUM_BROWSER_VNC_PORT: "5900"
+      SOCKET_WARP_LISTENER_API_URL: "http://socket-warp-listener:8080"
+      SOCKET_WARP_CONNECT_HOST: "socket-warp-listener"
+      SOCKET_WARP_PORT_RANGE: "12000-12100"
+    volumes:
+      - source: guacd_recordings
+        target: /var/lib/guacamole/recordings:ro
+        type: volume
+        drbd:
+          size: 5G
+          fstype: xfs
+    labels:
+      published_name: admingate-core
+      webgate:
+        proxies:
+        - target_port: 8080
+          readTimeout: 7200
+          maxBodySize: 10
+          pathPattern: /
+          hideContentDispositionHeader: true
+          addRemoteUserHeader: true
+          addRemoteGroupHeader: true
+          useWebSocket: true
+  

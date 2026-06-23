@@ -1,0 +1,65 @@
+---
+plugin: hive_services
+services:
+  # SeaweedFS Master: Metadata server and volume management
+  seaweedfs-master:
+    image: chrislusf/seaweedfs:latest
+    command:
+      - "master"
+      - "-ip=seaweedfs-master"
+      - "-mdir=/data"
+      - "-defaultReplication=000"
+    volumes:
+      - source: seaweedfs_master_data
+        target: /data
+        type: volume
+        drbd:
+          size: 1G
+          fstype: xfs
+
+  # SeaweedFS Volume: Data storage server
+  seaweedfs-volume:
+    image: chrislusf/seaweedfs:latest
+    command:
+      - "volume"
+      - "-mserver=seaweedfs-master:9333"
+      - "-dir=/data"
+      - "-max=100"
+      - "-ip=seaweedfs-volume"
+      - "-port=8080"
+      - "-publicUrl=seaweedfs-volume:8080"
+    volumes:
+      - source: seaweedfs_volume_data
+        target: /data
+        type: volume
+        drbd:
+          size: 5G
+          fstype: xfs
+
+  # SeaweedFS Filer (API operations)
+  seaweedfs-filer:
+    image: 
+      from: chrislusf/seaweedfs:latest
+      roles:
+        - python-aptk
+        - put-filer-toml
+    command:
+      - "filer"
+      - "-master=seaweedfs-master:9333"
+      - "-ip=seaweedfs-filer"
+      - "-port=8888"
+    
+
+  # SeaweedFS Filer (FUSE mount dedicated with notification enabled)
+  seaweedfs-filer-fuse:
+    image:
+      from: chrislusf/seaweedfs:latest
+      roles:
+        - python-aptk
+        - put-filer-toml
+        - put-notification-toml
+    command:
+      - "filer"
+      - "-master=seaweedfs-master:9333"
+      - "-ip=seaweedfs-filer-fuse"
+      - "-port=8888"

@@ -1,0 +1,6 @@
+---
+- name: Put notification.toml
+  template:
+    src: notification.toml
+    dest: /etc/seaweedfs/notification.toml
+    mode: '0644'

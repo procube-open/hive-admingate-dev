@@ -1,0 +1,6 @@
+---
+- name: Copy admingate_init.sql to docker-entrypoint-initdb.d
+  copy:
+    src: admingate_init.sql
+    dest: /docker-entrypoint-initdb.d/admingate_init.sql
+    mode: '0644'

@@ -25,6 +25,9 @@ server {
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Request-ID $request_id;
+{% if proxy.hideContentDispositionHeader is defined and proxy.hideContentDispositionHeader %}
+        proxy_hide_header Content-Disposition;
+{% endif %}
 {% if proxy.useWebSocket is defined and proxy.useWebSocket%}
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";

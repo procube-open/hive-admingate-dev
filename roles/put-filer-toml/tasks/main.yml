@@ -1,0 +1,6 @@
+---
+- name: Put filer.toml
+  template:
+    src: filer.toml
+    dest: /etc/seaweedfs/filer.toml
+    mode: '0644'
