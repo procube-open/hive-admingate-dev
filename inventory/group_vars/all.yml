@@ -34,17 +34,6 @@ pwAvailableDays: 0
 
 # MongoDB から復元するデータの定義
 restore_sequence_mongodb:
-- name: ldap_settings
-  interfaces:
-  - name: _sandboxProvSettings
-    key_property: name
-    filter:
-      name:
-        "$in":
-        - LdapDBProvisioning
-        - LdapSchemaProvisioning
-  - name: _sandboxOpenLdapDbSetting
-    key_property: number
 - name: definitions
   interfaces:
   - name: _sandboxSystemSettings
@@ -57,11 +46,6 @@ restore_sequence_mongodb:
     key_property: name
   - name: _sandboxProvSettings
     key_property: name
-    filter:
-      name:
-        "$nin":
-        - LdapDBProvisioning
-        - LdapSchemaProvisioning
 - name: layouts
   interfaces:
   - name:  _sandboxRoles

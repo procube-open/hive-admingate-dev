@@ -79,6 +79,31 @@ phases_data:
                 type: number
                 unique: false
                 uniqueIgnoreCase: false
+        -   displayName: 連携項目
+            isNestedObject: false
+            isPrimaryAndNestedObject: false
+            keyProperty: id
+            name: alignment
+            outputLdapSchema: false
+            propertyDefinitionList:
+            -   allowAnotherValue: false
+                displayName: 連携ID
+                isArray: false
+                name: id
+                outputLdapSchema: false
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 連携日時
+                isArray: false
+                name: date
+                outputLdapSchema: false
+                required: false
+                type: datetime
+                unique: false
+                uniqueIgnoreCase: false
         -   displayName: 接続先
             isNestedObject: false
             isPrimaryAndNestedObject: false
@@ -96,20 +121,11 @@ phases_data:
                 unique: true
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: 接続先名
-                isArray: false
-                name: name
-                outputLdapSchema: false
-                required: true
-                type: string
-                unique: true
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
                 displayName: ホスト名
                 isArray: false
                 name: hostname
                 outputLdapSchema: false
-                required: true
+                required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
@@ -120,18 +136,15 @@ phases_data:
                 outputLdapSchema: false
                 propagations:
                 -   targetProperty: connectionSpecificationName
-                -   targetProperty: protocol
-                -   targetProperty: port
-                -   targetProperty: username
-                -   targetProperty: password
-                -   targetProperty: params
-                required: true
+                required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
                 valuesInterface: selectConnectionSpecificationIF
             -   allowAnotherValue: false
-                derivation: 'this().connectionSpecification == null ? null : (find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification) == null ? "" : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).name)'
+                derivation: "this().connectionSpecification == null\r\n? null\r\n:
+                    find(getResource(\"/IDManager/selectConnectionSpecificationIF\"),\"id\",this().connectionSpecification)
+                    == null\r\n? \"\"\r\n: find(getResource(\"/IDManager/selectConnectionSpecificationIF\"),\"id\",this().connectionSpecification).name"
                 description: 接続仕様選択時の表示名
                 displayName: 接続仕様名
                 isArray: false
@@ -142,66 +155,25 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                derivation: 'this().connectionSpecification == null ? null : (find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification) == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).protocol)'
-                displayName: プロトコル
-                isArray: false
-                name: protocol
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                derivation: 'this().connectionSpecification == null ? null : (find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification) == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).port)'
-                displayName: ポート
-                isArray: false
-                name: port
-                outputLdapSchema: false
-                required: false
-                type: number
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                derivation: 'this().connectionSpecification == null ? null : (find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification) == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).username)'
-                displayName: 接続ユーザー名
-                isArray: false
-                name: username
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                derivation: 'this().connectionSpecification == null ? null : (find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification) == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).password)'
-                displayName: 接続パスワード
-                isArray: false
-                name: password
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                description: socket warp connector のクライアントID
-                displayName: socket warp client IDs
+                displayName: 参照のみ可能チーム
                 isArray: true
-                name: socket_warp_client_ids
+                name: viewTeam
                 outputLdapSchema: false
                 required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
+                valuesInterface: selectUserGroupIF
             -   allowAnotherValue: false
-                className: ConnectionParams
-                derivation: '{ web_sftp_enabled: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).web_sftp_enabled, socket_warp_client_ids: this().socket_warp_client_ids ? this().socket_warp_client_ids : [], initial_url: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).initial_url, login_url: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).login_url, browser_name: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).browser_name, browser_version: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).browser_version, platform_name: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).platform_name, vnc_host: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).vnc_host, vnc_port: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).vnc_port, privileged_username: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).privileged_username, privileged_password: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).privileged_password, browser_steps: this().connectionSpecification == null ? null : find(getResource("/IDManager/selectConnectionSpecificationIF"), "id", this().connectionSpecification).browser_steps }'
-                displayName: 接続パラメータ
-                isArray: false
-                name: params
+                displayName: 参照/編集可能チーム
+                isArray: true
+                name: editTeam
                 outputLdapSchema: false
                 required: false
-                type: object
+                type: string
                 unique: false
                 uniqueIgnoreCase: false
+                valuesInterface: selectUserGroupIF
             -   allowAnotherValue: false
                 displayName: 補足
                 isArray: false
@@ -211,6 +183,133 @@ phases_data:
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: SSH用ID
+                isArray: false
+                name: sshID
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: SSH用パスワード
+                isArray: false
+                name: sshPassword
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: RDP用ID
+                isArray: false
+                name: rdpID
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: RDP用パスワード
+                isArray: false
+                name: rdpPassword
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: Telnet用ID
+                isArray: false
+                name: telnetID
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: Telnet用パスワード
+                isArray: false
+                name: telnetPassword
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: HTTP/HTTPS用ID
+                isArray: false
+                name: httpID
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: HTTP用パスワード
+                isArray: false
+                name: httpPassword
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: パスワード更新日時
+                isArray: false
+                name: changePasswordDate
+                outputLdapSchema: false
+                required: false
+                type: datetime
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: socket warp connector のクライアントID
+                displayName: SWCゾーン
+                isArray: true
+                name: swcZone
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+        -   displayName: 接続先グループ
+            isNestedObject: false
+            isPrimaryAndNestedObject: false
+            keyProperty: name
+            name: connectionGroup
+            outputLdapSchema: false
+            propertyDefinitionList:
+            -   allowAnotherValue: false
+                displayName: 接続先グループ名
+                isArray: false
+                name: name
+                outputLdapSchema: false
+                required: true
+                type: string
+                unique: true
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 接続先一覧
+                isArray: true
+                name: connections
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                valuesInterface: selectConnectionIF
+            -   allowAnotherValue: false
+                displayName: 所属チーム
+                isArray: true
+                name: team
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                valuesInterface: selectUserGroupIF
         -   displayName: 接続仕様
             isNestedObject: false
             isPrimaryAndNestedObject: false
@@ -223,9 +322,9 @@ phases_data:
                 isArray: false
                 name: id
                 outputLdapSchema: false
-                required: true
+                required: false
                 type: string
-                unique: true
+                unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
                 displayName: 接続仕様名
@@ -234,178 +333,358 @@ phases_data:
                 outputLdapSchema: false
                 required: true
                 type: string
-                unique: true
+                unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: プロトコル
+                displayName: パスワード更新用ID
                 isArray: false
-                name: protocol
+                name: ansibleID
                 outputLdapSchema: false
                 required: true
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: パスワード更新用パスワード
+                isArray: false
+                name: ansiblePassword
+                outputLdapSchema: false
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: OS種別
+                isArray: false
+                name: osType
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
                 values:
-                -   displayName: SSH
-                    value: ssh
-                -   displayName: RDP
-                    value: rdp
-                -   displayName: VNC
-                    value: vnc
-                -   displayName: Browser
-                    value: browser
+                -   displayName: Linux
+                    value: linux
+                -   displayName: Windows
+                    value: windows
+                -   displayName: Cisco ASA
+                    value: asa
+                -   displayName: Cisco IOS
+                    value: ios
+                -   displayName: Cisco IOS XR
+                    value: iosxr
+                -   displayName: BIG-IP
+                    value: bigip
+                -   displayName: Juniper
+                    value: junos
+                -   displayName: Fortigate
+                    value: fortios
+                -   displayName: Arista EOS
+                    value: eos
+                -   displayName: ProLiant
+                    value: pro-liant
+                -   displayName: A10
+                    value: a10
+                -   displayName: 検証用
+                    value: test
+                -   displayName: Apresia AMIOS
+                    value: telnet_AP16K
+                -   displayName: Apresia AEOS
+                    value: telnet_AP3448
+                -   displayName: furukawa F70
+                    value: telnet_F70
+                -   displayName: Sei OLT
+                    value: telnet_FSU
+                -   displayName: NEC IX
+                    value: telnet_ix3115
+                -   displayName: NEC NS
+                    value: telnet_ns2480
+                -   displayName: CISCO IOS Telnet
+                    value: telnet_ios
+                -   displayName: Huawei telnet
+                    value: telnet_huawei
+                -   displayName: Alaxala
+                    value: telnet_Alaxala
+                -   displayName: FRM220
+                    value: telnet_FRM220
+                -   displayName: FW7040
+                    value: telnet_FW7040
+                -   displayName: GM3200
+                    value: telnet_GM3200
+                -   displayName: GbE-SLT
+                    value: telnet_GbE-SLT
+                -   displayName: MF-100GMC
+                    value: telnet_MF-100GMC
+                -   displayName: MW0500
+                    value: telnet_MW0500
+                -   displayName: ODN-183
+                    value: telnet_ODN-183
+                -   displayName: XGbE-SLT
+                    value: telnet_xgbe-slt
+                -   displayName: XGMC-2016
+                    value: telnet_XGMC-2016
+                -   displayName: SmartCS
+                    value: sii
+                -   displayName: SmartCS2240
+                    value: sii2240
+                -   displayName: Web Standard
+                    value: web_standard
+                -   displayName: A10 ACOS Telnet
+                    value: telnet_A10
             -   allowAnotherValue: false
-                displayName: ポート
+                displayName: SSH利用
                 isArray: false
-                name: port
-                outputLdapSchema: false
-                required: false
-                type: number
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 接続ユーザー名
-                isArray: false
-                name: username
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 接続パスワード
-                isArray: false
-                name: password
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Web SFTP利用
-                isArray: false
-                name: web_sftp_enabled
+                name: ssh
                 outputLdapSchema: false
                 required: false
                 type: boolean
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: 初期URL
+                displayName: SSH用ポート
                 isArray: false
-                name: initial_url
+                name: sshPort
                 outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: ログインURL
-                isArray: false
-                name: login_url
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Browser名
-                isArray: false
-                name: browser_name
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Browserバージョン
-                isArray: false
-                name: browser_version
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Platform名
-                isArray: false
-                name: platform_name
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: VNCホスト
-                isArray: false
-                name: vnc_host
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: VNCポート
-                isArray: false
-                name: vnc_port
-                outputLdapSchema: false
+                propGroupName:
+                - ssh
                 required: false
                 type: number
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: Browser初期化ユーザー名
+                displayName: SSH用ID
                 isArray: false
-                name: privileged_username
+                name: sshID
                 outputLdapSchema: false
+                propGroupName:
+                - ssh
                 required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: Browser初期化パスワード
+                displayName: SSH用パスワード
                 isArray: false
-                name: privileged_password
+                name: sshPassword
                 outputLdapSchema: false
+                propGroupName:
+                - ssh
                 required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                className: browserStep
-                displayName: Browser初期化ステップ
-                isArray: true
-                name: browser_steps
+                displayName: RDP利用
+                isArray: false
+                name: rdp
                 outputLdapSchema: false
                 required: false
-                type: object
+                type: boolean
                 unique: false
                 uniqueIgnoreCase: false
-        -   displayName: Browser初期化ステップ
-            isNestedObject: true
-            isPrimaryAndNestedObject: false
-            name: browserStep
-            outputLdapSchema: false
-            propertyDefinitionList:
             -   allowAnotherValue: false
-                displayName: ステップ種別
+                displayName: RDP用ポート
                 isArray: false
-                name: type
+                name: rdpPort
                 outputLdapSchema: false
+                propGroupName:
+                - rdp
+                required: false
+                type: number
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: RDP用ID
+                isArray: false
+                name: rdpID
+                outputLdapSchema: false
+                propGroupName:
+                - rdp
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: RDP用パスワード
+                isArray: false
+                name: rdpPassword
+                outputLdapSchema: false
+                propGroupName:
+                - rdp
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: Telnet利用
+                isArray: false
+                name: telnet
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: Telnet用ポート
+                isArray: false
+                name: telnetPort
+                outputLdapSchema: false
+                propGroupName:
+                - telnet
+                required: false
+                type: number
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: Telnet用ID
+                isArray: false
+                name: telnetID
+                outputLdapSchema: false
+                propGroupName:
+                - telnet
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: Telnet用パスワード
+                isArray: false
+                name: telnetPassword
+                outputLdapSchema: false
+                propGroupName:
+                - telnet
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: HTTP/HTTPS利用
+                isArray: false
+                name: http
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: HTTP/HTTPS用ポート
+                isArray: false
+                name: httpPort
+                outputLdapSchema: false
+                propGroupName:
+                - http
+                required: false
+                type: number
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: HTTP/HTTPS用ID
+                isArray: false
+                name: httpID
+                outputLdapSchema: false
+                propGroupName:
+                - http
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: HTTP/HTTPS用パスワード
+                isArray: false
+                name: httpPassword
+                outputLdapSchema: false
+                propGroupName:
+                - http
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 利用プロトコル
+                isArray: false
+                name: httpProtocol
+                outputLdapSchema: false
+                propGroupName:
+                - http
                 required: true
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
                 values:
-                -   value: goto
-                -   value: click
-                -   value: input
-                -   value: wait
-                -   value: sleep
+                -   displayName: HTTP
+                    value: http
+                -   displayName: HTTPS
+                    value: https
             -   allowAnotherValue: false
-                displayName: ロケータ種別
+                className: httpLoginParams
+                displayName: アクション
                 isArray: false
-                name: by
+                name: actions
+                outputLdapSchema: false
+                propGroupName:
+                - http
+                required: false
+                type: object
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 認証方式
+                isArray: false
+                name: authType
+                outputLdapSchema: false
+                propGroupName:
+                - http
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                values:
+                -   displayName: Basic認証
+                    value: basic
+                -   displayName: Digest認証
+                    value: digest
+                -   displayName: その他（アクションによる認証）
+                    value: action
+        -   displayName: 強制切断済みユーザ
+            isNestedObject: false
+            isPrimaryAndNestedObject: false
+            keyProperty: uid
+            name: disabledUser
+            outputLdapSchema: false
+            propertyDefinitionList:
+            -   allowAnotherValue: false
+                displayName: UID
+                isArray: false
+                name: uid
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+        -   displayName: アクション
+            isNestedObject: true
+            isPrimaryAndNestedObject: false
+            name: httpLoginParams
+            outputLdapSchema: false
+            propertyDefinitionList:
+            -   allowAnotherValue: false
+                displayName: イベント
+                isArray: false
+                name: event
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                values:
+                -   value: input
+                -   value: click
+                -   value: iframe
+                -   value: link
+            -   allowAnotherValue: false
+                displayName: 要素取得方法
+                isArray: false
+                name: getElementMethod
                 outputLdapSchema: false
                 required: false
                 type: string
@@ -413,270 +692,39 @@ phases_data:
                 uniqueIgnoreCase: false
                 values:
                 -   value: xpath
-                -   value: css
-                -   value: id
-                -   value: name
-                -   value: tag
-                -   value: class
-                -   value: link
             -   allowAnotherValue: false
-                displayName: ロケータ値
+                displayName: ターゲットXPath
                 isArray: false
-                name: value
+                name: targetElementPath
                 outputLdapSchema: false
                 required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: URL
+                displayName: 値
                 isArray: false
-                name: url
+                name: sendValue
                 outputLdapSchema: false
                 required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: 入力値
+                description: このアクションの前に画面遷移が存在する場合、チェックしてください。
+                displayName: 画面遷移あり
                 isArray: false
-                name: text
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: クリアしてから入力
-                isArray: false
-                name: clear
+                name: newPage
                 outputLdapSchema: false
                 required: false
                 type: boolean
                 unique: false
                 uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: タイムアウト秒
-                isArray: false
-                name: timeout_sec
-                outputLdapSchema: false
-                required: false
-                type: number
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: スリープミリ秒
-                isArray: false
-                name: ms
-                outputLdapSchema: false
-                required: false
-                type: number
-                unique: false
-                uniqueIgnoreCase: false
-        -   displayName: 接続パラメータ
-            isNestedObject: true
-            isPrimaryAndNestedObject: false
-            name: ConnectionParams
-            outputLdapSchema: false
-            propertyDefinitionList:
-            -   allowAnotherValue: false
-                displayName: Web SFTP利用
-                isArray: false
-                name: web_sftp_enabled
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: socket warp client IDs
-                isArray: true
-                name: socket_warp_client_ids
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 初期URL
-                isArray: false
-                name: initial_url
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: ログインURL
-                isArray: false
-                name: login_url
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Browser名
-                isArray: false
-                name: browser_name
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Browserバージョン
-                isArray: false
-                name: browser_version
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Platform名
-                isArray: false
-                name: platform_name
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: VNCホスト
-                isArray: false
-                name: vnc_host
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: VNCポート
-                isArray: false
-                name: vnc_port
-                outputLdapSchema: false
-                required: false
-                type: number
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Browser初期化ユーザー名
-                isArray: false
-                name: privileged_username
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Browser初期化パスワード
-                isArray: false
-                name: privileged_password
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                className: browserStep
-                displayName: Browser初期化ステップ
-                isArray: true
-                name: browser_steps
-                outputLdapSchema: false
-                required: false
-                type: object
-                unique: false
-                uniqueIgnoreCase: false
-        -   displayName: プロトコル別ファイル転送権限
-            isNestedObject: true
-            isPrimaryAndNestedObject: false
-            name: FileTransferProtocolPermissions
-            outputLdapSchema: false
-            propertyDefinitionList:
-            -   allowAnotherValue: false
-                displayName: 接続許可
-                isArray: false
-                name: connect
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 読み取り許可
-                isArray: false
-                name: read
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 書き込み許可
-                isArray: false
-                name: write
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-        -   displayName: ファイル転送権限
-            isNestedObject: true
-            isPrimaryAndNestedObject: false
-            name: WorkFileTransferPermissions
-            outputLdapSchema: false
-            propertyDefinitionList:
-            -   allowAnotherValue: false
-                className: FileTransferProtocolPermissions
-                displayName: HTTP
-                isArray: false
-                name: http
-                outputLdapSchema: false
-                required: false
-                type: object
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                className: FileTransferProtocolPermissions
-                displayName: Web SFTP
-                isArray: false
-                name: web_sftp
-                outputLdapSchema: false
-                required: false
-                type: object
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                className: FileTransferProtocolPermissions
-                displayName: FTP
-                isArray: false
-                name: ftp
-                outputLdapSchema: false
-                required: false
-                type: object
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                className: FileTransferProtocolPermissions
-                displayName: SFTP
-                isArray: false
-                name: sftp
-                outputLdapSchema: false
-                required: false
-                type: object
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                className: FileTransferProtocolPermissions
-                displayName: TFTP
-                isArray: false
-                name: tftp
-                outputLdapSchema: false
-                required: false
-                type: object
-                unique: false
-                uniqueIgnoreCase: false
+            validation:
+            -   descriptionEx: '"xpathに \"(ダブルクォーテーション)を使うことはできません。 \''(シングルクォーテーション)を用いてください。"'
+                isWarning: false
+                validateEx: "this().targetElementPath\r\n? !this().targetElementPath.toString().includes('\\\"')\r\n:
+                    true"
         -   description: AWS IAM ポリシーの一覧を保持する。作業申請のポリシー一覧に表示される
             displayName: IAMポリシー
             isNestedObject: false
@@ -719,15 +767,193 @@ phases_data:
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
-                valuesInterface: selectTeamIF
+                valuesInterface: selectUserGroupIF
+        -   displayName: 連携システムオブジェクト
+            isNestedObject: false
+            keyProperty: systemId
+            name: linkageSystem
+            outputLdapSchema: false
+            propertyDefinitionList:
+            -   allowAnotherValue: false
+                displayName: システムID
+                isArray: false
+                name: systemId
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 鍵
+                isArray: false
+                name: key
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+        -   displayName: SAML属性定義
+            isNestedObject: true
+            isPrimaryAndNestedObject: false
+            name: samlattr
+            outputLdapSchema: false
+            propertyDefinitionList:
+            -   allowAnotherValue: false
+                displayName: 属性定義ID
+                isArray: false
+                name: attr_id
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: E/U管理者画面には「連携項目名」として表示
+                displayName: 属性
+                isArray: false
+                name: attr
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                values:
+                -   displayName: UID
+                    value: UID
+                -   displayName: 氏名
+                    value: cn
+                -   displayName: データ1
+                    value: data1
+                -   displayName: データ2
+                    value: data2
+                -   displayName: データ3
+                    value: data3
+                -   displayName: データ4
+                    value: data4
+                -   displayName: データ5
+                    value: data5
+        -   displayName: SAML NameID定義
+            isNestedObject: true
+            isPrimaryAndNestedObject: false
+            name: samlnameid
+            outputLdapSchema: false
+            propertyDefinitionList:
+            -   allowAnotherValue: false
+                displayName: NameIDフォーマット
+                isArray: false
+                name: nameid_format
+                outputLdapSchema: false
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                values:
+                -   displayName: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+                    value: urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified
+                -   displayName: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+                    value: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress
+                -   displayName: urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName
+                    value: urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName
+                -   displayName: urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName
+                    value: urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName
+                -   displayName: urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos
+                    value: urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos
+                -   displayName: urn:oasis:names:tc:SAML:2.0:nameid-format:transient
+                    value: urn:oasis:names:tc:SAML:2.0:nameid-format:transient
+                -   displayName: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+                    value: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+            -   allowAnotherValue: false
+                displayName: SAML属性ID
+                isArray: false
+                name: attr_id
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+        -   description: SAML サービスプロバイダ
+            displayName: SAML SP
+            isNestedObject: true
+            isPrimaryAndNestedObject: false
+            name: samlsp
+            outputLdapSchema: false
+            propertyDefinitionList:
+            -   allowAnotherValue: false
+                description: SPのシステムを一位に特定するための名称
+                displayName: 公開名
+                isArray: false
+                name: published_name
+                outputLdapSchema: false
+                required: true
+                stringRestriction: id
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: SAML  SP のメタデータ
+                displayName: SP メタデータ
+                isArray: false
+                name: metadata
+                outputLdapSchema: false
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: サービスURL
+                isArray: false
+                name: service_url
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 配信対象SAML属性
+                isArray: true
+                name: saml_attrs_for_delivery
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: IdPからSPに送るSAMLアサーションを暗号化する。 Office 365の場合は false を設定する。
+                displayName: SAMLアサーションを暗号化する
+                isArray: false
+                name: encryptAssertions
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: IdPからSPに送る応答に署名する。Office365の場合は  false を指定する。
+                displayName: 応答に署名する
+                isArray: false
+                name: signResponses
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: IdPからSPに送るSAMLアサーションに署名する。Office365の場合は true を指定する。
+                displayName: SAMLアサーションに署名する
+                isArray: false
+                name: signAssertions
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
         -   description: システムの利用者のクラス
             displayName: 利用者
             isNestedObject: false
             isPrimaryAndNestedObject: false
             keyProperty: uid
-            ldapSuperClass: person
             name: user
-            outputLdapSchema: true
+            outputLdapSchema: false
             propertyDefinitionList:
             -   allowAnotherValue: false
                 description: ユーザを識別する一意の ID
@@ -739,7 +965,6 @@ phases_data:
                 outputLdapSchema: false
                 patternForInput: ^[a-z0-9_-]+$
                 propagations:
-                -   targetProperty: dn
                 -   targetProperty: displayName
                 required: true
                 stringRestriction: id
@@ -779,7 +1004,7 @@ phases_data:
                 displayName: ID管理役割
                 isArray: false
                 name: idmRole
-                outputLdapSchema: true
+                outputLdapSchema: false
                 required: true
                 type: string
                 unique: false
@@ -813,13 +1038,13 @@ phases_data:
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
-                valuesInterface: selectTeamIF
+                valuesInterface: selectUserGroupIF
             -   allowAnotherValue: false
                 description: true の場合アカウントを無効化する
                 displayName: アカウント無効化
                 isArray: false
                 name: accountLock
-                outputLdapSchema: true
+                outputLdapSchema: false
                 required: false
                 type: boolean
                 unique: false
@@ -836,7 +1061,8 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                derivation: 'this().cn && this().sn ? this().sn + " " + this().cn : (this().cn ? this().cn : (this().sn ? this().sn : this().uid))'
+                derivation: "this().cn && this().sn\r\n? this().sn + \" \" + this().cn\r\n:
+                    this().cn ? this().cn\r\n: this().sn ? this().sn \r\n: this().uid"
                 displayName: 表示名
                 isArray: false
                 name: displayName
@@ -870,7 +1096,7 @@ phases_data:
             isNestedObject: false
             isPrimaryAndNestedObject: false
             keyProperty: id
-            name: team
+            name: userGroups
             outputLdapSchema: false
             propertyDefinitionList:
             -   allowAnotherValue: false
@@ -993,7 +1219,7 @@ phases_data:
             outputLdapSchema: false
             propertyDefinitionList:
             -   allowAnotherValue: false
-                displayName: 作業ID
+                displayName: 業務ID
                 isArray: false
                 name: id
                 outputLdapSchema: false
@@ -1002,7 +1228,7 @@ phases_data:
                 unique: true
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: 作業名
+                displayName: 業務名
                 isArray: false
                 name: name
                 outputLdapSchema: false
@@ -1011,28 +1237,131 @@ phases_data:
                 unique: true
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: 説明
+                className: Period
+                displayName: 作業期間
+                isArray: true
+                name: Periods
+                outputLdapSchema: false
+                required: true
+                type: object
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: ステータス
                 isArray: false
-                name: description
+                name: status
                 outputLdapSchema: false
                 required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
+                values:
+                -   displayName: 編集中
+                    value: editing
+                -   displayName: 承認待ち
+                    value: pending
+                -   displayName: 取り消し
+                    value: cancel
+                -   displayName: 却下
+                    value: rejected
+                -   displayName: 差し戻し
+                    value: sendBack
+                -   displayName: 承認済み
+                    value: approved
+                -   displayName: 無効化
+                    value: disabled
             -   allowAnotherValue: false
                 displayName: 接続先
                 isArray: true
-                name: target_ids
+                name: connections
                 outputLdapSchema: false
+                propagations:
+                -   targetProperty: resultConnections
                 required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
                 valuesInterface: selectConnectionIF
             -   allowAnotherValue: false
-                displayName: 作業者
+                displayName: 接続先グループ
                 isArray: true
-                name: worker_ids
+                name: connectionGroups
+                outputLdapSchema: false
+                propagations:
+                -   targetProperty: resultConnections
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                valuesInterface: selectConnectionGroupIF
+            -   allowAnotherValue: false
+                derivation: "flatten(union(\r\nthis().connections,\r\nthis().connectionGroups\r\n?
+                    select(getResource(\"/IDManager/SystemConnectionGroupIF\", {\"name\":
+                    {\"$in\": this().connectionGroups}}), \"connections\")\r\n: []\r\n))"
+                displayName: 接続先一覧
+                isArray: true
+                name: resultConnections
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                valuesInterface: selectAllConnectionIF
+            -   allowAnotherValue: false
+                displayName: 作業者（単体選択）
+                isArray: true
+                name: workUsers
+                outputLdapSchema: false
+                propagations:
+                -   targetProperty: resultUsers
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                valuesInterface: selectUserIF
+            -   allowAnotherValue: false
+                displayName: 作業者（チーム選択）
+                isArray: true
+                name: workUserGroups
+                outputLdapSchema: false
+                propagations:
+                -   targetProperty: resultUsers
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                valuesInterface: selectUserGroupIF
+            -   allowAnotherValue: false
+                derivation: "flatten(union(\r\nthis().workUsers,\r\nthis().workUserGroups\r\n?
+                    select(getResource(\"/IDManager/userInfoWithTeam\", {\"team\":
+                    {\"$in\": this().workUserGroups}}), \"uid\")\r\n: []\r\n))"
+                displayName: 作業者一覧
+                isArray: true
+                name: resultUsers
+                outputLdapSchema: false
+                propagations:
+                -   targetProperty: applicationMailList
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                valuesInterface: selectAllUserIF
+            -   allowAnotherValue: false
+                displayName: 管理者（単体選択）
+                isArray: true
+                name: manageUsers
+                outputLdapSchema: false
+                propagations:
+                -   targetProperty: approveMailList
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                valuesInterface: selectAdminUserIF
+            -   allowAnotherValue: false
+                displayName: 申請者
+                isArray: false
+                name: applicationUser
                 outputLdapSchema: false
                 required: false
                 type: string
@@ -1040,85 +1369,201 @@ phases_data:
                 uniqueIgnoreCase: false
                 valuesInterface: selectUserIF
             -   allowAnotherValue: false
-                displayName: 管理者
+                displayName: 申請日時
+                isArray: false
+                name: applicationDatetime
+                outputLdapSchema: false
+                required: false
+                type: datetime
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 申請者コメント
+                isArray: false
+                name: applicationComment
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                derivation: "this().resultUsers\r\n? select(getResource(\"/IDManager/selectAllUserIF\",{uid:
+                    {\"$in\": this().resultUsers}}), \"email\").join(\",\")\r\n: \"\""
+                displayName: 申請者メールリスト
+                isArray: false
+                name: applicationMailList
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 承認者
+                isArray: false
+                name: approvedUser
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                valuesInterface: selectUserIF
+            -   allowAnotherValue: false
+                displayName: 承認日時
+                isArray: false
+                name: approvedDatetime
+                outputLdapSchema: false
+                required: false
+                type: datetime
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 承認者コメント
+                isArray: false
+                name: approvedComment
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 承認要求日時
+                isArray: false
+                name: approveRequestDatetime
+                outputLdapSchema: false
+                required: false
+                type: datetime
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 承認完了日時
+                isArray: false
+                name: approveCompletionDate
+                outputLdapSchema: false
+                required: false
+                type: datetime
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                derivation: "this().manageUsers\r\n? select(getResource(\"/IDManager/selectAllUserIF\",{uid:
+                    {\"$in\": this().manageUsers}}), \"email\").join(\",\")\r\n: \"\""
+                displayName: 承認者メールリスト
+                isArray: false
+                name: approveMailList
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: ファイルサーバから接続先へのファイル転送を制限します。
+                displayName: アップロード制限
+                isArray: false
+                name: disableUpload
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: 接続先からファイルサーバへのファイル転送を制限します。
+                displayName: ダウンロード制限
+                isArray: false
+                name: disableDownload
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: AWS IAMポリシーを選択する
+                displayName: IAMポリシー
                 isArray: true
-                name: manager_ids
+                name: iamPolicies
                 outputLdapSchema: false
                 required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
-                valuesInterface: selectAdminUserIF
-            -   allowAnotherValue: false
-                displayName: 開始日
-                isArray: false
-                name: valid_from_date
-                outputLdapSchema: false
-                required: true
-                type: date
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 終了日
-                isArray: false
-                name: valid_until_date
-                outputLdapSchema: false
-                required: true
-                type: date
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 開始時刻
-                isArray: false
-                name: daily_start_time
-                outputLdapSchema: false
-                pattern: ^([01][0-9]|2[0-3]):[0-5][0-9]$
-                patternForInput: ^([01][0-9]|2[0-3]):[0-5][0-9]$
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 終了時刻
-                isArray: false
-                name: daily_end_time
-                outputLdapSchema: false
-                pattern: ^([01][0-9]|2[0-3]):[0-5][0-9]$
-                patternForInput: ^([01][0-9]|2[0-3]):[0-5][0-9]$
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                className: WorkFileTransferPermissions
-                displayName: ファイル転送権限
-                isArray: false
-                name: file_transfer_permissions
-                outputLdapSchema: false
-                required: false
-                type: object
-                unique: false
-                uniqueIgnoreCase: false
+                valuesInterface: selectIamPolicyIF
+            validation:
+            -   descriptionEx: '''IAMポリシーは10個を超えて指定できません'''
+                isWarning: false
+                validateEx: '!(this().iamPolicies && this().iamPolicies.length > 10)'
+            -   descriptionEx: '''IAMポリシーを指定している場合、作業期間は2個以上指定できません'''
+                isWarning: false
+                validateEx: '!(this().iamPolicies && this().iamPolicies.length > 0
+                    && this().Periods&& this().Periods.length > 1)'
+            -   descriptionEx: '"接続先、接続先グループまたはIAMポリシーのいずれか1件以上登録してください。"'
+                isWarning: false
+                validateEx: "this().connections && this().connectionGroups && this().iamPolicies\r\n?
+                    this().connections.length != 0 || this().connectionGroups.length
+                    != 0 || this().iamPolicies.length != 0\r\n:this().connections
+                    && this().connectionGroups\r\n? this().connections.length != 0
+                    || this().connectionGroups.length != 0\r\n:this().connections
+                    && this().iamPolicies\r\n? this().connections.length != 0 || this().iamPolicies.length
+                    != 0\r\n:this().connectionGroups && this().iamPolicies\r\n? this().connectionGroups.length
+                    != 0 || this().iamPolicies.length != 0\r\n: this().connections\r\n?
+                    this().connections.length != 0\r\n: this().connectionGroups\r\n?
+                    this().connectionGroups.length != 0\r\n: this().iamPolicies\r\n?
+                    this().iamPolicies.length != 0\r\n: false"
+            -   descriptionEx: '"作業者（単体選択）または作業者（チーム選択）のどちらかは1件以上登録してください。"'
+                isWarning: false
+                validateEx: "this().workUsers && this().workUserGroups\r\n? this().workUsers.length
+                    != 0 || this().workUserGroups.length != 0\r\n: this().workUsers\r\n?
+                    this().workUsers.length != 0\r\n: this().workUserGroups\r\n? this().workUserGroups.length
+                    != 0\r\n: false"
         _sandboxGadgets:
         -   autoCommit: false
             backToDetail: false
-            className: work
+            className: linkageSystem
             clonable: false
             disableAdd: false
             disableDelete: false
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: 作業ガジェット
+            displayName: 連携システム修正用ガジェット
             downloadDisplayFormatCSV: false
-            downloadUpdateFormatCSV: true
-            interfaceName: workEditorInterface
+            downloadUpdateFormatCSV: false
+            interfaceName: sandboxLinkageSystem
             isSingleton: false
-            name: workEditor
+            name: LinkageSystemEdit
+            showHistory: false
+            uploadCSV: false
+            useDisplayNameHeader: false
+            withHeader: true
+        -   autoCommit: false
+            backToDetail: false
+            className: alignment
+            clonable: false
+            disableAdd: false
+            disableDelete: false
+            disableMultiDelete: false
+            disableSuspension: false
+            disableUpdate: false
+            displayName: 連携ガジェット
+            downloadDisplayFormatCSV: false
+            downloadUpdateFormatCSV: false
+            gadgetCommandlet:
+            -   autoCommit: false
+                backToDetail: false
+                commandlet:
+                -   derivation: Date()
+                    targetProperty: date
+                displayName: 連携
+                goToEdit: false
+                multiSelect: false
+                name: alignment
+                onDetailView: false
+                onEditView: false
+                onListView: true
+            interfaceName: alignmentEditIF
+            isSingleton: false
+            name: alignment_g
             propertiesOnDetail:
             -   className: ''
                 datePickerFlag: false
-                disableUpdate: true
+                disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
@@ -1128,6 +1573,106 @@ phases_data:
                 type: string
             -   className: ''
                 datePickerFlag: false
+                dateSeparator: /
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: date
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: datetime
+            showHistory: false
+            uploadCSV: false
+            useDisplayNameHeader: false
+            withHeader: true
+        -   autoCommit: true
+            backToDetail: false
+            className: work
+            clonable: true
+            clonableTitle: コピーして新規作成
+            disableAdd: false
+            disableDelete: true
+            disableMultiDelete: true
+            disableSuspension: false
+            disableUpdate: true
+            displayName: 作業申請ガジェット
+            downloadDisplayFormatCSV: false
+            downloadUpdateFormatCSV: false
+            gadgetCommandlet:
+            -   autoCommit: true
+                backToDetail: true
+                description: 編集中のみ
+                displayCondition: this().status=="editing" || this().status=="sendBack"
+                displayName: 修正する
+                goToEdit: true
+                multiSelect: false
+                name: edit
+                onDetailView: true
+                onEditView: false
+                onListView: false
+            -   autoCommit: true
+                backToDetail: true
+                commandlet:
+                -   derivation: '"pending"'
+                    targetProperty: status
+                -   derivation: Date()
+                    targetProperty: applicationDatetime
+                -   derivation: user()
+                    targetProperty: applicationUser
+                description: 申請する
+                displayCondition: this().status=="editing" || this().status=="sendBack"
+                displayName: 管理者に申請する
+                goToEdit: false
+                multiSelect: false
+                name: apply
+                onDetailView: true
+                onEditView: false
+                onListView: false
+            -   autoCommit: false
+                backToDetail: false
+                commandlet:
+                -   derivation: '"cancel"'
+                    targetProperty: status
+                displayName: 取り消す
+                goToEdit: false
+                multiSelect: false
+                name: cancel
+                onDetailView: true
+                onEditView: false
+                onListView: false
+            -   autoCommit: false
+                backToDetail: false
+                commandlet:
+                -   derivation: '"approved"'
+                    targetProperty: status
+                -   derivation: user()
+                    targetProperty: applicationUser
+                -   derivation: Date()
+                    targetProperty: applicationDatetime
+                displayCondition: this().status=="editing"
+                displayName: 承認無しで作業を開始する
+                goToEdit: false
+                multiSelect: false
+                name: applyWithoutApprove
+                onDetailView: true
+                onEditView: false
+                onListView: false
+            interfaceName: ApplicationWorkIF
+            isSingleton: false
+            name: applicationWork_g
+            propertiesOnDetail:
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: id
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
@@ -1137,75 +1682,141 @@ phases_data:
                 twoColumnFlag: false
                 type: string
             -   className: ''
+                defaultValue: editing
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: status
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: Period
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                inputUIWidth: xxlarge
-                name: description
+                name: Periods
+                propertiesOnDetail:
+                -   className: ''
+                    datePickerFlag: true
+                    dateSeparator: /
+                    defaultValueEx: Date()
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: validFrom
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: date
+                -   className: ''
+                    datePickerFlag: true
+                    dateSeparator: /
+                    defaultValueEx: Date()
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: validUntil
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: date
+                -   className: ''
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: specificTime
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: boolean
+                -   className: ''
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: startHour
+                    radioButtonFlag: false
+                    twoColumnFlag: true
+                    type: number
+                -   className: ''
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: startMinute
+                    radioButtonFlag: false
+                    twoColumnFlag: true
+                    type: number
+                -   className: ''
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: endHour
+                    radioButtonFlag: false
+                    twoColumnFlag: true
+                    type: number
+                -   className: ''
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: endMinute
+                    radioButtonFlag: false
+                    twoColumnFlag: true
+                    type: number
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: true
-                dateSeparator: '-'
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: valid_from_date
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: date
-            -   className: ''
-                datePickerFlag: true
-                dateSeparator: '-'
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: valid_until_date
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: date
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: daily_start_time
-                radioButtonFlag: false
-                twoColumnFlag: true
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: daily_end_time
-                radioButtonFlag: false
-                twoColumnFlag: true
-                type: string
+                type: object
             -   className: connection
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: target_ids
+                name: connections
                 propertiesOnList:
                 -   displayOnList: 'on'
-                    listUIWidth: 220
-                    name: name
-                -   displayOnList: 'on'
-                    listUIWidth: 220
+                    listUIWidth: 200
                     name: hostname
                 -   displayOnList: 'on'
-                    listUIWidth: 120
-                    name: protocol
+                    listUIWidth: 150
+                    name: connectionSpecificationName
+                -   displayOnList: 'on'
+                    listUIWidth: 500
+                    name: remark
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: connectionGroup
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: connectionGroups
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    listUIWidth: 150
+                    name: name
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: iamPolicy
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: iamPolicies
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: name
+                -   displayOnList: 'on'
+                    name: description
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -1215,7 +1826,39 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: worker_ids
+                name: workUsers
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: uid
+                -   displayOnList: 'on'
+                    name: sn
+                -   displayOnList: 'on'
+                    name: cn
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: userGroups
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: workUserGroups
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: name
+                -   displayOnList: 'on'
+                    name: id
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: user
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: manageUsers
                 propertiesOnList:
                 -   displayOnList: 'on'
                     name: uid
@@ -1228,11 +1871,11 @@ phases_data:
                 type: string
             -   className: user
                 datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
+                disableUpdate: true
+                hideOnEdit: true
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: manager_ids
+                name: applicationUser
                 propertiesOnList:
                 -   displayOnList: 'on'
                     name: uid
@@ -1243,16 +1886,55 @@ phases_data:
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: WorkFileTransferPermissions
+            -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: file_transfer_permissions
+                name: disableUpload
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: object
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: disableDownload
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                dateSeparator: /
+                disableUpdate: true
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: applicationDatetime
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: datetime
+            -   className: ''
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: applicationComment
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: approvedComment
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
             propertiesOnList:
             -   displayOnList: 'on'
                 filter: regex
@@ -1261,10 +1943,546 @@ phases_data:
                 filter: regex
                 name: name
             -   displayOnList: 'on'
-                name: valid_from_date
+                filter: all
+                name: status
             -   displayOnList: 'on'
-                name: valid_until_date
+                filter: regex
+                name: applicationUser
+            -   displayOnList: 'on'
+                name: applicationDatetime
             showHistory: false
+            titleOfAdd: 新規作成
+            uploadCSV: false
+            useDisplayNameHeader: false
+            withHeader: true
+        -   autoCommit: false
+            backToDetail: false
+            className: work
+            clonable: false
+            disableAdd: true
+            disableDelete: true
+            disableMultiDelete: true
+            disableSuspension: true
+            disableUpdate: true
+            displayName: 承認済み作業ガジェット
+            downloadDisplayFormatCSV: false
+            downloadUpdateFormatCSV: false
+            interfaceCommandlet:
+            -   className: work
+                commandlet:
+                -   derivation: '"disabled"'
+                    targetProperty: status
+                description: 作業を無効化する
+                displayCondition: "this().status == \"approved\"\r\n&& (\r\nuser()
+                    == \"IDM_ADMIN\"\r\n|| getResource(\"/IDManager/selectAllUserIF\",
+                    { \"uid\": user() }).pop().idmRole == \"IDM_ADMIN\"\r\n|| getResource(\"/IDManager/selectAllUserIF\",
+                    { \"uid\": user() }).pop().idmRole == \"IDM_USER_ADMIN\"\r\n)"
+                displayName: 無効化
+                httpMethod: PUT
+                interfaceName: disableWorkIF
+                keyProperty:
+                - id
+                name: disable
+            -   className: work
+                commandlet:
+                -   derivation: parent().name + " のコピー - " + rand(100, 999)
+                    targetProperty: name
+                -   derivation: parent().Periods
+                    targetProperty: Periods
+                -   derivation: '"editing"'
+                    targetProperty: status
+                -   derivation: parent().connections
+                    targetProperty: connections
+                -   derivation: parent().connectionGroups
+                    targetProperty: connectionGroups
+                -   derivation: parent().workUsers
+                    targetProperty: workUsers
+                -   derivation: parent().workUserGroups
+                    targetProperty: workUserGroups
+                -   derivation: parent().manageUsers
+                    targetProperty: manageUsers
+                -   derivation: parent().applicationComment
+                    targetProperty: applicationComment
+                -   derivation: parent().disableUpload
+                    targetProperty: disableUpload
+                -   derivation: parent().disableDownload
+                    targetProperty: disableDownload
+                -   derivation: parent().iamPolicies
+                    targetProperty: iamPolicies
+                description: 同じ内容の作業を編集中の状態で作成する
+                displayName: コピーして新規作成
+                httpMethod: POST
+                interfaceName: ApplicationWorkIF
+                name: copy
+            interfaceName: approvalWorkIF
+            isSingleton: false
+            name: approvalWork_g
+            propertiesOnDetail:
+            -   className: ''
+                datePickerFlag: false
+                defaultValueEx: 'getUnusedId("ApplicationWorkIF", "", {type: "random",
+                    alphabets: "346789ABCDEFGHJKLMNPQRTUVWXY",numberOfDigits: 5},
+                    "")'
+                disableUpdate: true
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: id
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: name
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: Period
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: Periods
+                propertiesOnDetail:
+                -   className: ''
+                    datePickerFlag: true
+                    dateSeparator: /
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: validFrom
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: date
+                -   className: ''
+                    datePickerFlag: true
+                    dateSeparator: /
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: validUntil
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: date
+                -   className: ''
+                    datePickerFlag: false
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: specificTime
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: boolean
+                -   className: ''
+                    datePickerFlag: false
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: startHour
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: number
+                -   className: ''
+                    datePickerFlag: false
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: startMinute
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: number
+                -   className: ''
+                    datePickerFlag: false
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: endHour
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: number
+                -   className: ''
+                    datePickerFlag: false
+                    disableUpdate: false
+                    hideOnEdit: false
+                    hideOnShow: false
+                    incrementalSearchFlag: false
+                    name: endMinute
+                    radioButtonFlag: false
+                    twoColumnFlag: false
+                    type: number
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: object
+            -   className: ''
+                datePickerFlag: false
+                defaultValue: editing
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: status
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: connection
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: true
+                incrementalSearchFlag: false
+                name: connections
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    listUIWidth: 200
+                    name: hostname
+                -   displayOnList: 'on'
+                    listUIWidth: 150
+                    name: connectionSpecification
+                -   displayOnList: 'on'
+                    listUIWidth: 500
+                    name: remark
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: connectionGroup
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: true
+                incrementalSearchFlag: false
+                name: connectionGroups
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: name
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: connection
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: resultConnections
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    listUIWidth: 200
+                    name: hostname
+                -   displayOnList: 'on'
+                    listUIWidth: 500
+                    name: connectionSpecificationName
+                -   displayOnList: 'on'
+                    listUIWidth: 500
+                    name: remark
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: iamPolicy
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: iamPolicies
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: name
+                -   displayOnList: 'on'
+                    name: description
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: user
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: true
+                incrementalSearchFlag: false
+                name: workUsers
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: uid
+                -   displayOnList: 'on'
+                    name: sn
+                -   displayOnList: 'on'
+                    name: cn
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: userGroups
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: true
+                incrementalSearchFlag: false
+                name: workUserGroups
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: name
+                -   displayOnList: 'on'
+                    name: id
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: user
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: resultUsers
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: uid
+                -   displayOnList: 'on'
+                    name: sn
+                -   displayOnList: 'on'
+                    name: cn
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: user
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: manageUsers
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: uid
+                -   displayOnList: 'on'
+                    name: sn
+                -   displayOnList: 'on'
+                    name: cn
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: user
+                datePickerFlag: false
+                defaultValueEx: user()
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: applicationUser
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: uid
+                -   displayOnList: 'on'
+                    name: sn
+                -   displayOnList: 'on'
+                    name: cn
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                dateSeparator: /
+                defaultValueEx: 'null'
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: applicationDatetime
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: datetime
+            -   className: ''
+                datePickerFlag: false
+                defaultValueEx: 'null'
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: applicationComment
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: user
+                datePickerFlag: false
+                defaultValueEx: 'null'
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: approvedUser
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: uid
+                -   displayOnList: 'on'
+                    name: sn
+                -   displayOnList: 'on'
+                    name: cn
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                dateSeparator: /
+                defaultValueEx: 'null'
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: approvedDatetime
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: datetime
+            -   className: ''
+                datePickerFlag: false
+                defaultValueEx: 'null'
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: approvedComment
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                dateSeparator: /
+                defaultValueEx: 'null'
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: true
+                incrementalSearchFlag: false
+                name: approveRequestDatetime
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: datetime
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: true
+                incrementalSearchFlag: false
+                name: approveMailList
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: disableUpload
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: disableDownload
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                dateSeparator: /
+                defaultValueEx: 'null'
+                disableUpdate: false
+                hideOnEdit: true
+                hideOnShow: true
+                incrementalSearchFlag: false
+                name: approveCompletionDate
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: datetime
+            propertiesOnList:
+            -   displayOnList: 'on'
+                filter: regex
+                name: id
+            -   displayOnList: 'on'
+                filter: regex
+                name: name
+            -   displayOnList: 'on'
+                filter: all
+                name: status
+            -   displayOnList: 'on'
+                filter: regex
+                name: applicationUser
+            -   displayOnList: 'on'
+                name: applicationDatetime
+            -   displayOnList: 'on'
+                filter: regex
+                name: approvedUser
+            -   displayOnList: 'on'
+                name: approvedDatetime
+            showHistory: false
+            uploadCSV: false
+            useDisplayNameHeader: false
+            withHeader: true
+        -   autoCommit: false
+            backToDetail: false
+            className: connectionGroup
+            clonable: false
+            disableAdd: false
+            disableDelete: false
+            disableMultiDelete: false
+            disableSuspension: false
+            disableUpdate: false
+            displayName: 接続先グループガジェット
+            downloadDisplayFormatCSV: false
+            downloadUpdateFormatCSV: true
+            interfaceName: connectionGroupEditorInterface
+            isSingleton: false
+            name: connectionGroup_g
+            propertiesOnDetail:
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: name
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: connection
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: connections
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: userGroups
+                datePickerFlag: false
+                defaultValueEx: 'flatten(select(getResource("/IDManager/userInfoWithTeam",
+                    {"uid": user()}), "team"))'
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: team
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            propertiesOnList:
+            -   displayOnList: 'on'
+                filter: regex
+                name: name
+            showHistory: false
+            titleOfUpdate: 編集
             uploadCSV: true
             useDisplayNameHeader: false
             withHeader: true
@@ -1282,7 +2500,7 @@ phases_data:
             downloadUpdateFormatCSV: true
             interfaceName: connectionSpecificationEditIF
             isSingleton: false
-            name: connectionSpecificationEditor
+            name: connectionSpecification_g
             propertiesOnDetail:
             -   className: ''
                 datePickerFlag: false
@@ -1311,7 +2529,7 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: protocol
+                name: ansibleID
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -1321,17 +2539,7 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: port
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: number
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: username
+                name: ansiblePassword
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -1341,7 +2549,7 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: password
+                name: osType
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -1351,8 +2559,10 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: web_sftp_enabled
+                name: ssh
                 radioButtonFlag: false
+                sectionSeparater: closed
+                sectionSeparaterTitle: SSH
                 twoColumnFlag: false
                 type: boolean
             -   className: ''
@@ -1361,67 +2571,7 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: initial_url
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: login_url
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: browser_name
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: browser_version
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: platform_name
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: vnc_host
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: vnc_port
+                name: sshPort
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: number
@@ -1431,7 +2581,7 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: privileged_username
+                name: sshID
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -1441,17 +2591,163 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: privileged_password
+                name: sshPassword
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: browserStep
+            -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: browser_steps
+                name: rdp
+                radioButtonFlag: false
+                sectionSeparater: closed
+                sectionSeparaterTitle: RDP
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: rdpPort
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: number
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: rdpID
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: rdpPassword
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: telnet
+                radioButtonFlag: false
+                sectionSeparater: closed
+                sectionSeparaterTitle: Telnet
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: telnetPort
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: number
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: telnetID
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: telnetPassword
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: http
+                radioButtonFlag: false
+                sectionSeparater: closed
+                sectionSeparaterTitle: HTTP/HTTPS
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: httpPort
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: number
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: httpID
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: httpPassword
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: httpProtocol
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: authType
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: httpLoginParams
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: actions
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: object
@@ -1463,10 +2759,17 @@ phases_data:
                 filter: regex
                 name: name
             -   displayOnList: 'on'
-                name: protocol
+                name: osType
             -   displayOnList: 'on'
-                name: port
+                name: ssh
+            -   displayOnList: 'on'
+                name: rdp
+            -   displayOnList: 'on'
+                name: telnet
+            -   displayOnList: 'on'
+                name: http
             showHistory: false
+            titleOfUpdate: 編集
             uploadCSV: true
             useDisplayNameHeader: false
             withHeader: true
@@ -1482,9 +2785,22 @@ phases_data:
             displayName: 接続先ガジェット
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
+            gadgetCommandlet:
+            -   autoCommit: true
+                backToDetail: false
+                commandlet:
+                -   derivation: Date()
+                    targetProperty: changePasswordDate
+                displayName: パスワード更新
+                goToEdit: false
+                multiSelect: true
+                name: changePassword
+                onDetailView: true
+                onEditView: false
+                onListView: true
             interfaceName: connectionEditIF
             isSingleton: false
-            name: connectionEditor
+            name: connection_g
             propertiesOnDetail:
             -   className: ''
                 datePickerFlag: false
@@ -1494,16 +2810,6 @@ phases_data:
                 hideOnShow: false
                 incrementalSearchFlag: false
                 name: id
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: name
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -1527,13 +2833,27 @@ phases_data:
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: ''
+            -   className: userGroups
                 datePickerFlag: false
+                defaultValueEx: 'flatten(select(getResource("/IDManager/userInfoWithTeam",
+                    {"uid": user()}), "team"))'
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: socket_warp_client_ids
+                name: viewTeam
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: userGroups
+                datePickerFlag: false
+                defaultValueEx: 'flatten(select(getResource("/IDManager/userInfoWithTeam",
+                    {"uid": user()}), "team"))'
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: editTeam
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -1549,41 +2869,23 @@ phases_data:
                 type: string
             -   className: ''
                 datePickerFlag: false
+                dateSeparator: '-'
+                defaultValueEx: Date()
                 disableUpdate: true
                 hideOnEdit: true
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: protocol
+                name: changePasswordDate
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: string
+                type: datetime
             -   className: ''
                 datePickerFlag: false
-                disableUpdate: true
-                hideOnEdit: true
+                disableUpdate: false
+                hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: port
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: number
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: true
-                hideOnEdit: true
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: username
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: true
-                hideOnEdit: true
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: password
+                name: swcZone
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -1592,14 +2894,14 @@ phases_data:
                 name: id
             -   displayOnList: 'on'
                 filter: regex
-                name: name
-            -   displayOnList: 'on'
-                filter: regex
                 name: hostname
             -   displayOnList: 'on'
-                name: protocol
-            -   displayOnList: 'on'
+                filter: regex
                 name: connectionSpecificationName
+            -   displayOnList: 'on'
+                name: remark
+            -   displayOnList: 'on'
+                name: swcZone
             showHistory: false
             uploadCSV: true
             useDisplayNameHeader: false
@@ -1641,7 +2943,7 @@ phases_data:
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: team
+            -   className: userGroups
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
@@ -1665,6 +2967,274 @@ phases_data:
             withHeader: true
         -   autoCommit: false
             backToDetail: false
+            className: linkageSystem
+            clonable: false
+            disableAdd: false
+            disableDelete: false
+            disableMultiDelete: false
+            disableSuspension: false
+            disableUpdate: false
+            displayName: 連携システムオブジェクト閲覧
+            downloadDisplayFormatCSV: false
+            downloadUpdateFormatCSV: false
+            interfaceName: masterLinkageSystem
+            isSingleton: false
+            name: masterLinkageSystem
+            showHistory: false
+            uploadCSV: false
+            useDisplayNameHeader: false
+            withHeader: false
+        -   autoCommit: true
+            backToDetail: true
+            className: work
+            clonable: false
+            disableAdd: true
+            disableDelete: true
+            disableMultiDelete: false
+            disableSuspension: false
+            disableUpdate: false
+            displayName: 要承認作業ガジェット
+            downloadDisplayFormatCSV: false
+            downloadUpdateFormatCSV: false
+            gadgetCommandlet:
+            -   autoCommit: true
+                backToDetail: false
+                commandlet:
+                -   derivation: user()
+                    targetProperty: approvedUser
+                -   derivation: Date()
+                    targetProperty: approvedDatetime
+                -   derivation: '"approved"'
+                    targetProperty: status
+                displayName: 承認
+                goToEdit: false
+                multiSelect: false
+                name: approve
+                onDetailView: true
+                onEditView: false
+                onListView: false
+            -   autoCommit: false
+                backToDetail: false
+                commandlet:
+                -   derivation: '"rejected"'
+                    targetProperty: status
+                displayName: 却下
+                goToEdit: false
+                multiSelect: false
+                name: reject
+                onDetailView: true
+                onEditView: false
+                onListView: false
+            -   autoCommit: false
+                backToDetail: false
+                commandlet:
+                -   derivation: '"sendBack"'
+                    targetProperty: status
+                displayName: 差し戻し
+                goToEdit: true
+                multiSelect: false
+                name: sendBack
+                onDetailView: true
+                onEditView: false
+                onListView: false
+            interfaceName: requiredApprovalWorkIF
+            isSingleton: false
+            name: requiredApprovalWork_g
+            propertiesOnDetail:
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: id
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: name
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: Period
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: Periods
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: object
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: status
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: connection
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: resultConnections
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    listUIWidth: 200
+                    name: hostname
+                -   displayOnList: 'on'
+                    listUIWidth: 500
+                    name: connectionSpecificationName
+                -   displayOnList: 'on'
+                    listUIWidth: 500
+                    name: remark
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: iamPolicy
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: iamPolicies
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: user
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: resultUsers
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: uid
+                -   displayOnList: 'on'
+                    name: sn
+                -   displayOnList: 'on'
+                    name: cn
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: user
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: manageUsers
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: uid
+                -   displayOnList: 'on'
+                    name: sn
+                -   displayOnList: 'on'
+                    name: cn
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: user
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: applicationUser
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    name: uid
+                -   displayOnList: 'on'
+                    name: sn
+                -   displayOnList: 'on'
+                    name: cn
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                dateSeparator: /
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: applicationDatetime
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: datetime
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: true
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: applicationComment
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: approvedComment
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: disableUpload
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: disableDownload
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: boolean
+            propertiesOnList:
+            -   displayOnList: 'on'
+                filter: regex
+                name: id
+            -   displayOnList: 'on'
+                filter: regex
+                name: name
+            -   displayOnList: 'on'
+                filter: all
+                name: status
+            -   displayOnList: 'on'
+                filter: 'off'
+                name: applicationUser
+            -   displayOnList: 'on'
+                name: applicationDatetime
+            showHistory: false
+            titleOfUpdate: コメント
+            uploadCSV: false
+            useDisplayNameHeader: false
+            withHeader: true
+        -   autoCommit: false
+            backToDetail: false
             className: user
             clonable: false
             disableAdd: false
@@ -1677,7 +3247,7 @@ phases_data:
             downloadUpdateFormatCSV: true
             interfaceName: sameTeamUsersIF
             isSingleton: false
-            name: sameTeamUserEditor
+            name: sameTeamUser_g
             propertiesOnDetail:
             -   className: ''
                 datePickerFlag: false
@@ -1729,7 +3299,7 @@ phases_data:
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: team
+            -   className: userGroups
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
@@ -1739,16 +3309,6 @@ phases_data:
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: dn
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: ''
             -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
@@ -1842,6 +3402,25 @@ phases_data:
             withHeader: true
         -   autoCommit: false
             backToDetail: false
+            className: linkageSystem
+            clonable: false
+            disableAdd: false
+            disableDelete: false
+            disableMultiDelete: false
+            disableSuspension: false
+            disableUpdate: false
+            displayName: 連携システムオブジェクト編集
+            downloadDisplayFormatCSV: false
+            downloadUpdateFormatCSV: false
+            interfaceName: sandboxLinkageSystem
+            isSingleton: false
+            name: sandboxLinkageSystem
+            showHistory: false
+            uploadCSV: false
+            useDisplayNameHeader: false
+            withHeader: false
+        -   autoCommit: false
+            backToDetail: false
             className: user
             clonable: false
             disableAdd: false
@@ -1902,7 +3481,7 @@ phases_data:
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: team
+            -   className: userGroups
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
@@ -1911,15 +3490,6 @@ phases_data:
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: ''
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: dn
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: ''
             -   className: ''
                 disableUpdate: false
                 hideOnEdit: false
@@ -1978,8 +3548,6 @@ phases_data:
             -   displayOnList: 'on'
                 filter: regex
                 name: email
-            -   displayOnList: 'off'
-                name: dn
             -   displayOnList: defaultOn
                 name: accountLock
             showHistory: true
@@ -1989,7 +3557,7 @@ phases_data:
             withHeader: true
         -   autoCommit: false
             backToDetail: false
-            className: team
+            className: userGroups
             clonable: false
             disableAdd: false
             disableDelete: true
@@ -2000,18 +3568,18 @@ phases_data:
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             interfaceCommandlet:
-            -   className: team
+            -   className: userGroups
                 displayCondition: 'getResource("/IDManager/userInfoWithTeam", {team:
                     this().id}).length == 0'
                 displayName: 削除
                 httpMethod: DELETE
-                interfaceName: teamEditorInterface
+                interfaceName: userGroupEditorInterface
                 keyProperty:
                 - id
                 name: delete
-            interfaceName: teamEditorInterface
+            interfaceName: userGroupEditorInterface
             isSingleton: false
-            name: teamEditor
+            name: userGroup_g
             propertiesOnDetail:
             -   className: ''
                 datePickerFlag: false
@@ -2130,66 +3698,230 @@ phases_data:
         _sandboxInterfaces:
         -   ACEs:
             -   allow: true
-                matching:
-                -   type: GROUP
-                    useArgument: false
-                    values:
-                    - IDM_ADMIN
-                    - IDM_USER_ADMIN
             accessLevel: full
             className: work
             database: Sandbox
             deleteAsUpdate: false
-            displayName: 作業編集インタフェース
-            name: workEditorInterface
+            displayName: 申請作業IF
+            filter: '{status:{$in:["editing","pending","sendBack"]}}'
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {status:{\"$in\":[\"editing\",\"pending\",\"sendBack\"]}}\r\n:
+                {\r\nstatus:{\"$in\":[\"editing\",\"pending\",\"sendBack\"]},\r\n\"$or\":
+                [\r\n{applicationUser: user()}\r\n]\r\n}"
+            initializer:
+            -   derivation: 'getUnusedId("ApplicationWorkIF", "", {type: "random",
+                    alphabets: "346789ABCDEFGHJKLMNPQRTUVWXY",numberOfDigits: 5},
+                    "")'
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: id
+            -   derivation: user()
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: applicationUser
+            name: ApplicationWorkIF
             properties:
             - id
             - name
-            - description
-            - target_ids
-            - worker_ids
-            - manager_ids
-            - valid_from_date
-            - valid_until_date
-            - daily_start_time
-            - daily_end_time
-            - file_transfer_permissions
+            - status
+            - connections
+            - connectionGroups
+            - applicationUser
+            - applicationDatetime
+            - applicationComment
+            - Periods
+            - workUsers
+            - workUserGroups
+            - manageUsers
+            - disableUpload
+            - disableDownload
+            - iamPolicies
+            - approvedComment
+            readOnlyProperties:
+            - applicationUser
+            - id
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: work
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: SYSTEM用承認済み作業IF
+            filter: '{status:{$in:["approved"]}}'
+            name: SystemApprovalWorkIF
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: connectionGroup
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: システム用接続先グループIF
+            name: SystemConnectionGroupIF
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: connection
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: SYSTEM用接続先インターフェース
+            name: SystemConnectionIF
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: connectionSpecification
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: SYSTEM用接続仕様インターフェース
+            name: SystemConnectionSpecificationIF
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: userGroups
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: SYSTEM用チームインターフェース
+            name: SystemUserGroupIF
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: alignment
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: 連携編集IF
+            name: alignmentEditIF
+            properties:
+            - id
+            - date
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readWrite
+            className: work
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: メール未送信承認完了IF
+            filter: '{status:"approved",approveCompletionDate:null}'
+            name: approvalCompletionMailIF
+            properties:
+            - id
+            - name
+            - Periods
+            - iamPolicies
+            - applicationMailList
+            - approveCompletionDate
+            - workUsers
+            - workUserGroups
+            - resultUsers
+            - connections
+            - connectionGroups
+            - resultConnections
+            readOnlyProperties:
+            - id
+            - name
+            - Periods
+            - iamPolicies
+            - applicationMailList
+            - workUsers
+            - workUserGroups
+            - resultUsers
+            - connections
+            - connectionGroups
+            - resultConnections
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
             -   allow: true
-                matching:
-                -   type: GROUP
-                    useArgument: false
-                    values:
-                    - IDM_ADMIN
-                    - IDM_USER_ADMIN
+            accessLevel: readOnly
+            className: work
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: 承認済み作業IF
+            filter: '{status:{$in:["approved"]}}'
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {hoge: null}\r\n: {\r\nstatus:{\"$in\":[\"approved\"]},\r\n\"$or\":[\r\n{workUsers:{\"$in\":[user()]}},\r\n{workUserGroups:{\"$in\":
+                flatten(select(getResource(\"/IDManager/userInfoWithTeam\", {\"uid\":
+                user()}), \"team\"))}},\r\n{applicationUser:user()},\r\n{manageUsers:{\"$in\":[user()]}}\r\n]\r\n}"
+            name: approvalWorkIF
+            sortOrder: +
+            sortProperty: approvedDatetime
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
+            accessLevel: readWrite
+            className: user
+            database: Sandbox
+            deleteAsUpdate: false
+            description: パスワード変更サーブレットが使用するインタフェース
+            displayName: パスワード変更IF
+            initializer:
+            -   conditionEx: 'true'
+                derivation: '(date = Date(Date().getTime() + (24 * 3600 * 1000 * ((sys
+                    = getResource("/IDManager/_masterSystemSettings/SystemSetting"))
+                    ? sys.pwAvailableDays : 180)))) ? date.getFullYear() + "-" + (date.getMonth()
+                    + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1)
+                    + "-" + (date.getDate() < 10 ? "0" + date.getDate() : date.getDate())
+                    : null'
+                onDeleteOnly: false
+                targetProperty: expireDate
+            name: changePassword
+            properties:
+            - uid
+            - userPassword
+            - email
+            - sn
+            - cn
+            propertyNameMapping:
+            -   destinationProperty: password
+                sourceProperty: userPassword
+            -   destinationProperty: mail
+                sourceProperty: email
+            -   destinationProperty: param1
+                sourceProperty: sn
+            readOnlyProperties:
+            - uid
+            - email
+            - sn
+            - cn
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
             accessLevel: full
             className: connection
             database: Sandbox
             deleteAsUpdate: false
             displayName: 接続先編集IF
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {hoge: null}\r\n: getResource(\"/IDManager/selectAllUserIF\",
+                {\"uid\": user()}).pop().idmRole == \"IDM_ADMIN\"\r\n|| getResource(\"/IDManager/selectAllUserIF\",
+                {\"uid\": user()}).pop().idmRole == \"IDM_USER_ADMIN\"\r\n? {hoge:
+                null}\r\n: {editTeam: {\"$in\": flatten(select(getResource(\"/IDManager/userInfoWithTeam\",
+                {\"uid\": user()}), \"team\")) }}"
             name: connectionEditIF
             properties:
             - id
-            - name
             - hostname
             - connectionSpecification
-            - connectionSpecificationName
-            - protocol
-            - port
-            - username
-            - password
-            - socket_warp_client_ids
-            - params
+            - viewTeam
+            - editTeam
             - remark
-            readOnlyProperties:
+            - changePasswordDate
+            - swcZone
             - connectionSpecificationName
-            - protocol
-            - port
-            - username
-            - password
-            - params
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
+            accessLevel: full
+            className: connectionGroup
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: 接続先グループ編集インターフェース
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {hoge: null}\r\n: {team:
+                {\"$in\": flatten(select(getResource(\"/IDManager/userInfoWithTeam\",
+                {\"uid\": user()}), \"team\")) }}"
+            name: connectionGroupEditorInterface
+            properties:
+            - name
+            - connections
+            - team
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
@@ -2208,6 +3940,40 @@ phases_data:
             name: connectionSpecificationEditIF
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
+                matching:
+                -   type: GROUP
+                    useArgument: false
+                    values:
+                    - IDM_ADMIN
+                    - IDM_USER_ADMIN
+            accessLevel: readWrite
+            className: work
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: 作業無効化IF
+            name: disableWorkIF
+            properties:
+            - status
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: disabledUser
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: ユーザ無効化IF
+            name: disabledUserIF
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readOnly
+            className: connectionGroup
+            database: Repository
+            deleteAsUpdate: false
+            displayName: 接続先グループ列挙IF
+            name: enumConnectionGroupIF
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
         -   accessLevel: readOnly
             className: connection
             database: Repository
@@ -2217,11 +3983,11 @@ phases_data:
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   accessLevel: readOnly
-            className: team
+            className: userGroups
             database: Repository
             deleteAsUpdate: false
             displayName: 利用者グループ列挙IF
-            name: enumTeamIF
+            name: enumUserGroupIF
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
@@ -2258,14 +4024,144 @@ phases_data:
             name: enumWorkIF
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
+        -   accessLevel: readOnly
+            className: work
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: 過去作業IF
+            filter: '{status:{$in:["rejected", "cancel"]}}'
+            name: historyWorkIF
+            sortOrder: '-'
+            sortProperty: startDatetime
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
         -   ACEs:
             -   allow: true
             accessLevel: full
             className: iamPolicy
             database: Sandbox
             deleteAsUpdate: false
-            displayName: IAM Policy編集インタフェース
+            displayName: IAM Policy編集インターフェース
             name: iamPolicyEditorInterface
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
+            accessLevel: readOnly
+            className: linkageSystem
+            database: Master
+            displayName: 連携システムオブジェクト編集用
+            name: masterLinkageSystem
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
+            accessLevel: readOnly
+            argumentType: none
+            className: _provRequest
+            database: System
+            deleteAsUpdate: false
+            displayName: プロビジョニング要求
+            name: my_provRequests
+            sortOrder: '-'
+            sortProperty: createDatetime
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
+            accessLevel: readOnly
+            argumentType: none
+            className: _task
+            database: System
+            deleteAsUpdate: false
+            description: プロビジョニングタスクの閲覧用
+            displayName: プロビジョニングタスク
+            name: my_task
+            sortOrder: '-'
+            sortProperty: registerdDatetime
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
+            accessLevel: readOnly
+            argumentType: none
+            className: _taskLog
+            database: System
+            deleteAsUpdate: false
+            description: タスクログオブジェクトの閲覧用
+            displayName: タスクログオブジェクトの閲覧用
+            name: my_taskLog
+            sortOrder: '-'
+            sortProperty: timestamp
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
+            accessLevel: readWrite
+            className: work
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: 要承認作業IF
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {status:\"pending\"}\r\n:
+                {status:\"pending\",manageUsers:{\"$in\":[user()]}}"
+            name: requiredApprovalWorkIF
+            properties:
+            - id
+            - name
+            - status
+            - applicationUser
+            - applicationDatetime
+            - approvedUser
+            - approvedDatetime
+            - applicationComment
+            - approvedComment
+            - manageUsers
+            - resultConnections
+            - resultUsers
+            - disableUpload
+            - disableDownload
+            - iamPolicies
+            - workUsers
+            - workUserGroups
+            - Periods
+            - connections
+            - connectionGroups
+            readOnlyProperties:
+            - id
+            - name
+            - connections
+            - connectionGroups
+            - applicationUser
+            - applicationDatetime
+            - applicationComment
+            - workUsers
+            - workUserGroups
+            - manageUsers
+            - disableUpload
+            - disableDownload
+            - iamPolicies
+            - Periods
+            - resultConnections
+            - resultUsers
+            sortOrder: '-'
+            sortProperty: applicationDatetime
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readWrite
+            className: work
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: メール未送信要承認作業IF
+            filter: '{status:"pending",approveRequestDatetime:null}'
+            name: requiredApprovalWorkMailIF
+            properties:
+            - id
+            - name
+            - approveRequestDatetime
+            - approveMailList
+            readOnlyProperties:
+            - id
+            - name
+            - approveMailList
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
@@ -2275,7 +4171,8 @@ phases_data:
             database: Sandbox
             deleteAsUpdate: false
             displayName: 同一チームユーザーIF
-            filterDerivation: '{team: {"$in": select(getResource("/IDManager/selectTeamIF").pop().id, "id")}}'
+            filterDerivation: '{team: {"$in": select(getResource("/IDManager/selectUserGroupIF").pop().id,
+                "id")}}'
             name: sameTeamUsersIF
             properties:
             - uid
@@ -2283,7 +4180,6 @@ phases_data:
             - cn
             - userPassword
             - team
-            - dn
             - accountLock
             - email
             - data1
@@ -2292,6 +4188,14 @@ phases_data:
             - data4
             - data5
             useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
+            accessLevel: full
+            className: linkageSystem
+            database: Sandbox
+            displayName: 連携システムオブジェクトマスタ
+            name: sandboxLinkageSystem
             useCustomBackendDatabase: false
         -   ACEs:
             -   allow: true
@@ -2318,9 +4222,7 @@ phases_data:
             name: selectAllConnectionIF
             properties:
             - id
-            - name
             - hostname
-            - protocol
             - remark
             - connectionSpecificationName
             useAESDecryptedResponse: false
@@ -2345,28 +4247,42 @@ phases_data:
         -   ACEs:
             -   allow: true
             accessLevel: readOnly
-            className: connection
-            database: Master
+            className: connectionGroup
+            database: Sandbox
             deleteAsUpdate: false
-            displayName: 接続先選択IF
-            name: selectConnectionIF
+            displayName: 接続先グループ選択IF
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {hoge: null}\r\n: {team:
+                {\"$in\": flatten(select(getResource(\"/IDManager/userInfoWithTeam\",
+                {\"uid\": user()}), \"team\")) }}"
+            name: selectConnectionGroupIF
             properties:
-            - id
             - name
-            - hostname
-            - protocol
-            - remark
-            - connectionSpecificationName
+            - connections
+            - team
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
             -   allow: true
-                matching:
-                -   type: GROUP
-                    useArgument: false
-                    values:
-                    - IDM_ADMIN
-                    - IDM_USER_ADMIN
+            accessLevel: readOnly
+            className: connection
+            database: Master
+            deleteAsUpdate: false
+            displayName: 接続先選択IF
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {hoge: null}\r\n: {\"$or\":
+                [{viewTeam: {\"$in\": flatten(select(getResource(\"/IDManager/userInfoWithTeam\",
+                {\"uid\": user()}), \"team\")) }}, {editTeam: {\"$in\": flatten(select(getResource(\"/IDManager/userInfoWithTeam\",
+                {\"uid\": user()}), \"team\")) }} ]}"
+            name: selectConnectionIF
+            properties:
+            - id
+            - hostname
+            - remark
+            - connectionSpecificationName
+            - viewTeam
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   ACEs:
+            -   allow: true
             accessLevel: readOnly
             className: connectionSpecification
             database: Master
@@ -2376,21 +4292,11 @@ phases_data:
             properties:
             - id
             - name
-            - protocol
-            - port
-            - username
-            - password
-            - web_sftp_enabled
-            - initial_url
-            - login_url
-            - browser_name
-            - browser_version
-            - platform_name
-            - vnc_host
-            - vnc_port
-            - privileged_username
-            - privileged_password
-            - browser_steps
+            - osType
+            - ssh
+            - rdp
+            - telnet
+            - http
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
@@ -2400,7 +4306,9 @@ phases_data:
             database: Master
             deleteAsUpdate: false
             displayName: IAM Policy選択IF
-            filterDerivation: 'user() == "IDM_ADMIN" ? {hoge: null} : {viewTeam: {"$in": flatten(select(getResource("/IDManager/userInfoWithTeam", {"uid": user()}), "team")) }}'
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {hoge: null}\r\n: {viewTeam:
+                {\"$in\": flatten(select(getResource(\"/IDManager/userInfoWithTeam\",
+                {\"uid\": user()}), \"team\")) }}"
             name: selectIamPolicyIF
             properties:
             - name
@@ -2410,12 +4318,16 @@ phases_data:
         -   ACEs:
             -   allow: true
             accessLevel: readOnly
-            className: team
+            className: userGroups
             database: Master
             deleteAsUpdate: false
             displayName: チーム選択IF
-            filterDerivation: 'user() == "IDM_ADMIN" ? {hoge: null} : getResource("/IDManager/selectAllUserIF", {"uid": user()}).pop().idmRole == "IDM_ADMIN" || getResource("/IDManager/selectAllUserIF", {"uid": user()}).pop().idmRole == "IDM_USER_ADMIN" ? {hoge: null} : {id: {"$in": flatten(select(getResource("/IDManager/userInfoWithTeam", {"uid": user()}), "team")) }}'
-            name: selectTeamIF
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {hoge: null}\r\n: getResource(\"/IDManager/selectAllUserIF\",
+                {\"uid\": user()}).pop().idmRole == \"IDM_ADMIN\"\r\n|| getResource(\"/IDManager/selectAllUserIF\",
+                {\"uid\": user()}).pop().idmRole == \"IDM_USER_ADMIN\"\r\n? {hoge:
+                null}\r\n: {id: {\"$in\": flatten(select(getResource(\"/IDManager/userInfoWithTeam\",
+                {\"uid\": user()}), \"team\")) }}"
+            name: selectUserGroupIF
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
@@ -2426,7 +4338,11 @@ phases_data:
             deleteAsUpdate: false
             description: 同一チームユーザを選択するインタフェース
             displayName: ユーザ選択IF
-            filterDerivation: 'user() == "IDM_ADMIN" ? {hoge: null} : getResource("/IDManager/selectAllUserIF", {"uid": user()}).pop().idmRole == "IDM_ADMIN" || getResource("/IDManager/selectAllUserIF", {"uid": user()}).pop().idmRole == "IDM_USER_ADMIN" ? {hoge: null} : {team: {"$in": flatten(select(getResource("/IDManager/userInfoWithTeam", {"uid": user()}), "team")) }}'
+            filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {hoge: null}\r\n: getResource(\"/IDManager/selectAllUserIF\",
+                {\"uid\": user()}).pop().idmRole == \"IDM_ADMIN\"\r\n|| getResource(\"/IDManager/selectAllUserIF\",
+                {\"uid\": user()}).pop().idmRole == \"IDM_USER_ADMIN\"\r\n? {hoge:
+                null}\r\n: {team: {\"$in\": flatten(select(getResource(\"/IDManager/userInfoWithTeam\",
+                {\"uid\": user()}), \"team\")) }}"
             name: selectUserIF
             properties:
             - uid
@@ -2509,11 +4425,11 @@ phases_data:
                     - IDM_USER_ADMIN
                     - IDM_USER_LEADER
             accessLevel: full
-            className: team
+            className: userGroups
             database: Sandbox
             deleteAsUpdate: false
-            displayName: チーム編集インタフェース
-            name: teamEditorInterface
+            displayName: チーム編集インターフェース
+            name: userGroupEditorInterface
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
@@ -2529,28 +4445,19 @@ phases_data:
             - team
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: work
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: 作業編集インターフェース
+            name: workEditorInterface
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
         _sandboxProvSettings:
         -   appendOnly: false
             classSetting:
             -   className: connection
                 noDecryption: false
-                properties:
-                -   modifiedOnly: false
-                    propertyName: id
-                -   modifiedOnly: false
-                    propertyName: name
-                -   modifiedOnly: false
-                    propertyName: hostname
-                -   modifiedOnly: false
-                    propertyName: protocol
-                -   modifiedOnly: false
-                    propertyName: port
-                -   modifiedOnly: false
-                    propertyName: username
-                -   modifiedOnly: false
-                    propertyName: password
-                -   modifiedOnly: false
-                    propertyName: params
                 type: CustomTaskExecutor
             database: Master
             displayName: 接続先作成
@@ -2600,6 +4507,29 @@ phases_data:
             withHeader: false
         -   appendOnly: false
             classSetting:
+            -   className: user
+                noDecryption: false
+                properties:
+                -   modifiedOnly: false
+                    propertyName: uid
+                -   modifiedOnly: false
+                    propertyName: cn
+                type: CustomTaskExecutor
+            database: Master
+            displayName: ユーザー作成
+            host: idm3-provtools
+            ignore: false
+            ignoreMultiResult: false
+            ignoreZeroResult: false
+            name: createUser
+            outputAll: false
+            path: /v1/execute_task
+            port: 8099
+            stop: false
+            type: CustomTaskExecutor
+            withHeader: false
+        -   appendOnly: false
+            classSetting:
             -   className: work
                 noDecryption: false
                 properties:
@@ -2608,23 +4538,17 @@ phases_data:
                 -   modifiedOnly: false
                     propertyName: name
                 -   modifiedOnly: false
-                    propertyName: description
+                    propertyName: status
                 -   modifiedOnly: false
-                    propertyName: target_ids
+                    propertyName: Periods
                 -   modifiedOnly: false
-                    propertyName: worker_ids
+                    propertyName: connections
                 -   modifiedOnly: false
-                    propertyName: manager_ids
+                    propertyName: workUsers
                 -   modifiedOnly: false
-                    propertyName: valid_from_date
+                    propertyName: manageUsers
                 -   modifiedOnly: false
-                    propertyName: valid_until_date
-                -   modifiedOnly: false
-                    propertyName: daily_start_time
-                -   modifiedOnly: false
-                    propertyName: daily_end_time
-                -   modifiedOnly: false
-                    propertyName: file_transfer_permissions
+                    propertyName: iamPolicies
                 type: CustomTaskExecutor
             database: Master
             displayName: 作業作成
@@ -2639,11 +4563,46 @@ phases_data:
             stop: false
             type: CustomTaskExecutor
             withHeader: false
+        -   appendOnly: false
+            classSetting:
+            -   className: disabledUser
+                noDecryption: false
+                type: CustomTaskExecutor
+            database: Master
+            displayName: ユーザ有効化
+            host: idm3-provtools
+            ignore: false
+            ignoreMultiResult: false
+            ignoreZeroResult: false
+            name: enableUser
+            outputAll: false
+            path: /v1/execute_task
+            port: 8099
+            stop: false
+            type: CustomTaskExecutor
+            withHeader: false
         _sandboxSystemSettings:
         -   adminRoles:
             - IDM_ADMIN
             - IDM_USER_ADMIN
             authType: none
+            clockDaemons:
+            -   clockType: monthly
+                day: 30
+                description: 作業申請の承認要求メール送信のクロックデーモン
+                displayName: 作業申請の承認要求メール送信
+                intervalSeconds: 60
+                name: approvalRequestDaemon
+                updateBatch:
+                - sendApprovalRequestMail
+            -   clockType: monthly
+                day: 30
+                description: 作業申請の承認完了メール送信のクロックデーモン
+                displayName: 作業申請の承認完了メール送信
+                intervalSeconds: 60
+                name: approveCompletionDaemon
+                updateBatch:
+                - sendApproveCompletionMail
             csvApiFileEncoding: UTF-8
             name: SystemSetting
             passphrase: P@ssw0rd123
@@ -2652,8 +4611,8 @@ phases_data:
             pwNotWaitTaskCompletion: false
             pwPermitSameValue: false
             pwTrustedSites:
-            - ^https://idp.{{ domain }}
-            - ^https://idm3.{{ domain }}
+            - ^https://auth.{{ domain }}
+            - ^https://idm.{{ domain }}
             - ^http://localhost
             pwUseQuestion: false
             pwUserIf: changePassword
@@ -2662,6 +4621,7 @@ phases_data:
             pwpolicyMinLen: 12
             pwpolicyNumSymbolCnt: 1
             pwpolicySymbolChars: '!"#$%&''()=~|¥^-@[]:;+*_?><,./'
+            systemIdIf: masterLinkageSystem
             systemName: 特権ID管理システム
             traceFormula: false
     layouts:
@@ -2780,18 +4740,6 @@ phases_data:
             -   displayName: ユーザ設定
                 gadgetName: userEditor
                 type: gadget
-            -   displayName: チーム編集
-                gadgetName: teamEditor
-                type: gadget
-            -   displayName: 接続仕様編集
-                gadgetName: connectionSpecificationEditor
-                type: gadget
-            -   displayName: 接続先編集
-                gadgetName: connectionEditor
-                type: gadget
-            -   displayName: 作業編集
-                gadgetName: workEditor
-                type: gadget
             -   displayName: ログアウト
                 icon: M30 10 L30 15 L40 15 L40 35 L30 35 L30 40 L45 40 L45 10 Z M20
                     18 L25 22.5 L18 22.5 L18 27.5 L25 27.5 L20 32 L5 25 Z
@@ -2799,18 +4747,15 @@ phases_data:
                     domain }}/idp/profile/Logout
                 type: link
             name: userSidebar
-    ldap_settings:
-        _sandboxOpenLdapDbSetting: []
-        _sandboxProvSettings: []
     objects:
         userEditorInterface:
         -   accountLock: false
-            cn: 亨哉
-            displayName: 中川路 亨哉
-            email: naoya@procube.jp
+            cn: Admin
+            displayName: "システム保守担当者"
+            email: 'admin@{{ domain }}'
             idmRole: IDM_ADMIN
-            sn: 中川路
+            sn: idm
+            uid: admin
             team:
-            - procube
-            uid: naoya
-            userPassword: '{ARGON2}$argon2id$v=19$m=65536,t=3,p=4$GidQ961L1Gmw2PQ/4BgoOA$WvoqfElQs/D1yfPzmM6od/rbcm5bIp+yM/0eo9x59tI'
+            - administorators
+            userPassword: '{{ db_password }}'
