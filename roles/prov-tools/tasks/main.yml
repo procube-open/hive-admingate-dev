@@ -198,16 +198,37 @@
           stderr_logfile=/dev/stderr
           stderr_logfile_maxbytes=0
 
+    - name: check whether supervisord is already running
+      ansible.builtin.command:
+        cmd: pgrep -f '[s]upervisord -c /etc/supervisord.conf'
+      register: supervisord_process
+      changed_when: false
+      failed_when: false
+
+    - name: remove stale supervisord socket
+      ansible.builtin.file:
+        path: /run/supervisor/supervisor.sock
+        state: absent
+      when: supervisord_process.rc != 0
+
     - name: start supervisord daemon
       ansible.builtin.command:
         cmd: /usr/bin/supervisord -c /etc/supervisord.conf
-      args:
-        creates: /run/supervisor/supervisor.sock
+      when: supervisord_process.rc != 0
 
     - name: wait for supervisord socket
       ansible.builtin.wait_for:
         path: /run/supervisor/supervisor.sock
         timeout: 30
+
+    # 新しく配置した ini を Supervisor に再読込させてから起動します。
+    - name: reread Supervisor program definitions
+      ansible.builtin.command:
+        cmd: /usr/bin/supervisorctl -c /etc/supervisord.conf reread
+
+    - name: update Supervisor program definitions
+      ansible.builtin.command:
+        cmd: /usr/bin/supervisorctl -c /etc/supervisord.conf update
 
     # すでにプレイブック内でタスク実行用のiniファイルを配置されているため、
     # 最後に supervisorctl で supercronic プロセスを開始・登録します

@@ -101,7 +101,7 @@
         - http
       loop_control:
         loop_var: loop_protocol
-    ignore_unreachable: yes
+    ignore_unreachable: true
     rescue:
     - name: Error.
       debug:

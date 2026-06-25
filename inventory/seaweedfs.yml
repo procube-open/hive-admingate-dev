@@ -38,7 +38,7 @@ services:
 
   # SeaweedFS Filer (API operations)
   seaweedfs-filer:
-    image: 
+    image:
       from: chrislusf/seaweedfs:latest
       roles:
         - python-aptk
@@ -48,7 +48,6 @@ services:
       - "-master=seaweedfs-master:9333"
       - "-ip=seaweedfs-filer"
       - "-port=8888"
-    
 
   # SeaweedFS Filer (FUSE mount dedicated with notification enabled)
   seaweedfs-filer-fuse:

@@ -104,6 +104,134 @@ phases_data:
                 type: datetime
                 unique: false
                 uniqueIgnoreCase: false
+        -   description: "ブラウザ接続で認証方式が browser_steps に設定された際の入力\r\n"
+            displayName: ブラウザ入力
+            isNestedObject: true
+            isPrimaryAndNestedObject: false
+            name: browserStep
+            outputLdapSchema: false
+            propertyDefinitionList:
+            -   allowAnotherValue: false
+                displayName: タイプ
+                isArray: false
+                name: type
+                outputLdapSchema: false
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                values:
+                -   displayName: 遷移
+                    value: goto
+                -   displayName: クリック
+                    value: click
+                -   displayName: テキスト入力
+                    value: input
+                -   displayName: 待機
+                    value: wait
+                -   displayName: スリープ
+                    value: sleep
+            -   allowAnotherValue: false
+                description: 要素を探す方法
+                displayName: 検索方法
+                isArray: false
+                name: by
+                outputLdapSchema: false
+                propGroupName:
+                - type#click
+                - type#input
+                - type#wait
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                values:
+                -   value: xpath
+                -   value: css
+                -   value: css selector
+                -   value: id
+                -   value: name
+                -   value: tag
+                -   value: tag name
+                -   value: class
+                -   value: class name
+                -   value: link
+                -   value: link text
+                -   value: partial link
+                -   value: partial link text
+            -   allowAnotherValue: false
+                description: "検索方法で選んだ方法に対応する指定文字列\r\nセレクタや属性値を入力"
+                displayName: 指定値
+                isArray: false
+                name: value
+                outputLdapSchema: false
+                propGroupName:
+                - type#click
+                - type#input
+                - type#wait
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: タイムアウト(秒)
+                isArray: false
+                name: timeout_sec
+                outputLdapSchema: false
+                propGroupName:
+                - type#click
+                - type#input
+                - type#wait
+                required: false
+                type: number
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: URL
+                isArray: false
+                name: url
+                outputLdapSchema: false
+                propGroupName:
+                - type#goto
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: 入力テキスト
+                displayName: テキスト
+                isArray: false
+                name: text
+                outputLdapSchema: false
+                propGroupName:
+                - type#input
+                required: true
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: inputの前に対象要素の中身を削除します。
+                displayName: 入力前消去
+                isArray: false
+                name: clear
+                outputLdapSchema: false
+                propGroupName:
+                - type#input
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: スリープ時間(ミリ秒)
+                isArray: false
+                name: ms
+                outputLdapSchema: false
+                propGroupName:
+                - type#sleep
+                required: false
+                type: number
+                unique: false
+                uniqueIgnoreCase: false
         -   displayName: 接続先
             isNestedObject: false
             isPrimaryAndNestedObject: false
@@ -184,78 +312,6 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: SSH用ID
-                isArray: false
-                name: sshID
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: SSH用パスワード
-                isArray: false
-                name: sshPassword
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: RDP用ID
-                isArray: false
-                name: rdpID
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: RDP用パスワード
-                isArray: false
-                name: rdpPassword
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Telnet用ID
-                isArray: false
-                name: telnetID
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Telnet用パスワード
-                isArray: false
-                name: telnetPassword
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: HTTP/HTTPS用ID
-                isArray: false
-                name: httpID
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: HTTP用パスワード
-                isArray: false
-                name: httpPassword
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
                 displayName: パスワード更新日時
                 isArray: false
                 name: changePasswordDate
@@ -310,7 +366,8 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
                 valuesInterface: selectUserGroupIF
-        -   displayName: 接続仕様
+        -   description: 接続する際に用いられる秘密情報
+            displayName: 接続仕様
             isNestedObject: false
             isPrimaryAndNestedObject: false
             keyProperty: id
@@ -432,219 +489,147 @@ phases_data:
                 -   displayName: A10 ACOS Telnet
                     value: telnet_A10
             -   allowAnotherValue: false
-                displayName: SSH利用
+                displayName: プロトコル
                 isArray: false
-                name: ssh
+                name: protocol
                 outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: SSH用ポート
-                isArray: false
-                name: sshPort
-                outputLdapSchema: false
-                propGroupName:
-                - ssh
-                required: false
-                type: number
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: SSH用ID
-                isArray: false
-                name: sshID
-                outputLdapSchema: false
-                propGroupName:
-                - ssh
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: SSH用パスワード
-                isArray: false
-                name: sshPassword
-                outputLdapSchema: false
-                propGroupName:
-                - ssh
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: RDP利用
-                isArray: false
-                name: rdp
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: RDP用ポート
-                isArray: false
-                name: rdpPort
-                outputLdapSchema: false
-                propGroupName:
-                - rdp
-                required: false
-                type: number
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: RDP用ID
-                isArray: false
-                name: rdpID
-                outputLdapSchema: false
-                propGroupName:
-                - rdp
-                required: true
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: RDP用パスワード
-                isArray: false
-                name: rdpPassword
-                outputLdapSchema: false
-                propGroupName:
-                - rdp
-                required: true
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Telnet利用
-                isArray: false
-                name: telnet
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Telnet用ポート
-                isArray: false
-                name: telnetPort
-                outputLdapSchema: false
-                propGroupName:
-                - telnet
-                required: false
-                type: number
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Telnet用ID
-                isArray: false
-                name: telnetID
-                outputLdapSchema: false
-                propGroupName:
-                - telnet
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: Telnet用パスワード
-                isArray: false
-                name: telnetPassword
-                outputLdapSchema: false
-                propGroupName:
-                - telnet
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: HTTP/HTTPS利用
-                isArray: false
-                name: http
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: HTTP/HTTPS用ポート
-                isArray: false
-                name: httpPort
-                outputLdapSchema: false
-                propGroupName:
-                - http
-                required: false
-                type: number
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: HTTP/HTTPS用ID
-                isArray: false
-                name: httpID
-                outputLdapSchema: false
-                propGroupName:
-                - http
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: HTTP/HTTPS用パスワード
-                isArray: false
-                name: httpPassword
-                outputLdapSchema: false
-                propGroupName:
-                - http
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 利用プロトコル
-                isArray: false
-                name: httpProtocol
-                outputLdapSchema: false
-                propGroupName:
-                - http
                 required: true
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
                 values:
-                -   displayName: HTTP
-                    value: http
-                -   displayName: HTTPS
-                    value: https
+                -   displayName: SSH
+                    value: ssh
+                -   displayName: RDP
+                    value: rdp
+                -   displayName: Telnet
+                    value: telnet
+                -   displayName: VNC
+                    value: vnc
+                -   displayName: ブラウザ
+                    value: browser
             -   allowAnotherValue: false
-                className: httpLoginParams
-                displayName: アクション
+                displayName: ポート
                 isArray: false
-                name: actions
+                name: port
                 outputLdapSchema: false
                 propGroupName:
-                - http
+                - protocol#ssh
+                - protocol#rdp
+                - protocol#vnc
+                - protocol#telnet
+                required: false
+                type: number
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: ユーザー名
+                isArray: false
+                name: username
+                outputLdapSchema: false
+                propGroupName:
+                - protocol#ssh
+                - protocol#rdp
+                - protocol#vnc
+                - protocol#telnet
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: パスワード
+                isArray: false
+                name: password
+                outputLdapSchema: false
+                propGroupName:
+                - protocol#ssh
+                - protocol#rdp
+                - protocol#vnc
+                - protocol#telnet
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: WEB-SFTP有効化
+                isArray: false
+                name: web_sftp_enabled
+                outputLdapSchema: false
+                propGroupName:
+                - protocol#ssh
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: ブラウザ認証方式
+                isArray: false
+                name: browser_auth_mode
+                outputLdapSchema: false
+                propGroupName:
+                - protocol#browser
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+                values:
+                -   displayName: なし
+                    value: none
+                -   displayName: Basic
+                    value: basic
+                -   displayName: Digest
+                    value: digest
+                -   displayName: 自動入力
+                    value: browser_steps
+            -   allowAnotherValue: false
+                description: "認証方式が Basic/Digest の場合のユーザー名\r\n自動入力の場合は ${privileged_username}
+                    を参照することでこれが入力できる"
+                displayName: 特権ユーザー名
+                isArray: false
+                name: privileged_username
+                outputLdapSchema: false
+                propGroupName:
+                - protocol#browser
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: "認証方式が Basic/Digest の場合のユーザーパスワード\r\n自動入力の場合は ${privileged_password}
+                    を参照することでこれが入力できる"
+                displayName: 特権ユーザーパスワード
+                isArray: false
+                name: privileged_password
+                outputLdapSchema: false
+                propGroupName:
+                - protocol#browser
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                className: browserStep
+                displayName: 自動入力手順
+                isArray: false
+                name: browser_steps
+                outputLdapSchema: false
+                propGroupName:
+                - browser_auth_mode#browser_steps
                 required: false
                 type: object
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                displayName: 認証方式
+                displayName: 初期URL
                 isArray: false
-                name: authType
+                name: initial_url
                 outputLdapSchema: false
                 propGroupName:
-                - http
+                - protocol#browser
                 required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
-                values:
-                -   displayName: Basic認証
-                    value: basic
-                -   displayName: Digest認証
-                    value: digest
-                -   displayName: その他（アクションによる認証）
-                    value: action
         -   displayName: 強制切断済みユーザ
             isNestedObject: false
             isPrimaryAndNestedObject: false
@@ -661,70 +646,6 @@ phases_data:
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
-        -   displayName: アクション
-            isNestedObject: true
-            isPrimaryAndNestedObject: false
-            name: httpLoginParams
-            outputLdapSchema: false
-            propertyDefinitionList:
-            -   allowAnotherValue: false
-                displayName: イベント
-                isArray: false
-                name: event
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-                values:
-                -   value: input
-                -   value: click
-                -   value: iframe
-                -   value: link
-            -   allowAnotherValue: false
-                displayName: 要素取得方法
-                isArray: false
-                name: getElementMethod
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-                values:
-                -   value: xpath
-            -   allowAnotherValue: false
-                displayName: ターゲットXPath
-                isArray: false
-                name: targetElementPath
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                displayName: 値
-                isArray: false
-                name: sendValue
-                outputLdapSchema: false
-                required: false
-                type: string
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                description: このアクションの前に画面遷移が存在する場合、チェックしてください。
-                displayName: 画面遷移あり
-                isArray: false
-                name: newPage
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            validation:
-            -   descriptionEx: '"xpathに \"(ダブルクォーテーション)を使うことはできません。 \''(シングルクォーテーション)を用いてください。"'
-                isWarning: false
-                validateEx: "this().targetElementPath\r\n? !this().targetElementPath.toString().includes('\\\"')\r\n:
-                    true"
         -   description: AWS IAM ポリシーの一覧を保持する。作業申請のポリシー一覧に表示される
             displayName: IAMポリシー
             isNestedObject: false
@@ -1455,26 +1376,6 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
-                description: ファイルサーバから接続先へのファイル転送を制限します。
-                displayName: アップロード制限
-                isArray: false
-                name: disableUpload
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
-                description: 接続先からファイルサーバへのファイル転送を制限します。
-                displayName: ダウンロード制限
-                isArray: false
-                name: disableDownload
-                outputLdapSchema: false
-                required: false
-                type: boolean
-                unique: false
-                uniqueIgnoreCase: false
-            -   allowAnotherValue: false
                 description: AWS IAMポリシーを選択する
                 displayName: IAMポリシー
                 isArray: true
@@ -1886,26 +1787,6 @@ phases_data:
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: disableUpload
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: boolean
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: disableDownload
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: boolean
             -   className: ''
                 dateSeparator: /
                 disableUpdate: true
@@ -2382,7 +2263,7 @@ phases_data:
                 name: disableUpload
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: boolean
+                type: ''
             -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
@@ -2392,7 +2273,7 @@ phases_data:
                 name: disableDownload
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: boolean
+                type: ''
             -   className: ''
                 datePickerFlag: false
                 dateSeparator: /
@@ -2559,19 +2440,17 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: ssh
+                name: protocol
                 radioButtonFlag: false
-                sectionSeparater: closed
-                sectionSeparaterTitle: SSH
                 twoColumnFlag: false
-                type: boolean
+                type: string
             -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: sshPort
+                name: port
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: number
@@ -2581,7 +2460,7 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: sshID
+                name: username
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -2591,7 +2470,7 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: sshPassword
+                name: password
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -2601,10 +2480,8 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: rdp
+                name: web_sftp_enabled
                 radioButtonFlag: false
-                sectionSeparater: closed
-                sectionSeparaterTitle: RDP
                 twoColumnFlag: false
                 type: boolean
             -   className: ''
@@ -2613,17 +2490,19 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: rdpPort
+                name: browser_auth_mode
                 radioButtonFlag: false
+                sectionSeparater: opened
+                sectionSeparaterTitle: ブラウザ接続設定
                 twoColumnFlag: false
-                type: number
+                type: string
             -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: rdpID
+                name: privileged_username
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -2633,124 +2512,30 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: rdpPassword
+                name: privileged_password
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
-            -   className: ''
+            -   className: browserStep
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: telnet
-                radioButtonFlag: false
-                sectionSeparater: closed
-                sectionSeparaterTitle: Telnet
-                twoColumnFlag: false
-                type: boolean
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: telnetPort
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: number
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: telnetID
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: telnetPassword
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: http
-                radioButtonFlag: false
-                sectionSeparater: closed
-                sectionSeparaterTitle: HTTP/HTTPS
-                twoColumnFlag: false
-                type: boolean
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: httpPort
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: number
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: httpID
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: httpPassword
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: httpProtocol
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: authType
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: httpLoginParams
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: actions
+                name: browser_steps
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: object
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: initial_url
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
             propertiesOnList:
             -   displayOnList: 'on'
                 filter: regex
@@ -2761,13 +2546,7 @@ phases_data:
             -   displayOnList: 'on'
                 name: osType
             -   displayOnList: 'on'
-                name: ssh
-            -   displayOnList: 'on'
-                name: rdp
-            -   displayOnList: 'on'
-                name: telnet
-            -   displayOnList: 'on'
-                name: http
+                name: protocol
             showHistory: false
             titleOfUpdate: 編集
             uploadCSV: true
@@ -3202,7 +2981,7 @@ phases_data:
                 name: disableUpload
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: boolean
+                type: ''
             -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
@@ -3212,7 +2991,7 @@ phases_data:
                 name: disableDownload
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: boolean
+                type: ''
             propertiesOnList:
             -   displayOnList: 'on'
                 filter: regex
@@ -3703,7 +3482,7 @@ phases_data:
             database: Sandbox
             deleteAsUpdate: false
             displayName: 申請作業IF
-            filter: '{status:{$in:["editing","pending","sendBack"]}}'
+            filter: '{"status":{"$in":["editing","pending","sendBack"]}}'
             filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {status:{\"$in\":[\"editing\",\"pending\",\"sendBack\"]}}\r\n:
                 {\r\nstatus:{\"$in\":[\"editing\",\"pending\",\"sendBack\"]},\r\n\"$or\":
                 [\r\n{applicationUser: user()}\r\n]\r\n}"
@@ -3732,8 +3511,6 @@ phases_data:
             - workUsers
             - workUserGroups
             - manageUsers
-            - disableUpload
-            - disableDownload
             - iamPolicies
             - approvedComment
             readOnlyProperties:
@@ -3746,7 +3523,7 @@ phases_data:
             database: Sandbox
             deleteAsUpdate: false
             displayName: SYSTEM用承認済み作業IF
-            filter: '{status:{$in:["approved"]}}'
+            filter: '{"status":{"$in":["approved"]}}'
             name: SystemApprovalWorkIF
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
@@ -3798,7 +3575,7 @@ phases_data:
             database: Sandbox
             deleteAsUpdate: false
             displayName: メール未送信承認完了IF
-            filter: '{status:"approved",approveCompletionDate:null}'
+            filter: '{"status":"approved","approveCompletionDate":null}'
             name: approvalCompletionMailIF
             properties:
             - id
@@ -3834,7 +3611,7 @@ phases_data:
             database: Sandbox
             deleteAsUpdate: false
             displayName: 承認済み作業IF
-            filter: '{status:{$in:["approved"]}}'
+            filter: '{"status":{"$in":["approved"]}}'
             filterDerivation: "user() == \"IDM_ADMIN\"\r\n? {hoge: null}\r\n: {\r\nstatus:{\"$in\":[\"approved\"]},\r\n\"$or\":[\r\n{workUsers:{\"$in\":[user()]}},\r\n{workUserGroups:{\"$in\":
                 flatten(select(getResource(\"/IDManager/userInfoWithTeam\", {\"uid\":
                 user()}), \"team\"))}},\r\n{applicationUser:user()},\r\n{manageUsers:{\"$in\":[user()]}}\r\n]\r\n}"
@@ -4029,7 +3806,7 @@ phases_data:
             database: Sandbox
             deleteAsUpdate: false
             displayName: 過去作業IF
-            filter: '{status:{$in:["rejected", "cancel"]}}'
+            filter: '{"status":{"$in":["rejected", "cancel"]}}'
             name: historyWorkIF
             sortOrder: '-'
             sortProperty: startDatetime
@@ -4055,47 +3832,6 @@ phases_data:
             useCustomBackendDatabase: false
         -   ACEs:
             -   allow: true
-            accessLevel: readOnly
-            argumentType: none
-            className: _provRequest
-            database: System
-            deleteAsUpdate: false
-            displayName: プロビジョニング要求
-            name: my_provRequests
-            sortOrder: '-'
-            sortProperty: createDatetime
-            useAESDecryptedResponse: false
-            useCustomBackendDatabase: false
-        -   ACEs:
-            -   allow: true
-            accessLevel: readOnly
-            argumentType: none
-            className: _task
-            database: System
-            deleteAsUpdate: false
-            description: プロビジョニングタスクの閲覧用
-            displayName: プロビジョニングタスク
-            name: my_task
-            sortOrder: '-'
-            sortProperty: registerdDatetime
-            useAESDecryptedResponse: false
-            useCustomBackendDatabase: false
-        -   ACEs:
-            -   allow: true
-            accessLevel: readOnly
-            argumentType: none
-            className: _taskLog
-            database: System
-            deleteAsUpdate: false
-            description: タスクログオブジェクトの閲覧用
-            displayName: タスクログオブジェクトの閲覧用
-            name: my_taskLog
-            sortOrder: '-'
-            sortProperty: timestamp
-            useAESDecryptedResponse: false
-            useCustomBackendDatabase: false
-        -   ACEs:
-            -   allow: true
             accessLevel: readWrite
             className: work
             database: Sandbox
@@ -4117,8 +3853,6 @@ phases_data:
             - manageUsers
             - resultConnections
             - resultUsers
-            - disableUpload
-            - disableDownload
             - iamPolicies
             - workUsers
             - workUserGroups
@@ -4136,8 +3870,6 @@ phases_data:
             - workUsers
             - workUserGroups
             - manageUsers
-            - disableUpload
-            - disableDownload
             - iamPolicies
             - Periods
             - resultConnections
@@ -4151,7 +3883,7 @@ phases_data:
             database: Sandbox
             deleteAsUpdate: false
             displayName: メール未送信要承認作業IF
-            filter: '{status:"pending",approveRequestDatetime:null}'
+            filter: '{"status":"pending","approveRequestDatetime":null}'
             name: requiredApprovalWorkMailIF
             properties:
             - id
@@ -4293,10 +4025,7 @@ phases_data:
             - id
             - name
             - osType
-            - ssh
-            - rdp
-            - telnet
-            - http
+            - protocol
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
@@ -4499,29 +4228,6 @@ phases_data:
             ignoreMultiResult: false
             ignoreZeroResult: false
             name: createIdPUser
-            outputAll: false
-            path: /v1/execute_task
-            port: 8099
-            stop: false
-            type: CustomTaskExecutor
-            withHeader: false
-        -   appendOnly: false
-            classSetting:
-            -   className: user
-                noDecryption: false
-                properties:
-                -   modifiedOnly: false
-                    propertyName: uid
-                -   modifiedOnly: false
-                    propertyName: cn
-                type: CustomTaskExecutor
-            database: Master
-            displayName: ユーザー作成
-            host: idm3-provtools
-            ignore: false
-            ignoreMultiResult: false
-            ignoreZeroResult: false
-            name: createUser
             outputAll: false
             path: /v1/execute_task
             port: 8099
@@ -4740,6 +4446,12 @@ phases_data:
             -   displayName: ユーザ設定
                 gadgetName: userEditor
                 type: gadget
+            -   displayName: 接続先
+                gadgetName: connection_g
+                type: gadget
+            -   displayName: 接続仕様
+                gadgetName: connectionSpecification_g
+                type: gadget
             -   displayName: ログアウト
                 icon: M30 10 L30 15 L40 15 L40 35 L30 35 L30 40 L45 40 L45 10 Z M20
                     18 L25 22.5 L18 22.5 L18 27.5 L25 27.5 L20 32 L5 25 Z
@@ -4751,11 +4463,11 @@ phases_data:
         userEditorInterface:
         -   accountLock: false
             cn: Admin
-            displayName: "システム保守担当者"
-            email: 'admin@{{ domain }}'
+            displayName: idm Admin
+            email: admin@{{ domain }}
             idmRole: IDM_ADMIN
             sn: idm
-            uid: admin
             team:
             - administorators
-            userPassword: '{{ db_password }}'
+            uid: admin
+            userPassword: '{ARGON2}$argon2id$v=19$m=65536,t=3,p=4$FpwDzKrQGp8WoaydBYYGDw$Y/mlQ3JK4TFDM11DKvjPmhfEC0bq0fjnP34qFbggCxI'
