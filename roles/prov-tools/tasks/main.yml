@@ -80,7 +80,7 @@
   - src: ansible.cfg
     dest: /etc/ansible
   - src: hosts
-    dest: /etc/ansible/ 
+    dest: /etc/ansible/
   - src: task-executer.ini
     dest: /etc/supervisord.d/
   - src: TenantProvisioningMessage.js

@@ -1,122 +1,159 @@
 ---
-- name: Provisioning to user account.
+- name: Provisioning connection target.
   hosts: connections
   gather_facts: false
   serial: 1
   vars:
-    ansible_host: "{{ hostname }}"
+    ansible_connection: local
     ansible_python_interpreter: /root/prov/bin/python
-    username: guacadmin
-    password: guacadmin
-    cs_obj: "{{ hostvars[connectionSpecification] }}"
-    ansible_user: "{{ cs_obj.ansibleID }}"
-    ansible_password: "{{ cs_obj.ansiblePassword }}"
+    api_user: provtools
+    core_server_admin_base_url: http://admingate-core-server:8081
+    admin_headers:
+      HTTP_REMOTEUSER: "{{ api_user }}"
+      X-Auth-Role: ADMIN
+    admin_json_headers:
+      HTTP_REMOTEUSER: "{{ api_user }}"
+      X-Auth-Role: ADMIN
+      Content-Type: application/json
+    target_name: "{{ ((remark | default('', true)) | trim) or id }}"
+    cs_obj: "{{ hostvars[connectionSpecification] if (connectionSpecification | default('')) in hostvars else {} }}"
 
   tasks:
-  - name: Get token of REST API.
+  - name: Get targets.
     uri:
-      url: "http://guacamole:8080/guacamole/api/tokens"
-      headers:
-        Content-Type: "application/x-www-form-urlencoded"
-      method: POST
-      body: 'username={{ username }}&password={{ password }}'
-      validate_certs: false
-      return_content: yes
-      status_code: 200
-    register: token
-    vars:
-      ansible_connection: local
-  - name: Get Connections.
-    uri:
-      url: "http://guacamole:8080/guacamole/api/session/data/postgresql/connections"
-      headers:
-        Guacamole-Token: "{{ token.json.authToken }}"
+      url: "{{ core_server_admin_base_url }}/admin/targets"
+      headers: "{{ admin_headers }}"
       method: GET
       validate_certs: false
       return_content: yes
       status_code: 200
-    register: guacamole_connections
-    vars:
-      ansible_connection: local
-  - name: Get Connection parameter.
-    uri:
-      url: "http://guacamole:8080/guacamole/api/session/data/postgresql/connections/{{ guacamole_connection_id }}/parameters"
-      headers:
-        Guacamole-Token: "{{ token.json.authToken }}"
-      method: GET
-      validate_certs: false
-      return_content: yes
-      status_code: 200
-    register: guacamole_connection_parameters
-    vars:
-      ansible_connection: local
-    loop: "{{ guacamole_connections.json | dict2items | selectattr('value.idmIdentifier', 'eq', id) | map(attribute='key') | list }}"
+    register: admin_targets
+
+  - name: Find existing target ID.
+    set_fact:
+      target_id: "{{ item.id }}"
+    when: item.name == target_name and target_id is not defined
+    loop: "{{ admin_targets.json | default([]) }}"
     loop_control:
-      loop_var: guacamole_connection_id
+      label: "{{ item.name }}"
+
+  - name: Delete target.
+    uri:
+      url: "{{ core_server_admin_base_url }}/admin/targets/{{ target_id }}"
+      headers: "{{ admin_headers }}"
+      method: DELETE
+      validate_certs: false
+      status_code: 200
+    when: prov_operation == 'delete' and target_id is defined
+
+  - name: Validate connection target data.
+    assert:
+      that:
+        - (hostname | default('', true) | trim) != ''
+        - (connectionSpecification | default('', true) | trim) != ''
+        - (connectionSpecification | default('')) in hostvars
+        - (cs_obj.protocol | default('', true) | trim) != ''
+      fail_msg: >-
+        connection provisioning requires hostname and a valid connectionSpecification
+        with protocol.
+    when: prov_operation != 'delete'
+
   - block:
-    - name: Change password.
-      include_tasks:
-        file: "connection/changePassword/{{ cs_obj.osType }}.yml"
-      when: cs_obj[loop_protocol] and check_change and check_defined
-      vars:
-        parameters_json: "{{ guacamole_connection_parameters.results | map(attribute='json') | list }}"
-        check_defined: "{{ loop_protocol ~ 'ID' in cs_obj and loop_protocol ~ 'Password' in cs_obj }}"
-        check_change: >
-          {{
-            parameters_json |
-            selectattr('username', 'defined') |
-            selectattr('username', 'eq', cs_obj[loop_protocol ~ 'ID'] | default('')) |
-            selectattr('password', 'defined') |
-            selectattr('password', 'eq', cs_obj[loop_protocol ~ 'Password'] | default('')) |
-            list | length == 0
-          }}
-      loop:
-        - ssh
-        - rdp
-        - telnet
-        - http
-      loop_control:
-        loop_var: loop_protocol
-    - name: Register connection.
-      include_tasks:
-        file: "connection/register/{{ loop_protocol }}.yml"
-      when: cs_obj[loop_protocol] and check_change
-      vars:
-        parameters_json: "{{ guacamole_connection_parameters.results | map(attribute='json') | list }}"
-        check_change: >
-          {{
-            parameters_json |
-            selectattr('username', 'defined') |
-            selectattr('username', 'eq', cs_obj[loop_protocol ~ 'ID'] | default('')) |
-            selectattr('password', 'defined') |
-            selectattr('password', 'eq', cs_obj[loop_protocol ~ 'Password'] | default('')) |
-            selectattr('port', 'defined') |
-            selectattr('port', 'eq', cs_obj[loop_protocol ~ 'Port'] | default('')) |
-            list | length == 0
-          }}
-      loop:
-        - ssh
-        - rdp
-        - telnet
-        - http
-      loop_control:
-        loop_var: loop_protocol
-    ignore_unreachable: true
-    rescue:
-    - name: Error.
-      debug:
-        msg: "{{ hostname }} is not registered."
-    - name: Register connection.
-      include_tasks:
-        file: "connection/register/{{ loop_protocol }}.yml"
-      when: cs_obj[loop_protocol]
-      vars:
-        parameters_json: "{{ guacamole_connection_parameters.results | map(attribute='json') | list }}"
-        check_change: "{{ parameters_json | selectattr('username', 'eq', cs_obj[loop_protocol ~ 'ID'] | default('')) | selectattr('password', 'eq', cs_obj[loop_protocol ~ 'Password'] | default('')) | selectattr('port', 'eq', cs_obj[loop_protocol ~ 'Port'] | default('')) | list | length == 0 }}"
-      loop:
-        - ssh
-        - rdp
-        - telnet
-        - http
-      loop_control:
-        loop_var: loop_protocol
+      - name: Build target params.
+        set_fact:
+          target_params:
+            web_sftp_enabled: "{{ cs_obj.web_sftp_enabled | default(true) | bool }}"
+
+      - name: Add osType to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'osType': cs_obj.osType}) }}"
+        when: cs_obj.osType is defined and cs_obj.osType is not none and (cs_obj.osType | string | trim) != ''
+
+      - name: Add browser auth mode to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'browser_auth_mode': cs_obj.browser_auth_mode}) }}"
+        when: cs_obj.browser_auth_mode is defined and cs_obj.browser_auth_mode is not none and (cs_obj.browser_auth_mode | string | trim) != ''
+
+      - name: Add privileged username to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'privileged_username': cs_obj.privileged_username}) }}"
+        when: cs_obj.privileged_username is defined and cs_obj.privileged_username is not none and (cs_obj.privileged_username | string | trim) != ''
+
+      - name: Add privileged password to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'privileged_password': cs_obj.privileged_password}) }}"
+        when: cs_obj.privileged_password is defined and cs_obj.privileged_password is not none and (cs_obj.privileged_password | string | trim) != ''
+
+      - name: Add browser steps to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'browser_steps': cs_obj.browser_steps}) }}"
+        when: cs_obj.browser_steps is defined and cs_obj.browser_steps is not none and (cs_obj.browser_steps | length) > 0
+
+      - name: Add initial URL to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'initial_url': cs_obj.initial_url}) }}"
+        when: cs_obj.initial_url is defined and cs_obj.initial_url is not none and (cs_obj.initial_url | string | trim) != ''
+
+      - name: Build target body.
+        set_fact:
+          target_body:
+            id: "{{ id }}"
+            name: "{{ target_name }}"
+            protocol: "{{ cs_obj.protocol | default('', true) | trim | lower }}"
+            hostname: "{{ hostname }}"
+
+
+      - name: Add target params to body.
+        set_fact:
+          target_body: "{{ target_body | combine({'params': target_params}) }}"
+
+      - name: Add target port.
+        set_fact:
+          target_body: "{{ target_body | combine({'port': cs_obj.port | int}) }}"
+        when:
+          - cs_obj.port is defined
+          - cs_obj.port is not none
+          - (cs_obj.port | string | trim) != ''
+          - (cs_obj.protocol | default('', true) | trim | lower) != 'browser'
+
+      - name: Add target username.
+        set_fact:
+          target_body: "{{ target_body | combine({'username': cs_obj.username}) }}"
+        when:
+          - cs_obj.username is defined
+          - cs_obj.username is not none
+          - (cs_obj.protocol | default('', true) | trim | lower) != 'browser'
+
+      - name: Add target password.
+        set_fact:
+          target_body: "{{ target_body | combine({'password': cs_obj.password}) }}"
+        when: cs_obj.password is defined and cs_obj.password is not none
+
+      - name: Apply browser target body defaults.
+        set_fact:
+          target_body: "{{ target_body | combine({'password': 'secret'}) }}"
+        when: (cs_obj.protocol | default('', true) | trim | lower) == 'browser'
+
+      - name: Create target.
+        uri:
+          url: "{{ core_server_admin_base_url }}/admin/targets"
+          headers: "{{ admin_json_headers }}"
+          method: POST
+          body_format: raw
+          body: "{{ target_body | to_json }}"
+          validate_certs: false
+          status_code: 201
+        when: target_id is not defined
+
+      - name: Update target.
+        uri:
+          url: "{{ core_server_admin_base_url }}/admin/targets/{{ target_id }}"
+          headers: "{{ admin_json_headers }}"
+          method: PUT
+          body_format: raw
+          body: "{{ target_body | to_json }}"
+          validate_certs: false
+          status_code: 200
+        when: target_id is defined
+    when: prov_operation != 'delete'
+    no_log: true

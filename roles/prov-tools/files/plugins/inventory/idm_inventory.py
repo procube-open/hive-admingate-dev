@@ -9,7 +9,7 @@ ID Manager inventory: dynamic inventory plugin for ID Manager
 
 from ansible.plugins.inventory import BaseInventoryPlugin, Cacheable
 from ansible.errors import AnsibleParserError, AnsibleError
-from ansible.module_utils._text import to_text
+from ansible.module_utils.common.text.converters import to_text
 from ansible.module_utils.urls import open_url
 import ansible.module_utils.six.moves.urllib.error as urllib_error
 import json

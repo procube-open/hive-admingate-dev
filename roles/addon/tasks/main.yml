@@ -17,3 +17,9 @@
     dest: "/etc/docker/certs.d/{{ ns_container_repository }}/client.key"
     mode: '0600'
   become: true
+
+- import_role:
+    name: selenium-node-docker
+
+- import_role:
+    name: pull-docker-images

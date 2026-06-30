@@ -1,119 +1,133 @@
 ---
-- name: Get token of REST API.
+- name: Get works.
   uri:
-    url: "http://guacamole:8080/guacamole/api/tokens"
+    url: "http://admingate-core-server:8081/admin/works"
     headers:
-      Content-Type: "application/x-www-form-urlencoded"
-    method: POST
-    body: 'username={{ username }}&password={{ password }}'
-    validate_certs: false
-    return_content: yes
-    status_code: 200
-  register: token
-- name: output token
-  debug:
-    msg: "{{ token.json.authToken }}"
-- name: Get Connections.
-  uri:
-    url: "http://guacamole:8080/guacamole/api/session/data/postgresql/connections"
-    headers:
-      Guacamole-Token: "{{ token.json.authToken }}"
+      HTTP_REMOTEUSER: "{{ username }}"
+      X-Auth-Role: ADMIN
     method: GET
     validate_certs: false
     return_content: yes
     status_code: 200
-  register: guacamoleConnections
-- name: Make connectionid list.
+  register: admin_works
+
+- name: Find existing work id.
   set_fact:
-    connectionids: >
-      {{ connectionids | default([]) + [{ "identifier": item }] }}
-  loop: "{{ guacamoleConnections.json | dict2items | selectattr('value.idmIdentifier', 'in', resultConnections) | map(attribute='key') | list }}"
-- set_fact:
-    Periods: "{{ Periods | default([]) }}"
-- set_fact:
-    resultUsers: "{{ resultUsers | default([]) }}"
-- set_fact:
-    manageUsers: "{{ manageUsers | default([]) }}"
-- name: Format periods.
+    work_id: "{{ item.id }}"
+  when: item.name == name and work_id is not defined
+  loop: "{{ admin_works.json | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Build file transfer permissions.
   set_fact:
-    req_periods: >
-      {{ req_periods | default([]) + [{
-        "validFrom": item.validFrom,
-        "validUntil": item.validUntil,
-        "startTime": item.startHour ~ ":" ~ (0 ~ item.startMinute)[-2:] ~ ":00" if item.specificTime else "00:00:00",
-        "endTime": item.endHour ~ ":" ~ (0 ~ item.endMinute)[-2:] ~ ":00" if item.specificTime else "23:59:59"
-      }] }}
-  loop: "{{ Periods }}"
-- name: Format workers.
+    work_file_transfer_permissions:
+      http:
+        connect: true
+        read: "{{ not (disableDownload | default(false) | bool) }}"
+        write: "{{ not (disableUpload | default(false) | bool) }}"
+      web_sftp:
+        connect: true
+        read: "{{ not (disableDownload | default(false) | bool) }}"
+        write: "{{ not (disableUpload | default(false) | bool) }}"
+      ftp:
+        connect: true
+        read: "{{ not (disableDownload | default(false) | bool) }}"
+        write: "{{ not (disableUpload | default(false) | bool) }}"
+      sftp:
+        connect: true
+        read: "{{ not (disableDownload | default(false) | bool) }}"
+        write: "{{ not (disableUpload | default(false) | bool) }}"
+      tftp:
+        connect: true
+        read: "{{ not (disableDownload | default(false) | bool) }}"
+        write: "{{ not (disableUpload | default(false) | bool) }}"
+
+- name: Build work payload.
   set_fact:
-    workers: >
-      {{ workers | default([]) + [{
-        "identifier": item,
-        "name": "hoge",
-        "isWorker": true,
-        "isManager": false
-      }] }}
-  loop: "{{ resultUsers | difference(manageUsers) }}"
-- name: Format managers.
-  set_fact:
-    managers: >
-      {{ managers | default([]) + [{
-        "identifier": item,
-        "name": "hoge",
-        "isWorker": false,
-        "isManager": true
-      }] }}
-  loop: "{{ manageUsers | difference(resultUsers) }}"
-- name: Format worker and manager.
-  set_fact:
-    workerAndManager: >
-      {{ workerAndManager | default([]) + [{
-        "identifier": item,
-        "name": "hoge",
-        "isWorker": true,
-        "isManager": true
-      }] }}
-  loop: "{{ resultUsers | intersect(manageUsers) }}"
-- name: Post Work.
-  uri:
-    url: "http://guacamole:8080/guacamole/api/session/data/postgresql/works"
-    headers:
-      Guacamole-Token: "{{ token.json.authToken }}"
-      Content-Type: "application/json;charset=UTF-8"
-    method: POST
-    body_format: json
-    body:
+    work_payload:
       name: "{{ name }}"
-      idmIdentifier: "{{ id }}"
-      disabled: false
-      attributes: {}
-      periods: "{{ req_periods | default([]) }}"
-      connections: "{{ connectionids | default([]) }}"
-      users: "{{ (workers | default([])) + (managers | default([])) + (workerAndManager | default([])) }}"
-    validate_certs: false
-    status_code: 200
-- name: Get connection list
+      worker_ids: "{{ resultUsers | default([]) | unique | list }}"
+      manager_ids: "{{ manageUsers | default([]) | unique | list }}"
+      target_ids: "{{ resultConnections | default([]) | unique | list }}"
+      file_transfer_permissions: "{{ work_file_transfer_permissions }}"
+
+- name: Set first period.
+  set_fact:
+    first_period: "{{ (Periods | default([])) | first }}"
+  when: (Periods | default([]) | length) > 0
+
+- name: Set first period time values.
+  set_fact:
+    first_period_daily_start_time: >-
+      {{
+        '%02d:%02d' | format(
+          first_period.startHour | default('0') | int,
+          first_period.startMinute | default('0') | int
+        )
+        if (
+          first_period.specificTime | default(false) | bool
+          and (first_period.startHour | default('') | string | trim is match('^[0-9]+$'))
+          and (first_period.startMinute | default('') | string | trim is match('^[0-9]+$'))
+          and ((first_period.startHour | default('0') | int) >= 0 and (first_period.startHour | default('0') | int) <= 23)
+          and ((first_period.startMinute | default('0') | int) >= 0 and (first_period.startMinute | default('0') | int) <= 59)
+        )
+        else ''
+      }}
+    first_period_daily_end_time: >-
+      {{
+        '%02d:%02d' | format(
+          first_period.endHour | default('0') | int,
+          first_period.endMinute | default('0') | int
+        )
+        if (
+          first_period.specificTime | default(false) | bool
+          and (first_period.endHour | default('') | string | trim is match('^[0-9]+$'))
+          and (first_period.endMinute | default('') | string | trim is match('^[0-9]+$'))
+          and ((first_period.endHour | default('0') | int) >= 0 and (first_period.endHour | default('0') | int) <= 23)
+          and ((first_period.endMinute | default('0') | int) >= 0 and (first_period.endMinute | default('0') | int) <= 59)
+        )
+        else ''
+      }}
+  when: first_period is defined
+
+- name: Add first period to work payload.
+  set_fact:
+    work_payload: >-
+      {{
+        work_payload | combine({
+          'valid_from_date': first_period.validFrom,
+          'valid_until_date': first_period.validUntil,
+          'daily_start_time': first_period_daily_start_time,
+          'daily_end_time': first_period_daily_end_time
+        })
+      }}
+  when: first_period is defined
+
+- name: Create work.
   uri:
-    url: "http://idm3-bindbroker:8090/IDManager/SystemConnectionIF"
+    url: "http://admingate-core-server:8081/admin/works"
     headers:
-      HTTP_SYSTEMACCOUNT: "SYSTEM"
-    method: GET
-    validate_certs: false
-    status_code: 200
-  register: connectionList
-- name: to file server
-  uri:
-    url: "http://admingate-client:4200/api/works/add"
-    headers:
-      Guacamole-Token: "{{ token.json.authToken }}"
+      HTTP_REMOTEUSER: "{{ username }}"
+      X-Auth-Role: ADMIN
+      Content-Type: "application/json"
     method: POST
-    body_format: json
-    body:
-      dirname: "{{ name }}"
-      idmIdentifier: "{{ id }}"
-      password: hoge
-      enableUpload: "{{ not disableUpload | default(true) }}"
-      enableDownload: "{{ not disableDownload | default(true) }}"
-      whitelist: "{{ connectionList.json | selectattr('id', 'in', resultConnections) | map(attribute='hostname') | list }}"
+    body_format: raw
+    body: "{{ work_payload | to_json }}"
     validate_certs: false
     status_code: 201
+  when: work_id is not defined
+
+- name: Update work.
+  uri:
+    url: "http://admingate-core-server:8081/admin/works/{{ work_id }}"
+    headers:
+      HTTP_REMOTEUSER: "{{ username }}"
+      X-Auth-Role: ADMIN
+      Content-Type: "application/json"
+    method: PUT
+    body_format: raw
+    body: "{{ work_payload | to_json }}"
+    validate_certs: false
+    status_code: 200
+  when: work_id is defined

@@ -1,0 +1,16 @@
+---
+- name: Place config.toml at 
+  copy:
+    src: config.toml
+    dest: "/tmp/config.toml"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Place entrypoint wrapper at
+  copy:
+    src: entrypoint-with-hostname.sh
+    dest: "/tmp/entrypoint-with-hostname.sh"
+    owner: root
+    group: root
+    mode: '0755'

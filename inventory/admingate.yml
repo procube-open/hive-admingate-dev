@@ -6,6 +6,8 @@ services:
     image: docker-repository.procube.jp/admingate-guacd:latest
     labels:
       HIVE_MARK: guacamole
+    # environment:
+    #   GUACD_LOG_LEVEL: "trace"
     volumes:
       - source: guacd_recordings
         target: /var/lib/guacamole/recordings
@@ -42,10 +44,11 @@ services:
     environment:
       PORT: "8080"
       ADMIN_PORT: "8081"
-      RUST_LOG: "info"
+      RUST_LOG: "debug"
       ADMINGATE_DATABASE_URL: "postgresql://admingate_user:{{ db_password }}@postgres:5432/admingate_app"
       ADMINGATE_SEAWEEDFS_FILER_URL: "http://seaweedfs-filer:8888"
       ADMINGATE_STATIC_DIR: "/app/dist"
+      ADMINGATE_CONNECT_TIMEOUT_SECS: "300"
       FILE_HISTORY_WEBHOOK_SECRET: "{{ db_password }}"
       ADMINGATE_AUTH_HEADER: "HTTP_REMOTEUSER"
       ADMINGATE_TIMEZONE: "Asia/Tokyo"
@@ -63,7 +66,7 @@ services:
       SOCKET_WARP_PORT_RANGE: "12000-12100"
     volumes:
       - source: guacd_recordings
-        target: /var/lib/guacamole/recordings:ro
+        target: /var/lib/guacamole/recordings
         type: volume
         drbd:
           size: 5G

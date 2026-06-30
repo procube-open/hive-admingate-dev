@@ -1,0 +1,16 @@
+---
+- name: Copy default.conf to /etc/nginx/conf.d
+  copy:
+    src: default.conf
+    dest: /etc/nginx/conf.d/default.conf
+    mode: '0644'
+- name: Copy index.html to /usr/share/nginx/html
+  copy:
+    src: index.html
+    dest: /usr/share/nginx/html/index.html
+    mode: '0644'
+- name: Copy login.html to /usr/share/nginx/html
+  copy:
+    src: login.html
+    dest: /usr/share/nginx/html/login.html
+    mode: '0644'

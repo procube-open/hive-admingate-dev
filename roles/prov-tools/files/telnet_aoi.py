@@ -10,7 +10,7 @@ __metaclass__ = type
 import telnetlib
 from time import sleep
 
-from ansible.module_utils._text import to_bytes, to_text
+from ansible.module_utils.common.text.converters import to_bytes, to_text
 from ansible.module_utils.six import text_type
 from ansible.plugins.action import ActionBase
 from ansible.utils.display import Display

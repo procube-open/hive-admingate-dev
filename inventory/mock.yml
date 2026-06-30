@@ -1,0 +1,19 @@
+---
+plugin: hive_services
+services:
+  mock-ssh-server:
+    image: lscr.io/linuxserver/openssh-server:latest
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: "Asia/Tokyo"
+      PASSWORD_ACCESS: "true"       
+      USER_PASSWORD: "password"
+      USER_NAME: "user"             
+      SUDO_ACCESS: "true"
+  mock-http-server:
+    image:
+      from: nginx:latest
+      roles:
+        - python-aptk
+        - browser-login-mock
