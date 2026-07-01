@@ -8,18 +8,6 @@ services:
       SE_SESSION_REQUEST_TIMEOUT: "300"
       SE_SESSION_RETRY_INTERVAL: "5"
 
-  # Docker API bridge for Selenium Node-Docker
-  docker-daemon:
-    image: alpine/socat:latest
-    command:
-      - "tcp-listen:2375,fork,reuseaddr"
-      - "unix-connect:/var/run/docker.sock"
-    mode: global
-    volumes:
-      - source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        type: bind
-
   # Selenium Grid Node-Docker (session-per-container)
   selenium-node-docker:
     image: selenium/node-docker:latest

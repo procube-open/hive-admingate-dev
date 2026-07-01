@@ -3,10 +3,10 @@
 # so keep the Docker API URL on 127.0.0.1:2375.
 url = "http://127.0.0.1:2375"
 configs = [
-  "docker-repository.procube.jp/selenium-standalone-custom-weed:latest", '{"browserName": "chrome", "platformName": "linux"}'
+  "docker-repository.procube.jp/selenium-standalone-custom-weed:latest", '{"browserName": "chrome", "platformName": "linux", "selenium:vncEnabled": true, "docker:config": {"HostConfig": {"ShmSize": 2147483648}}}'
 ]
 # Pass FUSE device through to browser containers so weed mount can run without
 # relying on Swarm-only device/security flags.
 devices = ["/dev/fuse:/dev/fuse"]
-# Allow node-docker to pass selected host config options when needed
-host-config-keys = ["Binds", "ExtraHosts", "CapAdd", "Devices", "SecurityOpt"]
+# Allow node-docker to pass selected host config options when needed.
+host-config-keys = ["Binds", "ExtraHosts", "CapAdd", "Devices", "SecurityOpt", "ShmSize"]
