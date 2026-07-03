@@ -5,7 +5,7 @@ services:
   selenium-hub:
     image: selenium/hub:latest
     environment:
-      SE_SESSION_REQUEST_TIMEOUT: "300"
+      SE_SESSION_REQUEST_TIMEOUT: "60"
       SE_SESSION_RETRY_INTERVAL: "5"
 
   # Selenium Grid Node-Docker (session-per-container)
@@ -25,6 +25,7 @@ services:
       SE_OTEL_JAVA_GLOBAL_AUTOCONFIGURE_ENABLED: "false"
       SE_NODE_ENABLE_MANAGED_DOWNLOADS: "false"
       SE_NODE_MAX_SESSIONS: "1"
+      SE_NODE_SESSION_TIMEOUT: "10800" # 3 hours
       SE_NODE_OVERRIDE_MAX_SESSIONS: "true"
       # Browser containers must join the shared Swarm overlay network so the
       # node can reach their published ports and shared assets volume.
@@ -46,9 +47,11 @@ services:
       - source: /var/run/docker.sock
         target: /var/run/docker.sock
         type: bind
-      - source: selenium_assets
+      # Mount the Docker volume data path as a host bind so Selenium's
+      # host-config propagation copies it into browser containers.
+      - source: /var/lib/docker/volumes/selenium_assets/_data
         target: /opt/selenium/assets
-        type: volume
+        type: bind
       - source: /tmp/config.toml
         target: /opt/selenium/docker.toml
         type: bind

@@ -3,7 +3,7 @@ plugin: hive_services
 services:
   # SeaweedFS Master: Metadata server and volume management
   seaweedfs-master:
-    image: chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:4.23
     command:
       - "master"
       - "-ip=seaweedfs-master"
@@ -19,7 +19,7 @@ services:
 
   # SeaweedFS Volume: Data storage server
   seaweedfs-volume:
-    image: chrislusf/seaweedfs:latest
+    image: chrislusf/seaweedfs:4.23
     command:
       - "volume"
       - "-mserver=seaweedfs-master:9333"
@@ -39,7 +39,7 @@ services:
   # SeaweedFS Filer (API operations)
   seaweedfs-filer:
     image:
-      from: chrislusf/seaweedfs:latest
+      from: chrislusf/seaweedfs:4.23
       roles:
         - python-aptk
         - put-filer-toml
@@ -52,7 +52,7 @@ services:
   # SeaweedFS Filer (FUSE mount dedicated with notification enabled)
   seaweedfs-filer-fuse:
     image:
-      from: chrislusf/seaweedfs:latest
+      from: chrislusf/seaweedfs:4.23
       roles:
         - python-aptk
         - put-filer-toml
