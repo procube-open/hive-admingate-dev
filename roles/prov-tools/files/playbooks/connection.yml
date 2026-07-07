@@ -32,7 +32,6 @@
   - name: Find existing target ID.
     set_fact:
       target_id: "{{ item.id }}"
-    when: item.name == target_name and target_id is not defined
     loop: "{{ admin_targets.json | default([]) }}"
     loop_control:
       label: "{{ item.name }}"
@@ -68,6 +67,11 @@
         set_fact:
           target_params: "{{ target_params | combine({'osType': cs_obj.osType}) }}"
         when: cs_obj.osType is defined and cs_obj.osType is not none and (cs_obj.osType | string | trim) != ''
+      
+      - name: Add swcZone to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'socket_warp_client_ids': swcZone}) }}"
+        when: swcZone is defined and swcZone is not none and (swcZone | length) > 0
 
       - name: Add browser auth mode to target params.
         set_fact:
@@ -143,7 +147,7 @@
           body: "{{ target_body | to_json }}"
           validate_certs: false
           status_code: 201
-        when: target_id is not defined
+        when: prov_operation == 'add'
 
       - name: Update target.
         uri:
@@ -154,6 +158,6 @@
           body: "{{ target_body | to_json }}"
           validate_certs: false
           status_code: 200
-        when: target_id is defined
+        when: prov_operation == 'modify'
     when: prov_operation != 'delete'
     no_log: true

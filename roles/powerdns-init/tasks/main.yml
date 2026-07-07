@@ -48,7 +48,7 @@
     {%- set output_services = ['monitor'] -%}
     {%- for s in groups['services'] | intersect(groups[hive_stage]) -%}
       {%- set labels = (hostvars[s].hive_labels | default({})) -%}
-      {%- if labels.webgate is defined -%}
+      {%- if labels.published_name is defined -%}
         {%- set _ = output_services.append(labels.published_name | default(s)) -%}
       {%- endif -%}
     {%- endfor -%}

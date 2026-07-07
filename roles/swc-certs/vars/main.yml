@@ -1,0 +1,3 @@
+swc_uid: swc-1
+swc_tmp_dir: "/tmp/{{ swc_uid }}"
+swc_local_tmp_dir: /workspaces/hive-admingate-dev/tmp

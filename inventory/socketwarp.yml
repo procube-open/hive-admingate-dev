@@ -1,0 +1,80 @@
+---
+plugin: hive_services
+services:
+  # MySQL database for SCEP (Simple Certificate Enrollment Protocol)
+  scep-mysql:
+    image: mysql:8.3
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ db_password }}"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: scep
+      MYSQL_USER: scep
+      MYSQL_PASSWORD: "{{ db_password }}"
+      TZ: Asia/Tokyo
+    volumes:
+      - source: scep_mysql_data
+        target: /var/lib/mysql
+        type: volume
+        drbd:
+          size: 3G
+          fstype: xfs
+
+  # SCEP Certificate Server
+  scep:
+    image:
+      from: ghcr.io/procube-open/scep:0.2.2
+      roles:
+        - python-aptk
+        - scep-depot
+    initialize_roles:
+      - swl-certs
+      # - swc-certs
+      # 実行順
+      # swc-certsロールのコメントアウト解除
+      # hive initialize-services -l scep
+      # dcp scep:/tmp/swc-1 ./
+      # scp -r -F .hive/production/ssh_config hive2.admingate-dev:/home/ec2-user/swc-1 ./
+    labels:
+      HIVE_MARK: socket-warp
+    environment:
+      SCEP_DSN: "scep:{{ db_password }}@tcp(scep-mysql:3306)/scep?parseTime=true&loc=Asia%2FTokyo"
+      SCEP_SIGN_SERVER_ATTRS: "true"
+    volumes:
+      - source: swl_certs
+        target: /tmp/swl
+        type: volume
+        drbd:
+          size: 500M
+          fstype: xfs
+    ports:
+      - "13000:3000"
+
+  # Socket Warp Listener: Certificate-based access control listener
+  socket-warp-listener:
+    image: ghcr.io/procube-open/socket-warp:1.3.1-rc.0
+    environment:
+      SWL_CERT_PATH: /socket-warp-certs/swl/cert.pem
+      SWL_KEY_PATH: /socket-warp-certs/swl/key.pem
+      SWL_CA_PATH: /socket-warp-certs/swl/ca.crt
+      SWL_ADDRS: 0.0.0.0
+      SWL_PORT: "11443"
+      SWL_SCEP_URL: "http://scep:3000/api/cert/verify"
+      APIS_ADDRS: 0.0.0.0
+      APIS_PORT: "8080"
+      SWL_LOG_LEVEL: info
+    ports:
+      - target_port: 11443
+        published_port: 11443
+        protocol: udp
+    placement:
+      constraints:
+        - node.labels.socket-warp == true
+    labels:
+      published_name: socket-warp-listener
+    volumes:
+      - source: swl_certs
+        target: /socket-warp-certs/swl
+        type: volume
+        drbd:
+          size: 500M
+          fstype: xfs

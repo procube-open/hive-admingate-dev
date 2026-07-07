@@ -955,7 +955,7 @@ phases_data:
                 isArray: true
                 name: team
                 outputLdapSchema: false
-                required: true
+                required: false
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
@@ -1496,22 +1496,11 @@ phases_data:
             disableDelete: true
             disableMultiDelete: true
             disableSuspension: false
-            disableUpdate: true
+            disableUpdate: false
             displayName: 作業申請ガジェット
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: false
             gadgetCommandlet:
-            -   autoCommit: true
-                backToDetail: true
-                description: 編集中のみ
-                displayCondition: this().status=="editing" || this().status=="sendBack"
-                displayName: 修正する
-                goToEdit: true
-                multiSelect: false
-                name: edit
-                onDetailView: true
-                onEditView: false
-                onListView: false
             -   autoCommit: true
                 backToDetail: true
                 commandlet:
@@ -2609,6 +2598,16 @@ phases_data:
                 hideOnShow: false
                 incrementalSearchFlag: false
                 name: connectionSpecification
+                propertiesOnList:
+                -   displayOnList: 'on'
+                    listUIWidth: 300
+                    name: id
+                -   displayOnList: 'on'
+                    name: name
+                -   displayOnList: 'on'
+                    name: osType
+                -   displayOnList: 'on'
+                    name: protocol
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -4351,6 +4350,12 @@ phases_data:
                 priority: 30
                 sidebarName: userSidebar
                 type: sidebar
+            -   align: left
+                displayName: ワークフロー設定
+                openInNewTab: false
+                priority: 40
+                sidebarName: workflowSidebar
+                type: sidebar
             -   align: right
                 priority: 10
                 type: username
@@ -4443,14 +4448,11 @@ phases_data:
                 type: gadget
             name: layoutSidebar
         -   children:
-            -   displayName: ユーザ設定
+            -   displayName: ユーザ編集
                 gadgetName: userEditor
                 type: gadget
-            -   displayName: 接続先
-                gadgetName: connection_g
-                type: gadget
-            -   displayName: 接続仕様
-                gadgetName: connectionSpecification_g
+            -   displayName: チーム編集
+                gadgetName: userGroup_g
                 type: gadget
             -   displayName: ログアウト
                 icon: M30 10 L30 15 L40 15 L40 35 L30 35 L30 40 L45 40 L45 10 Z M20
@@ -4459,6 +4461,29 @@ phases_data:
                     domain }}/idp/profile/Logout
                 type: link
             name: userSidebar
+        -   children:
+            -   displayName: 作業申請
+                gadgetName: applicationWork_g
+                type: gadget
+            -   displayName: 要承認作業
+                gadgetName: requiredApprovalWork_g
+                type: gadget
+            -   displayName: 承認済み作業
+                gadgetName: approvalWork_g
+                type: gadget
+            -   children:
+                -   displayName: 接続先編集
+                    gadgetName: connection_g
+                    type: gadget
+                -   displayName: 接続先グループ編集
+                    gadgetName: connectionGroup_g
+                    type: gadget
+                -   displayName: 接続仕様編集
+                    gadgetName: connectionSpecification_g
+                    type: gadget
+                displayName: 接続先編集
+                type: parent
+            name: workflowSidebar
     objects:
         userEditorInterface:
         -   accountLock: false

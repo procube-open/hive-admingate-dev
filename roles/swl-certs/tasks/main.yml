@@ -1,0 +1,69 @@
+---
+- name: Build scepclient-swc binary
+  shell: >-
+    go build -ldflags "-X main.flServerURL=http://localhost:3000/scep -X main.flPKeyFileName=key.pem -X main.flCertFileName=cert.pem -X main.flKeySize=2048 -X main.flOrg=Procube -X main.flCountry=JP -X main.flDNSName=socket-warp-listener.admingate-dev.procube-demo.jp" -o scepclient-swl ./cmd/scepclient
+  # args:
+  #   chdir: "{{ role_path }}/../.."
+  register: scepclient_build_result
+  failed_when: scepclient_build_result.rc != 0
+
+- name: Wait for SCEP server to be ready
+  wait_for:
+    host: localhost
+    port: 3000
+    delay: 5
+    timeout: 60
+
+- name: Revoke existing client via admin API
+  uri:
+    url: http://localhost:3000/admin/api/client/revoke
+    method: POST
+    headers:
+      Content-Type: application/json
+    body_format: json
+    body:
+      uid: swl
+    status_code: 200,500
+- name: Add client via admin API
+  uri:
+    url: http://localhost:3000/admin/api/client/add
+    method: POST
+    headers:
+      Content-Type: application/json
+    body_format: json
+    body:
+      uid: swl
+      attributes:
+        hoge: fuga
+    status_code: 200,500
+
+- name: Create secret via admin API
+  uri:
+    url: http://localhost:3000/admin/api/secret/create
+    method: POST
+    headers:
+      Content-Type: application/json
+    body_format: json
+    body:
+      secret: pass
+      target: swl
+      available_period: 30m
+    status_code: 201
+
+- name: Mkdir for certificate output
+  file:
+    path: /tmp/swl
+    state: directory
+    mode: '0755'
+
+- name: Exec scepclient-swl to request a certificate
+  shell: ./scepclient-swl -uid swl -secret pass -out "/tmp/swl/"
+  register: scepclient_result
+  failed_when: scepclient_result.rc != 0
+
+- name: Copy ca.crt to /tmp/swl
+  copy:
+    src: /app/ca-certs/ca.crt
+    remote_src: true
+    dest: /tmp/swl/ca.crt
+    mode: '0644'

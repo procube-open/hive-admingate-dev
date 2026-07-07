@@ -84,3 +84,35 @@ services:
           addRemoteGroupHeader: true
           useWebSocket: true
   
+  admingate-ftp-server:
+    image: docker-repository.procube.jp/admingate-ftp-server:latest
+    environment:
+      ADMINGATE_DATABASE_URL: postgresql://admingate_user:{{ db_password }}@postgres:5432/admingate_app
+      ADMINGATE_SEAWEEDFS_FILER_URL: http://seaweedfs-filer:8888
+      ADMINGATE_FTP_BIND_ADDR: 0.0.0.0:2121
+      ADMINGATE_FTP_PASV_HOST: 127.0.0.1
+      ADMINGATE_FTP_PASV_PORT_MIN: "40000"
+      ADMINGATE_FTP_PASV_PORT_MAX: "40010"
+    placement:
+      constraints:
+        - "node.hostname == {{ ( groups['hives'] | intersect(groups[hive_stage]) | select('match', '.*hive0.*') | first ) | split('.') | first }}"
+
+  admingate-sftp-server:
+    image: docker-repository.procube.jp/admingate-sftp-server:latest
+    environment:
+      ADMINGATE_DATABASE_URL: postgresql://admingate_user:{{ db_password }}@postgres:5432/admingate_app
+      ADMINGATE_SEAWEEDFS_FILER_URL: http://seaweedfs-filer:8888
+      ADMINGATE_SFTP_BIND_ADDR: 0.0.0.0:2222
+    placement:
+      constraints:
+        - "node.hostname == {{ ( groups['hives'] | intersect(groups[hive_stage]) | select('match', '.*hive0.*') | first ) | split('.') | first }}"
+
+  admingate-tftp-server:
+    image: docker-repository.procube.jp/admingate-tftp-server:latest
+    environment:
+      ADMINGATE_DATABASE_URL: postgresql://admingate_user:{{ db_password }}@postgres:5432/admingate_app
+      ADMINGATE_SEAWEEDFS_FILER_URL: http://seaweedfs-filer:8888
+      ADMINGATE_TFTP_BIND_ADDR: 0.0.0.0:6969
+    placement:
+      constraints:
+        - "node.hostname == {{ ( groups['hives'] | intersect(groups[hive_stage]) | select('match', '.*hive0.*') | first ) | split('.') | first }}"

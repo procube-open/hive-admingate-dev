@@ -1,0 +1,9 @@
+---
+- name: Initialize SCEP server CA
+  shell: ./scepserver-opt ca -init
+  register: result
+  failed_when: result.rc != 0
+  
+- name: Display SCEP initialization result
+  debug:
+    msg: "{{ result.stdout }}"

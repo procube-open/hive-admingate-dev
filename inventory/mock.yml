@@ -7,9 +7,9 @@ services:
       PUID: "1000"
       PGID: "1000"
       TZ: "Asia/Tokyo"
-      PASSWORD_ACCESS: "true"       
+      PASSWORD_ACCESS: "true"
       USER_PASSWORD: "password"
-      USER_NAME: "user"             
+      USER_NAME: "user"
       SUDO_ACCESS: "true"
   mock-http-server:
     image:
