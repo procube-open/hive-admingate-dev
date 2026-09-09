@@ -100,6 +100,9 @@ services:
       from: almalinux:10
       roles:
         - prov-tools
+    placement:
+      constraints:
+        - node.labels.guacamole == true
     command:
       - "/usr/bin/supervisord"
       - "-n"

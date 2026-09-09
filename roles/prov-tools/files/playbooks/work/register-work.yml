@@ -24,85 +24,92 @@
     work_file_transfer_permissions:
       http:
         connect: true
-        read: "{{ not (disableDownload | default(false) | bool) }}"
-        write: "{{ not (disableUpload | default(false) | bool) }}"
+        read: "{{ not (disableDownload | default(false, true) | bool) }}"
+        write: "{{ not (disableUpload | default(false, true) | bool) }}"
       web_sftp:
         connect: true
-        read: "{{ not (disableDownload | default(false) | bool) }}"
-        write: "{{ not (disableUpload | default(false) | bool) }}"
+        read: "{{ not (disableDownload | default(false, true) | bool) }}"
+        write: "{{ not (disableUpload | default(false, true) | bool) }}"
       ftp:
         connect: true
-        read: "{{ not (disableDownload | default(false) | bool) }}"
-        write: "{{ not (disableUpload | default(false) | bool) }}"
+        read: "{{ not (disableDownload | default(false, true) | bool) }}"
+        write: "{{ not (disableUpload | default(false, true) | bool) }}"
       sftp:
         connect: true
-        read: "{{ not (disableDownload | default(false) | bool) }}"
-        write: "{{ not (disableUpload | default(false) | bool) }}"
+        read: "{{ not (disableDownload | default(false, true) | bool) }}"
+        write: "{{ not (disableUpload | default(false, true) | bool) }}"
       tftp:
         connect: true
-        read: "{{ not (disableDownload | default(false) | bool) }}"
-        write: "{{ not (disableUpload | default(false) | bool) }}"
+        read: "{{ not (disableDownload | default(false, true) | bool) }}"
+        write: "{{ not (disableUpload | default(false, true) | bool) }}"
 
 - name: Build work payload.
   set_fact:
     work_payload:
       name: "{{ name }}"
-      worker_ids: "{{ resultUsers | default([]) | unique | list }}"
-      manager_ids: "{{ manageUsers | default([]) | unique | list }}"
-      target_ids: "{{ resultConnections | default([]) | unique | list }}"
+      worker_ids: "{{ resultUsers | default([], true) | unique | list }}"
+      manager_ids: "{{ manageUsers | default([], true) | unique | list }}"
+      target_ids: "{{ resultConnections | default([], true) | unique | list }}"
       file_transfer_permissions: "{{ work_file_transfer_permissions }}"
 
-- name: Set first period.
+- name: Build work periods.
   set_fact:
-    first_period: "{{ (Periods | default([])) | first }}"
-  when: (Periods | default([]) | length) > 0
-
-- name: Set first period time values.
-  set_fact:
-    first_period_daily_start_time: >-
+    work_valid_periods: >-
       {{
-        '%02d:%02d' | format(
-          first_period.startHour | default('0') | int,
-          first_period.startMinute | default('0') | int
-        )
-        if (
-          first_period.specificTime | default(false) | bool
-          and (first_period.startHour | default('') | string | trim is match('^[0-9]+$'))
-          and (first_period.startMinute | default('') | string | trim is match('^[0-9]+$'))
-          and ((first_period.startHour | default('0') | int) >= 0 and (first_period.startHour | default('0') | int) <= 23)
-          and ((first_period.startMinute | default('0') | int) >= 0 and (first_period.startMinute | default('0') | int) <= 59)
-        )
-        else ''
+        work_valid_periods | default([], true) + [
+          (
+            {
+              'valid_from_date': item.validFrom,
+              'valid_until_date': item.validUntil
+            }
+            | combine(
+                {
+                  'daily_start_time': '%02d:%02d' | format(
+                    item.startHour | default('0') | int,
+                    item.startMinute | default('0') | int
+                  )
+                }
+                if (
+                  item.specificTime | default(false, true) | bool
+                  and (item.startHour | default('') | string | trim is match('^[0-9]+$'))
+                  and (item.startMinute | default('') | string | trim is match('^[0-9]+$'))
+                  and ((item.startHour | default('0') | int) >= 0 and (item.startHour | default('0') | int) <= 23)
+                  and ((item.startMinute | default('0') | int) >= 0 and (item.startMinute | default('0') | int) <= 59)
+                )
+                else {}
+              )
+            | combine(
+                {
+                  'daily_end_time': '%02d:%02d' | format(
+                    item.endHour | default('0') | int,
+                    item.endMinute | default('0') | int
+                  )
+                }
+                if (
+                  item.specificTime | default(false, true) | bool
+                  and (item.endHour | default('') | string | trim is match('^[0-9]+$'))
+                  and (item.endMinute | default('') | string | trim is match('^[0-9]+$'))
+                  and ((item.endHour | default('0') | int) >= 0 and (item.endHour | default('0') | int) <= 23)
+                  and ((item.endMinute | default('0') | int) >= 0 and (item.endMinute | default('0') | int) <= 59)
+                )
+                else {}
+              )
+          )
+        ]
       }}
-    first_period_daily_end_time: >-
-      {{
-        '%02d:%02d' | format(
-          first_period.endHour | default('0') | int,
-          first_period.endMinute | default('0') | int
-        )
-        if (
-          first_period.specificTime | default(false) | bool
-          and (first_period.endHour | default('') | string | trim is match('^[0-9]+$'))
-          and (first_period.endMinute | default('') | string | trim is match('^[0-9]+$'))
-          and ((first_period.endHour | default('0') | int) >= 0 and (first_period.endHour | default('0') | int) <= 23)
-          and ((first_period.endMinute | default('0') | int) >= 0 and (first_period.endMinute | default('0') | int) <= 59)
-        )
-        else ''
-      }}
-  when: first_period is defined
+  loop: "{{ Periods | default([], true) }}"
+  loop_control:
+    label: "{{ item.validFrom }} - {{ item.validUntil }}"
 
-- name: Add first period to work payload.
+- name: Add work periods to work payload.
   set_fact:
     work_payload: >-
       {{
         work_payload | combine({
-          'valid_from_date': first_period.validFrom,
-          'valid_until_date': first_period.validUntil,
-          'daily_start_time': first_period_daily_start_time,
-          'daily_end_time': first_period_daily_end_time
+          'valid_periods': work_valid_periods | default([], true)
         })
       }}
-  when: first_period is defined
+  when: (Periods | default([], true) | length) > 0
 
 - name: Create work.
   uri:

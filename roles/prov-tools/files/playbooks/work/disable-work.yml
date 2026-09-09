@@ -1,37 +1,41 @@
 ---
-- name: Get token of REST API.
+- name: Get works.
   uri:
-    url: "http://guacamole:8080/guacamole/api/tokens"
+    url: "http://admingate-core-server:8081/admin/works"
     headers:
-      Content-Type: "application/x-www-form-urlencoded"
-    method: POST
-    body: 'username={{ username }}&password={{ password }}'
+      HTTP_REMOTEUSER: "{{ username }}"
+      X-Auth-Role: ADMIN
+    method: GET
     validate_certs: false
     return_content: yes
     status_code: 200
-  register: token
-- name: Get Works
-  uri:
-    url: "http://guacamole:8080/guacamole/api/session/data/postgresql/works"
-    headers:
-      Guacamole-Token: "{{ token.json.authToken }}"
-    method: GET
-    status_code: 200
-  register: guacamoleWorks
-- name: Filter Works
+  register: admin_works
+
+- name: Find existing work id.
   set_fact:
-    works: "{{ guacamoleWorks.json | dict2items | selectattr('value.idmIdentifier', 'eq', id) | map(attribute='key') | list }}"
-# - name: debug
-#   debug:
-#     msg: "{{ works | first }}"
-- name: Disable Works
-  uri: 
-    url: "http://guacamole:8080/guacamole/api/session/data/postgresql/works/{{ works | first }}"
+    work_id: "{{ item.id }}"
+  when: item.name == name and work_id is not defined
+  loop: "{{ admin_works.json | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Ensure work exists.
+  assert:
+    that:
+      - work_id is defined
+    fail_msg: "Work not found: {{ name }}"
+
+- name: Disable work.
+  uri:
+    url: "http://admingate-core-server:8081/admin/works/{{ work_id }}/status"
     headers:
-      Guacamole-Token: "{{ token.json.authToken }}"
+      HTTP_REMOTEUSER: "{{ username }}"
+      X-Auth-Role: ADMIN
       Content-Type: "application/json"
-    method: PUT
+    method: POST
     body_format: json
     body:
-      disabled: true
-    status_code: 204
+      status: disabled
+    validate_certs: false
+    return_content: yes
+    status_code: 200

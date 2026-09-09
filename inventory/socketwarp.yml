@@ -64,7 +64,7 @@ services:
       SWL_LOG_LEVEL: info
     ports:
       - target_port: 11443
-        published_port: 11443
+        published_port: 443
         protocol: udp
     placement:
       constraints:

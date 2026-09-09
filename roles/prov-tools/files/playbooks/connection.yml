@@ -63,15 +63,38 @@
           target_params:
             web_sftp_enabled: "{{ cs_obj.web_sftp_enabled | default(true) | bool }}"
 
+      - name: Read socket-warp client IDs.
+        set_fact:
+          swc_zone_value: "{{ swcZone | default(cs_obj.swcZone | default([], true), true) }}"
+
+      - name: Normalize socket-warp client IDs.
+        set_fact:
+          socket_warp_client_ids: >-
+            {{
+              swc_zone_value
+              if swc_zone_value is sequence and swc_zone_value is not string
+              else (swc_zone_value | string).split(',')
+            }}
+
+      - name: Remove empty socket-warp client IDs.
+        set_fact:
+          socket_warp_client_ids: >-
+            {{
+              socket_warp_client_ids
+              | map('trim')
+              | reject('equalto', '')
+              | list
+            }}
+
       - name: Add osType to target params.
         set_fact:
           target_params: "{{ target_params | combine({'osType': cs_obj.osType}) }}"
         when: cs_obj.osType is defined and cs_obj.osType is not none and (cs_obj.osType | string | trim) != ''
       
-      - name: Add swcZone to target params.
+      - name: Add socket-warp client IDs to target params.
         set_fact:
-          target_params: "{{ target_params | combine({'socket_warp_client_ids': swcZone}) }}"
-        when: swcZone is defined and swcZone is not none and (swcZone | length) > 0
+          target_params: "{{ target_params | combine({'socket_warp_client_ids': socket_warp_client_ids}) }}"
+        when: (socket_warp_client_ids | length) > 0
 
       - name: Add browser auth mode to target params.
         set_fact:

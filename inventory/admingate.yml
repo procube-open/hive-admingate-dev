@@ -52,6 +52,7 @@ services:
       FILE_HISTORY_WEBHOOK_SECRET: "{{ db_password }}"
       ADMINGATE_AUTH_HEADER: "HTTP_REMOTEUSER"
       ADMINGATE_TIMEZONE: "Asia/Tokyo"
+      ADMINGATE_IDM_URL: "https://idm3.{{ domain }}"
       GUACD_HOST: "guacd"
       GUACD_PORT: "4822"
       RECORDING_PATH: "/var/lib/guacamole/recordings"
