@@ -32,9 +32,19 @@
   - name: Find existing target ID.
     set_fact:
       target_id: "{{ item.id }}"
+    when:
+      - item.id == id
+      - target_id is not defined
     loop: "{{ admin_targets.json | default([]) }}"
     loop_control:
       label: "{{ item.name }}"
+
+  - name: Ensure existing target was found.
+    assert:
+      that:
+        - target_id is defined
+      fail_msg: "target {{ id }} was not found in Core Server"
+    when: prov_operation == 'delete' or prov_operation == 'modify'
 
   - name: Delete target.
     uri:
@@ -90,6 +100,11 @@
         set_fact:
           target_params: "{{ target_params | combine({'osType': cs_obj.osType}) }}"
         when: cs_obj.osType is defined and cs_obj.osType is not none and (cs_obj.osType | string | trim) != ''
+
+      - name: Add ignore-cert to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'ignore-cert': cs_obj.ignoreCert}) }}"
+        when: cs_obj.ignoreCert is defined
       
       - name: Add socket-warp client IDs to target params.
         set_fact:
