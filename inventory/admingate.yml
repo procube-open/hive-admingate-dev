@@ -49,6 +49,7 @@ services:
       ADMINGATE_SEAWEEDFS_FILER_URL: "http://seaweedfs-filer:8888"
       ADMINGATE_STATIC_DIR: "/app/dist"
       ADMINGATE_CONNECT_TIMEOUT_SECS: "300"
+      ADMINGATE_LOGOUT_URL: "https://admingate-core.{{ domain }}/logout"
       FILE_HISTORY_WEBHOOK_SECRET: "{{ db_password }}"
       ADMINGATE_AUTH_HEADER: "HTTP_REMOTEUSER"
       ADMINGATE_TIMEZONE: "Asia/Tokyo"
