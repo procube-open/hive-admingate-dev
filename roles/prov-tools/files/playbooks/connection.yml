@@ -101,6 +101,16 @@
           target_params: "{{ target_params | combine({'osType': cs_obj.osType}) }}"
         when: cs_obj.osType is defined and cs_obj.osType is not none and (cs_obj.osType | string | trim) != ''
 
+      - name: Add private key to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'primary_key': cs_obj.primaryKey}) }}"
+        when: cs_obj.primaryKey is defined and cs_obj.primaryKey is not none and (cs_obj.primaryKey | string | trim) != '' and cs_obj.usePrimaryKey
+      
+      - name: Add private key to target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'passphrase': cs_obj.passphrase}) }}"
+        when: cs_obj.passphrase is defined and cs_obj.passphrase is not none and (cs_obj.passphrase | string | trim) != '' and cs_obj.usePrimaryKey
+
       - name: Add ignore-cert to target params.
         set_fact:
           target_params: "{{ target_params | combine({'ignore-cert': cs_obj.ignoreCert}) }}"
