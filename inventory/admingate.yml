@@ -50,10 +50,11 @@ services:
       ADMINGATE_STATIC_DIR: "/app/dist"
       ADMINGATE_CONNECT_TIMEOUT_SECS: "300"
       ADMINGATE_LOGOUT_URL: "https://admingate-core.{{ domain }}/logout"
+      ADMINGATE_DOCUMENT_URL: "https://admingate-docs.{{ domain }}"
+      ADMINGATE_IDM_URL: "https://idm3.{{ domain }}"
       FILE_HISTORY_WEBHOOK_SECRET: "{{ db_password }}"
       ADMINGATE_AUTH_HEADER: "HTTP_REMOTEUSER"
       ADMINGATE_TIMEZONE: "Asia/Tokyo"
-      ADMINGATE_IDM_URL: "https://idm3.{{ domain }}"
       GUACD_HOST: "guacd"
       GUACD_PORT: "4822"
       RECORDING_PATH: "/var/lib/guacamole/recordings"
@@ -118,3 +119,16 @@ services:
     placement:
       constraints:
         - "node.hostname == {{ ( groups['hives'] | intersect(groups[hive_stage]) | select('match', '.*hive0.*') | first ) | split('.') | first }}"
+
+  admingate-docs-server:
+    image: docker-repository.procube.jp/admingate-docs-server:latest
+    environment:
+      ADMINGATE_DOCS_MANUALS: "user,operator,builder,developer"
+      ADMINGATE_DOCS_INDEXING: "private"
+      DOCS_SITE_URL: "https://admingate-docs.{{ domain }}"
+    labels:
+      published_name: admingate-docs
+      webgate:
+        proxies:
+        - target_port: 8080
+          pathPattern: /
