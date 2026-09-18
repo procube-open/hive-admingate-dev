@@ -74,6 +74,7 @@ services:
       OIDC_LOGOUT_ENDPOINT: https://idp.{{ domain }}/realms/webgate/protocol/openid-connect/logout
       OIDC_TOKEN_ENDPOINT: http://idp:8080/realms/webgate/protocol/openid-connect/token
       OIDC_USER_INFO_ENDPOINT: http://idp:8080/realms/webgate/protocol/openid-connect/userinfo
+      OIDC_COOKIE_OPTIONS: "; Domain={{ domain }}; Path=/; secure; httpOnly"
       OIDC_REDIRECT_SCHEME: https
       OIDC_JWT_GEN_KEY: "{{ credentials.oidc_jwt_gen_key }}"
       OIDC_USER_CLAIM: "username"
