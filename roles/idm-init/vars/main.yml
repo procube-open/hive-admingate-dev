@@ -551,12 +551,60 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
+                description: ログイン時に秘密鍵を利用する場合はチェックしてください。
+                displayName: 秘密鍵利用
+                isArray: false
+                name: usePrimaryKey
+                outputLdapSchema: false
+                propGroupName:
+                - protocol#ssh
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: 秘密鍵の内容を入力します。
+                displayName: 秘密鍵
+                isArray: false
+                name: primaryKey
+                outputLdapSchema: false
+                propGroupName:
+                - usePrimaryKey
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: 秘密鍵にかかっているパスフレーズを入力します。
+                displayName: パスフレーズ
+                isArray: false
+                name: passphrase
+                outputLdapSchema: false
+                propGroupName:
+                - usePrimaryKey
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
                 displayName: WEB-SFTP有効化
                 isArray: false
                 name: web_sftp_enabled
                 outputLdapSchema: false
                 propGroupName:
                 - protocol#ssh
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                description: 自己署名証明書や未登録の CA などを使用する場合に有効化
+                displayName: 証明書を無視
+                isArray: false
+                name: ignoreCert
+                outputLdapSchema: false
+                propGroupName:
+                - protocol#rdp
                 required: false
                 type: boolean
                 unique: false
@@ -1155,7 +1203,7 @@ phases_data:
                 outputLdapSchema: false
                 required: true
                 type: string
-                unique: true
+                unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
                 className: Period
@@ -1572,9 +1620,10 @@ phases_data:
                 twoColumnFlag: false
                 type: string
             -   className: ''
+                datePickerFlag: false
                 defaultValue: editing
                 disableUpdate: true
-                hideOnEdit: false
+                hideOnEdit: true
                 hideOnShow: false
                 incrementalSearchFlag: false
                 name: status
@@ -1853,6 +1902,7 @@ phases_data:
                 keyProperty:
                 - id
                 name: disable
+                showConfirmModal: false
             -   className: work
                 commandlet:
                 -   derivation: parent().name + " のコピー - " + rand(100, 999)
@@ -2469,7 +2519,47 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
+                name: usePrimaryKey
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: primaryKey
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: passphrase
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: string
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
                 name: web_sftp_enabled
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: ignoreCert
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: boolean
@@ -2775,7 +2865,7 @@ phases_data:
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: false
             gadgetCommandlet:
-            -   autoCommit: true
+            -   autoCommit: false
                 backToDetail: false
                 commandlet:
                 -   derivation: user()
@@ -2791,6 +2881,7 @@ phases_data:
                 onDetailView: true
                 onEditView: false
                 onListView: false
+                showConfirmModal: false
             -   autoCommit: false
                 backToDetail: false
                 commandlet:
@@ -3338,8 +3429,8 @@ phases_data:
             className: userGroups
             clonable: false
             disableAdd: false
-            disableDelete: true
-            disableMultiDelete: true
+            disableDelete: false
+            disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
             displayName: チームガジェット
@@ -3385,80 +3476,6 @@ phases_data:
                 hideOnShow: false
                 incrementalSearchFlag: false
                 name: managers
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: accountLockNotification
-                radioButtonFlag: false
-                sectionSeparater: fixed
-                sectionSeparaterTitle: メール通知先連携
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: immediateLoginLogoutNotification
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: summaryLoginLogoutNotification
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: immediatePreapprovalNotification
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: summaryPreapprovalNotification
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: allowedAddressList
-                radioButtonFlag: false
-                sectionSeparater: fixed
-                sectionSeparaterTitle: 通信許可先・禁止先連携
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: forbiddenAddressList
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -4236,6 +4253,7 @@ phases_data:
         -   appendOnly: false
             classSetting:
             -   className: work
+                filter: '{"status": {"$in": ["approved","disabled"]}}'
                 noDecryption: false
                 properties:
                 -   modifiedOnly: false
@@ -4457,8 +4475,7 @@ phases_data:
             -   displayName: ログアウト
                 icon: M30 10 L30 15 L40 15 L40 35 L30 35 L30 40 L45 40 L45 10 Z M20
                     18 L25 22.5 L18 22.5 L18 27.5 L25 27.5 L20 32 L5 25 Z
-                redirectUrl: https://idm3.{{ domain }}/Shibboleth.sso/Logout?return=https://auth.{{
-                    domain }}/idp/profile/Logout
+                redirectUrl: https://idp.{{ domain }}/realms/webgate/protocol/openid-connect/logout
                 type: link
             name: userSidebar
         -   children:
@@ -4491,8 +4508,52 @@ phases_data:
             displayName: idm Admin
             email: admin@{{ domain }}
             idmRole: IDM_ADMIN
+            loginDateTime: '2026-06-26T08:18:46.820Z'
             sn: idm
             team:
             - administorators
             uid: admin
-            userPassword: '{ARGON2}$argon2id$v=19$m=65536,t=3,p=4$FpwDzKrQGp8WoaydBYYGDw$Y/mlQ3JK4TFDM11DKvjPmhfEC0bq0fjnP34qFbggCxI'
+            userPassword: ''
+        -   accountLock: false
+            cn: 充
+            displayName: 中川路 充
+            email: mitsuru@procube.jp
+            idmRole: IDM_ADMIN
+            loginDateTime: '2026-07-21T04:11:41.057Z'
+            sn: 中川路
+            team:
+            - procube
+            uid: admin2
+            userPassword: ''
+        -   accountLock: false
+            cn: 玄哉
+            displayName: 中川路 玄哉
+            email: hiroya@procube.jp
+            idmRole: IDM_ADMIN
+            loginDateTime: '2026-09-14T07:34:03.318Z'
+            sn: 中川路
+            team:
+            - procube
+            uid: hiroya
+            userPassword: ''
+        -   accountLock: false
+            cn: 充
+            displayName: 中川路 充
+            email: mitsuru@procube.jp
+            idmRole: IDM_ADMIN
+            sn: 中川路
+            team:
+            - procube
+            uid: mitsuru
+            userPassword: '{ARGON2}$argon2id$v=19$m=65536,t=3,p=4$gVItaskf9D4iUZFZGshTQQ$WNYcF4sQSCv0/sueHLLQXclEQ33XIX/Zsich1uZzPXU'
+        -   accountLock: false
+            cn: アカウント
+            displayName: テスト アカウント
+            email: hiroya@procube.jp
+            idmRole: IDM_ADMIN
+            loginDateTime: '2026-09-16T01:52:08.579Z'
+            sn: テスト
+            team:
+            - procube
+            uid: test-user
+            userPassword: ''
