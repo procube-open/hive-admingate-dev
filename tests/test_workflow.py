@@ -9,7 +9,7 @@ def browser_context_args(browser_context_args):
         "storage_state": "state.json",
     }
 
-def test_dashboard_menu(page: Page):
+def test_dashboard_menu(page: Page, shared_state):
     page.goto("https://idm3.admingate-dev.procube-demo.jp/")
 
     # 認証設定ボタンをクリック
@@ -41,8 +41,9 @@ def test_dashboard_menu(page: Page):
 
     # 作成した作業が一覧に表示されていることを確認する
     expect(page.get_by_role("row").filter(has_text="検証作業1")).to_be_visible()
-    # 作業idを取得
+    # 作業idを取得（他のテストから参照できるように保存する）
     work_id = page.get_by_role("row").filter(has_text="検証作業1").get_attribute("data-id")
+    shared_state["work_id"] = work_id
     print(f"取得したランダムID: {work_id}")
 
     page.locator(f'div[data-id="{work_id}"]').get_by_role("button", name="詳細").click()

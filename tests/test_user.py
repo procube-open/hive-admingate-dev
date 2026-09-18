@@ -35,13 +35,14 @@ def test_dashboard_menu(page: Page):
     page.locator('input[name="email"]').fill("test@procube.jp")
     # 特徴的なクラス名「refine-save-button」を直接狙い撃ちする
     page.get_by_role("button", name="保存").click()
-    page.get_by_role("button", name="発行").click()
+    page.get_by_role("button", name="発効").click()
 
     # test-user1 の行が存在（表示）しているか検証する
     expect(page.locator('[data-id="test-user1"]')).to_be_visible()
 
     # test-user1の行（親要素）を探し、その中にある「編集」ボタンをクリックする
     page.locator('[data-id="test-user1"]').get_by_role("button", name="編集").click()
+    page.get_by_role("button", name="削除").click()
     page.get_by_role("button", name="削除").click()
     page.get_by_role("button", name="発行").click()
 
