@@ -44,7 +44,7 @@ def test_dashboard_menu(page: Page):
     page.locator('[data-id="test-user1"]').get_by_role("button", name="編集").click()
     page.get_by_role("button", name="削除").click()
     page.get_by_role("button", name="削除").click()
-    page.get_by_role("button", name="発行").click()
+    page.get_by_role("button", name="発効").click()
 
     # test-user1 の行が存在しない（消えた）ことを検証する
     expect(page.locator('[data-id="test-user1"]')).not_to_be_visible()

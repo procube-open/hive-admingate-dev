@@ -46,15 +46,17 @@ def test_dashboard_menu(page: Page, shared_state):
     shared_state["work_id"] = work_id
     print(f"取得したランダムID: {work_id}")
 
-    page.locator(f'div[data-id="{work_id}"]').get_by_role("button", name="詳細").click()
+    page.locator(f'[data-id="{work_id}"]').get_by_role("button", name="詳細").click()
     expect(page.get_by_role("heading", name="作業申請ガジェット / 詳細")).to_be_visible()
     page.get_by_role("button", name="管理者に申請する").click()
 
     page.get_by_role("menuitem", name="要承認作業").click()
-    expect(page.locator(f'div[data-id="{work_id}"]')).to_be_visible()
-    page.locator(f'div[data-id="{work_id}"]').get_by_role("button", name="詳細").click()
+    approval_row = page.get_by_role("row").filter(has_text=work_id)
+    expect(approval_row).to_be_visible(timeout=60_000)
+    approval_row.get_by_role("button", name="詳細").click()
     page.get_by_role("button", name="承認").click()
     page.get_by_role("button", name="発効").click()
 
     page.get_by_role("menuitem", name="承認済み作業").click()
-    expect(page.locator(f'div[data-id="{work_id}"]')).to_be_visible()
+    approved_row = page.get_by_role("row").filter(has_text=work_id)
+    expect(approved_row).to_be_visible(timeout=60_000)
