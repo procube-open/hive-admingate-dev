@@ -2519,20 +2519,21 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: usePrimaryKey
+                name: usePrivateKey
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: ''
+                type: boolean
             -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
-                name: primaryKey
+                inputUIWidth: multi
+                name: privateKey
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: ''
+                type: string
             -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
