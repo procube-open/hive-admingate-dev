@@ -49,8 +49,8 @@ services:
     ports:
     - "10443:9443"
     initialize_roles:
-      - idm-download
-      #- idm-init
+      #- idm-download
+      - idm-init
     environment:
       # 認証設定
       AUTH_METHOD: basic
