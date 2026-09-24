@@ -103,13 +103,13 @@
 
       - name: Add private key to target params.
         set_fact:
-          target_params: "{{ target_params | combine({'primary_key': cs_obj.primaryKey}) }}"
-        when: cs_obj.primaryKey is defined and cs_obj.primaryKey is not none and (cs_obj.primaryKey | string | trim) != '' and cs_obj.usePrimaryKey
+          target_params: "{{ target_params | combine({'private_key': cs_obj.privateKey}) }}"
+        when: cs_obj.privateKey is defined and cs_obj.privateKey is not none and (cs_obj.privateKey | string | trim) != '' and cs_obj.usePrivateKey
       
       - name: Add private key to target params.
         set_fact:
           target_params: "{{ target_params | combine({'passphrase': cs_obj.passphrase}) }}"
-        when: cs_obj.passphrase is defined and cs_obj.passphrase is not none and (cs_obj.passphrase | string | trim) != '' and cs_obj.usePrimaryKey
+        when: cs_obj.passphrase is defined and cs_obj.passphrase is not none and (cs_obj.passphrase | string | trim) != '' and cs_obj.usePrivateKey
 
       - name: Add ignore-cert to target params.
         set_fact:

@@ -554,7 +554,7 @@ phases_data:
                 description: ログイン時に秘密鍵を利用する場合はチェックしてください。
                 displayName: 秘密鍵利用
                 isArray: false
-                name: usePrimaryKey
+                name: usePrivateKey
                 outputLdapSchema: false
                 propGroupName:
                 - protocol#ssh
@@ -566,10 +566,10 @@ phases_data:
                 description: 秘密鍵の内容を入力します。
                 displayName: 秘密鍵
                 isArray: false
-                name: primaryKey
+                name: privateKey
                 outputLdapSchema: false
                 propGroupName:
-                - usePrimaryKey
+                - usePrivateKey
                 required: false
                 type: string
                 unique: false
@@ -581,7 +581,7 @@ phases_data:
                 name: passphrase
                 outputLdapSchema: false
                 propGroupName:
-                - usePrimaryKey
+                - usePrivateKey
                 required: false
                 type: string
                 unique: false
@@ -2522,7 +2522,7 @@ phases_data:
                 name: usePrimaryKey
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: boolean
+                type: ''
             -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
@@ -2532,7 +2532,7 @@ phases_data:
                 name: primaryKey
                 radioButtonFlag: false
                 twoColumnFlag: false
-                type: string
+                type: ''
             -   className: ''
                 datePickerFlag: false
                 disableUpdate: false
@@ -4475,7 +4475,7 @@ phases_data:
             -   displayName: ログアウト
                 icon: M30 10 L30 15 L40 15 L40 35 L30 35 L30 40 L45 40 L45 10 Z M20
                     18 L25 22.5 L18 22.5 L18 27.5 L25 27.5 L20 32 L5 25 Z
-                redirectUrl: https://idp.{{ domain }}/realms/webgate/protocol/openid-connect/logout
+                redirectUrl: https://idm3.{{ domain }}/logout
                 type: link
             name: userSidebar
         -   children:

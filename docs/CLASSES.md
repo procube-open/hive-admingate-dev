@@ -218,14 +218,14 @@ SWCゾーン(swcZone) はsocket warp connector のクライアントIDです。
 |----|----------------|
 |必須|:x:|
 |一意|:x:|
-### 秘密鍵利用(usePrimaryKey)
-秘密鍵利用(usePrimaryKey) はログイン時に秘密鍵を利用する場合はチェックしてください。です。
+### 秘密鍵利用(usePrivateKey)
+秘密鍵利用(usePrivateKey) はログイン時に秘密鍵を利用する場合はチェックしてください。です。
 | データ型|boolean|
 |----|----------------|
 |必須|:x:|
 |一意|:x:|
-### 秘密鍵(primaryKey)
-秘密鍵(primaryKey) は秘密鍵の内容を入力します。です。
+### 秘密鍵(privateKey)
+秘密鍵(privateKey) は秘密鍵の内容を入力します。です。
 | データ型|string|
 |----|----------------|
 |必須|:x:|
