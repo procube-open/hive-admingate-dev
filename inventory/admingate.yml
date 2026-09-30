@@ -35,6 +35,9 @@ services:
           size: 1G
           fstype: xfs
 
+  clamav:
+    image: clamav/clamav:1.5.4-debian13-slim
+
   admingate-core-server:
     image: docker-repository.procube.jp/admingate-core-server:latest
     # guacd_recordingsの共有マウントをするために、guacdと同じnodeに配置する必要がある。
@@ -47,6 +50,8 @@ services:
       RUST_LOG: "debug"
       ADMINGATE_DATABASE_URL: "postgresql://admingate_user:{{ db_password }}@postgres:5432/admingate_app"
       ADMINGATE_SEAWEEDFS_FILER_URL: "http://seaweedfs-filer:8888"
+      ADMINGATE_VIRUS_SCAN_ENABLED: "{{ virus_scan_enabled | default('false') }}"
+      ADMINGATE_CLAMAV_ADDR: "clamav:3310"
       ADMINGATE_STATIC_DIR: "/app/dist"
       ADMINGATE_CONNECT_TIMEOUT_SECS: "300"
       ADMINGATE_LOGOUT_URL: "https://admingate-core.{{ domain }}/logout"
@@ -92,6 +97,7 @@ services:
     environment:
       ADMINGATE_DATABASE_URL: postgresql://admingate_user:{{ db_password }}@postgres:5432/admingate_app
       ADMINGATE_SEAWEEDFS_FILER_URL: http://seaweedfs-filer:8888
+      ADMINGATE_VIRUS_SCAN_ENABLED: "{{ virus_scan_enabled | default('false') }}"
       ADMINGATE_FTP_BIND_ADDR: 0.0.0.0:2121
       ADMINGATE_FTP_PASV_HOST: 127.0.0.1
       ADMINGATE_FTP_PASV_PORT_MIN: "40000"
@@ -105,6 +111,7 @@ services:
     environment:
       ADMINGATE_DATABASE_URL: postgresql://admingate_user:{{ db_password }}@postgres:5432/admingate_app
       ADMINGATE_SEAWEEDFS_FILER_URL: http://seaweedfs-filer:8888
+      ADMINGATE_VIRUS_SCAN_ENABLED: "{{ virus_scan_enabled | default('false') }}"
       ADMINGATE_SFTP_BIND_ADDR: 0.0.0.0:2222
     placement:
       constraints:
@@ -115,6 +122,7 @@ services:
     environment:
       ADMINGATE_DATABASE_URL: postgresql://admingate_user:{{ db_password }}@postgres:5432/admingate_app
       ADMINGATE_SEAWEEDFS_FILER_URL: http://seaweedfs-filer:8888
+      ADMINGATE_VIRUS_SCAN_ENABLED: "{{ virus_scan_enabled | default('false') }}"
       ADMINGATE_TFTP_BIND_ADDR: 0.0.0.0:6969
     placement:
       constraints:
