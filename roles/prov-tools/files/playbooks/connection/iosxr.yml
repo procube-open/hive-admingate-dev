@@ -1,0 +1,43 @@
+- name: check for user
+  iosxr_command:
+    commands:
+      - "show running-config | include username {{ login_id}}"
+  vars:
+    ansible_connection: network_cli
+    ansible_network_os: iosxr
+  register: result_check_user
+
+- name: create user
+  iosxr_user:
+    name: "{{ login_id}}"
+    configured_password: "{{ login_password}}"
+    groups:
+      - sysadmin
+      - root-lr
+    update_password: always
+    state: present
+  vars:
+    ansible_connection: network_cli
+    ansible_network_os: iosxr
+  when: result_check_user.stdout_lines[0] | length == 1
+
+- name: update user
+  iosxr_user:
+    name: "{{ login_id}}"
+    configured_password: "{{ login_password}}"
+    update_password: always
+    state: present
+  vars:
+    ansible_connection: network_cli
+    ansible_network_os: iosxr
+  when: result_check_user.stdout_lines[0] | length > 1
+
+- name: remote login linux shell admin-exec
+  expect:
+    command: ssh -o StrictHostKeyChecking=no -l "{{ login_id}}" "{{ hostname }}"
+    responses:
+      ".*[Pp]assword:.*": "{{ login_password}}"
+    timeout: 10
+  changed_when: false
+  vars:
+    ansible_connection: local

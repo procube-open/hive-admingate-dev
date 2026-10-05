@@ -1,0 +1,45 @@
+# vdom利用時修正が必要！
+- name: check user
+  vars:
+    ansible_network_os: fortinet.fortios
+  raw: |
+    show system admin "{{ login_id }}"
+  register: result_check_user
+
+- name: create user
+  vars:
+    ansible_network_os: fortinet.fortios
+  raw: |
+    config global
+    config system admin
+    edit "{{ login_id }}"
+    set accprofile "super_admin"
+    set vdom "root"
+    set password "{{ login_password }}"
+    next
+    end
+    exit
+  when: result_check_user.stdout_lines | length < 5
+
+- name: update password
+  vars:
+    ansible_network_os: fortinet.fortios
+  raw: |
+    config global
+    config system admin
+    edit "{{ login_id }}"
+    set password "{{ login_password }}"
+    next
+    end
+    exit
+  when: result_check_user.stdout_lines | length > 7
+
+- name: remote login linux shell admin-exec
+  expect:
+    command: ssh -o StrictHostKeyChecking=no -l "{{ login_id }}" "{{ hostname }}"
+    responses:
+      ".*[Pp]assword:.*": "{{ login_password }}"
+    timeout: 10
+  changed_when: false
+  vars:
+    ansible_connection: local
