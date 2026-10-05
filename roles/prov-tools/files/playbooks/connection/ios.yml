@@ -1,0 +1,58 @@
+- name: check user
+  ios_command:
+    commands:
+      - "show running-config | include username {{ login_id }}"
+  register: result_check_user
+  vars:
+    ansible_connection: network_cli
+    ansible_network_os: ios
+    ansible_become: yes
+    ansible_become_method: enable
+
+- name: create user
+  ios_user:
+    name: "{{ login_id }}"
+    configured_password: "{{ login_password }}"
+    update_password: always
+    state: present
+    privilege: 15
+  vars:
+    ansible_connection: network_cli
+    ansible_network_os: ios
+    ansible_become: yes
+    ansible_become_method: enable
+    # ansible_become_password
+  when: result_check_user.stdout[0] | length == 0
+
+- name: update user
+  ios_user:
+    name: "{{ login_id }}"
+    configured_password: "{{ login_password }}"
+    update_password: always
+    state: present
+  vars:
+    ansible_connection: network_cli
+    ansible_network_os: ios
+    ansible_become: yes
+    ansible_become_method: enable
+    # ansible_become_password
+  when: result_check_user.stdout[0] | length > 10
+
+- name: remote login linux shell admin-exec
+  expect:
+    command: ssh -o StrictHostKeyChecking=no -l "{{ login_id }}" "{{ hostname }}"
+    responses:
+      ".*[Pp]assword:.*": "{{ login_password }}"
+    timeout: 10
+  changed_when: false
+  vars:
+    ansible_connection: local
+
+- name: config save
+  ios_command:
+    commands: 'write mem'
+  vars:
+    ansible_connection: network_cli
+    ansible_network_os: ios
+    ansible_become: yes
+    ansible_become_method: enable
