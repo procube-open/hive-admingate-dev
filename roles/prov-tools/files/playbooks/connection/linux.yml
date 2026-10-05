@@ -1,0 +1,30 @@
+- name: Check SSH connection with password
+  command: sshpass -p "{{ ansible_password }}" ssh -p "{{ ansible_port }}" -o StrictHostKeyChecking=no "{{ ansible_user }}@{{ hostname }}" echo "Connection successful"
+  delegate_to: localhost
+  register: ssh_check
+  failed_when: "'Permission denied' in ssh_check.stderr or ssh_check.rc != 0"
+
+- name: Add Users.
+  user:
+    name: "{{ login_id }}"
+    password: "{{ login_password | password_hash('sha512') }}"
+  vars:
+    # play-level ansible_connection is local; target the remote host explicitly
+    ansible_connection: ssh
+    ansible_host: "{{ hostname }}"
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_become: true
+    ansible_become_password: "{{ ansible_password }}"
+
+- name: ssh login.
+  expect:
+    command: ssh -o StrictHostKeyChecking=no -l "{{ login_id }}" "{{ hostname }}" -p "{{ ansible_port }}"
+    responses:
+      ".*[Pp]assword:.*": "{{ login_password }}"
+    timeout: 10
+  delegate_to: localhost
+  changed_when: false
+  vars:
+    ansible_connection: local
+  

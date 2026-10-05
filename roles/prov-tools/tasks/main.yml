@@ -11,6 +11,13 @@
         name: supervisor
         state: present
 
+- name: install ssh client packages
+  ansible.builtin.dnf:
+    name:
+      - sshpass
+      - openssh-clients
+    state: present
+
 - name: setup python3
   yum:
     name:
