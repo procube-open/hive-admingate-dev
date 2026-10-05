@@ -6,6 +6,7 @@
     "yaml.validate": true,
     "yaml.hover": true,
     "yaml.schemas": {
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/tasks.json": "roles/prov-tools/files/playbooks/connection/linux.yml",
         ".vscode/configs/hive_yml.json": "inventory/hive.yml",
         ".vscode/configs/services_yml.json": [
             "inventory/*.yml",

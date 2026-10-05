@@ -68,6 +68,22 @@
     when: prov_operation != 'delete'
 
   - block:
+      - name: Run connection setup for the target OS.
+        block:
+          - name: Run OS-specific connection tasks.
+            ansible.builtin.include_tasks: "connection/{{ cs_obj.osType }}.yml"
+            vars:
+              ansible_user: "{{ cs_obj.ansibleID }}"
+              ansible_password: "{{ cs_obj.ansiblePassword }}"
+              ansible_port: "{{ cs_obj.port }}"
+              login_id: "{{ cs_obj.username }}"
+              login_password: "{{ cs_obj.password }}"
+        rescue:
+          - name: Stop after connection setup failure.
+            ansible.builtin.debug:
+              msg: "Connection setup failed for {{ cs_obj.osType | default('unknown') }}."
+            no_log: false
+
       - name: Build target params.
         set_fact:
           target_params:
