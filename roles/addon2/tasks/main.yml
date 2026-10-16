@@ -1,0 +1,4 @@
+---
+# Pull only after docker/docker-client provide the Docker daemon and Python SDK.
+- import_role:
+    name: pull-docker-images
