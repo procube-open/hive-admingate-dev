@@ -4255,7 +4255,6 @@ phases_data:
         -   adminRoles:
             - IDM_ADMIN
             - IDM_USER_ADMIN
-            authType: none
             clockDaemons:
             -   clockType: monthly
                 day: 30
