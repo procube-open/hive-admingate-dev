@@ -4042,41 +4042,6 @@ phases_data:
             - sn
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
-        -   accessLevel: full
-            className: swConnector
-            database: Sandbox
-            deleteAsUpdate: false
-            displayName: socket warp connector編集IF
-            name: swConnectorEditIF
-            readOnlyProperties:
-            - certificate
-            - certIss
-            - certExp
-            useAESDecryptedResponse: false
-            useCustomBackendDatabase: false
-        -   accessLevel: readOnly
-            className: swConnector
-            database: Sandbox
-            deleteAsUpdate: false
-            displayName: swConnector取得IF
-            name: swConnectorGetIF
-            properties:
-            - uid
-            - password
-            useAESDecryptedResponse: false
-            useCustomBackendDatabase: false
-        -   accessLevel: readWrite
-            className: swConnector
-            database: Sandbox
-            deleteAsUpdate: false
-            displayName: swConnector更新IF
-            name: swConnectorPutIF
-            properties:
-            - certificate
-            - certIss
-            - certExp
-            useAESDecryptedResponse: false
-            useCustomBackendDatabase: false
         -   accessLevel: readWrite
             className: user
             database: Sandbox
