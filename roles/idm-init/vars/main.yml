@@ -4220,7 +4220,6 @@ phases_data:
         -   adminRoles:
             - IDM_ADMIN
             - IDM_USER_ADMIN
-            authType: none
             clockDaemons:
             -   clockType: interval
                 day: 30
@@ -4425,4 +4424,4 @@ phases_data:
             team:
             - administorators
             uid: admin
-            userPassword: ''
+            userPassword: 'admin'
