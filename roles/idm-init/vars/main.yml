@@ -4221,7 +4221,7 @@ phases_data:
             - IDM_ADMIN
             - IDM_USER_ADMIN
             clockDaemons:
-            -   clockType: monthly
+            -   clockType: interval
                 day: 30
                 description: 作業申請の承認要求メール送信のクロックデーモン
                 displayName: 作業申請の承認要求メール送信
@@ -4229,7 +4229,7 @@ phases_data:
                 name: approvalRequestDaemon
                 updateBatch:
                 - sendApprovalRequestMail
-            -   clockType: monthly
+            -   clockType: interval
                 day: 30
                 description: 作業申請の承認完了メール送信のクロックデーモン
                 displayName: 作業申請の承認完了メール送信
