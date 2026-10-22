@@ -35,6 +35,9 @@
     # Keep null inside a mapping so non-native Jinja does not turn it into an empty string.
     swl_client_lookup: "{{ {'client': swl_client_response.content | from_json} }}"
 
+- debug:
+    var: swl_client_lookup
+
 - name: Validate existing SWL client response
   assert:
     that:
