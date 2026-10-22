@@ -57,7 +57,7 @@ class IDMLogger:
     self.codebase = codebase
     self.logtemplate = dict(taskId=taskId, provSettingName=provSettingName)
     self.userid = userid
-    self.url = baseurl + '?_ignoreWarning=true'
+    self.url = baseurl + '?_ignoreWarning=true&_forceExecuteOnWaitingRestart=true'
     self.contexttemplate = dict(class_name=class_name, playbook=playbook)
 
   def _post2idm(self, data):
