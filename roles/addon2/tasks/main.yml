@@ -1,4 +1,12 @@
 ---
+- name: Create Selenium assets volume before deploying node-docker
+  community.docker.docker_volume:
+    name: selenium_assets
+    state: present
+  vars:
+    ansible_python_interpreter: "{{ hive_home_dir }}/docker/bin/python3"
+  when: "'hives' in group_names"
+
 # Pull only after docker/docker-client provide the Docker daemon and Python SDK.
 - import_role:
     name: pull-docker-images
