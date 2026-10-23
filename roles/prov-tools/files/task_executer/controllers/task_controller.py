@@ -156,7 +156,10 @@ class AnsibleExecuter:
       with tempfile.NamedTemporaryFile(mode='w+t') as inventory_file:
         json.dump(self.prov_data, inventory_file)
         inventory_file.flush()
-        env = {'IDM_IFFILE_' + self.support_class: inventory_file.name}
+        env = {
+          'IDM_IFFILE_' + self.support_class: inventory_file.name,
+          'IDM_FORCE_EXECUTE_ON_WAITING_RESTART': 'true'
+        }
         args = ['/root/prov/bin/ansible-playbook']
         # we cannot split debug messsage and result json
         # if self.logger.getEffectiveLevel() < logging.INFO:

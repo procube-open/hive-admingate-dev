@@ -139,6 +139,8 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
     if class_name is None:
       raise AnsibleParserError(f'class_name property is required')
     url = 'http://' + self.get_option('host') + ':' + str(self.get_option('port')) + '/IDManager/' + interface
+    if os.environ.get('IDM_FORCE_EXECUTE_ON_WAITING_RESTART') == 'true':
+      url += '?_forceExecuteOnWaitingRestart=true'
     results = None
     cache_key = self.get_cache_key(url)
     # get the user's cache option to see if we should save the cache if it is changing
