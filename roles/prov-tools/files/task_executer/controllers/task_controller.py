@@ -57,7 +57,7 @@ class IDMLogger:
     self.codebase = codebase
     self.logtemplate = dict(taskId=taskId, provSettingName=provSettingName)
     self.userid = userid
-    self.url = baseurl + '?_ignoreWarning=true&_forceExecuteOnWaitingRestart=true'
+    self.url = baseurl + '?_ignoreWarning=true'
     self.contexttemplate = dict(class_name=class_name, playbook=playbook)
 
   def _post2idm(self, data):
@@ -156,10 +156,7 @@ class AnsibleExecuter:
       with tempfile.NamedTemporaryFile(mode='w+t') as inventory_file:
         json.dump(self.prov_data, inventory_file)
         inventory_file.flush()
-        env = {
-          'IDM_IFFILE_' + self.support_class: inventory_file.name,
-          'IDM_FORCE_EXECUTE_ON_WAITING_RESTART': 'true'
-        }
+        env = {'IDM_IFFILE_' + self.support_class: inventory_file.name}
         args = ['/root/prov/bin/ansible-playbook']
         # we cannot split debug messsage and result json
         # if self.logger.getEffectiveLevel() < logging.INFO:
