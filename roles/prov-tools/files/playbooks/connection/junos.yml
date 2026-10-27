@@ -5,7 +5,6 @@
   vars:
     ansible_connection: netconf
     ansible_network_os: junos
-    ansible_ssh_port: 22
   register: result_check_user
 
 - name: create user
@@ -17,7 +16,6 @@
   vars:
     ansible_connection: netconf
     ansible_network_os: junos
-    ansible_ssh_port: 22
   when: result_check_user.stdout[0] | length < 2
 
 - name: update user
@@ -28,12 +26,11 @@
   vars:
     ansible_connection: netconf
     ansible_network_os: junos
-    ansible_ssh_port: 22
   when: result_check_user.stdout[0] | length > 2
 
 - name: remote login linux shell admin-exec
   expect:
-    command: ssh -o StrictHostKeyChecking=no -l "{{ login_id }}" "{{ hostname }}"
+    command: ssh -o StrictHostKeyChecking=no -p "{{ ansible_port }}" -l "{{ login_id }}" "{{ hostname }}"
     responses:
       ".*[Pp]assword:.*": "{{ login_password }}"
     timeout: 10

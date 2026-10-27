@@ -1,6 +1,7 @@
 # vdom利用時修正が必要！
 - name: check user
   vars:
+    ansible_connection: ssh
     ansible_network_os: fortinet.fortios
   raw: |
     show system admin "{{ login_id }}"
@@ -8,6 +9,7 @@
 
 - name: create user
   vars:
+    ansible_connection: ssh
     ansible_network_os: fortinet.fortios
   raw: |
     config global
@@ -23,6 +25,7 @@
 
 - name: update password
   vars:
+    ansible_connection: ssh
     ansible_network_os: fortinet.fortios
   raw: |
     config global
@@ -36,7 +39,7 @@
 
 - name: remote login linux shell admin-exec
   expect:
-    command: ssh -o StrictHostKeyChecking=no -l "{{ login_id }}" "{{ hostname }}"
+    command: ssh -o StrictHostKeyChecking=no -p "{{ ansible_port }}" -l "{{ login_id }}" "{{ hostname }}"
     responses:
       ".*[Pp]assword:.*": "{{ login_password }}"
     timeout: 10

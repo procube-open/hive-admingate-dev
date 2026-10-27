@@ -73,6 +73,7 @@
           - name: Run OS-specific connection tasks.
             ansible.builtin.include_tasks: "connection/{{ cs_obj.osType }}.yml"
             vars:
+              ansible_host: "{{ hostname }}"
               ansible_user: "{{ cs_obj.ansibleID }}"
               ansible_password: "{{ cs_obj.ansiblePassword }}"
               ansible_port: "{{ cs_obj.port }}"

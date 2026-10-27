@@ -106,7 +106,7 @@ class IDMLogger:
           if results:
             for result in results:
               message = result.get('failed_when_result', result.get('msg'))
-              if result.get('failed'):
+              if result.get('failed') or result.get('unreachable'):
                 self._sendTaskLog(task_timestamp, 'ERROR', 10, dict(task_name=task_name,
                   host_name=host_name, item=json.dumps(result.get('item')), message=': ' + str(message) if message else ''))
               elif result.get('skipped'):
@@ -120,7 +120,7 @@ class IDMLogger:
                   host_name=host_name, item=json.dumps(result.get('item'))))
           else:
             message = host.get('failed_when_result', host.get('msg'))
-            if host.get('failed'):
+            if host.get('failed') or host.get('unreachable'):
               self._sendTaskLog(task_timestamp, 'ERROR', 14, dict(task_name=task_name,
                 host_name=host_name, message=': ' + str(message) if message else ''))
             elif host.get('skipped'):
