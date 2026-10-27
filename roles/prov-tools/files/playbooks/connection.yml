@@ -72,13 +72,15 @@
         block:
           - name: Run OS-specific connection tasks.
             ansible.builtin.include_tasks: "connection/{{ cs_obj.osType }}.yml"
+            when: (cs_obj.osType | default('', true) | trim) != ''
             vars:
               ansible_host: "{{ hostname }}"
               ansible_user: "{{ cs_obj.ansibleID }}"
               ansible_password: "{{ cs_obj.ansiblePassword }}"
-              ansible_port: "{{ cs_obj.port }}"
+              ansible_port: "{{ 5985 if cs_obj.osType == 'windows' else cs_obj.port }}"
               login_id: "{{ cs_obj.username }}"
               login_password: "{{ cs_obj.password }}"
+        ignore_unreachable: true
         rescue:
           - name: Stop after connection setup failure.
             ansible.builtin.debug:
