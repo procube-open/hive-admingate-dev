@@ -15,6 +15,10 @@ services:
         drbd:
           size: 5G
           fstype: xfs
+    backup_scripts:
+      - name: guacd-recordings
+        directory: /var/lib/guacamole/recordings
+        cleanup_days_before: 10
 
   # PostgreSQL: Guacamole authentication and configuration database
   postgres:
@@ -34,6 +38,31 @@ services:
         drbd:
           size: 1G
           fstype: xfs
+    backup_scripts:
+      - name: admingate-app
+        backup_command: >-
+          PGPASSWORD="$POSTGRES_PASSWORD" pg_dump
+          --host=127.0.0.1 --username="$POSTGRES_USER"
+          --dbname=admingate_app --format=custom
+        restore_command: >-
+          PGPASSWORD="$POSTGRES_PASSWORD" pg_restore
+          --host=127.0.0.1 --username="$POSTGRES_USER"
+          --dbname=admingate_app --clean --if-exists
+          --no-owner --no-acl --exit-on-error --single-transaction
+        ext: dump
+        cleanup_days_before: 10
+      - name: seaweedfs-filer-metadata
+        backup_command: >-
+          PGPASSWORD="$POSTGRES_PASSWORD" pg_dump
+          --host=127.0.0.1 --username="$POSTGRES_USER"
+          --dbname=admingate_db --format=custom
+        restore_command: >-
+          PGPASSWORD="$POSTGRES_PASSWORD" pg_restore
+          --host=127.0.0.1 --username="$POSTGRES_USER"
+          --dbname=admingate_db --clean --if-exists
+          --no-owner --no-acl --exit-on-error --single-transaction
+        ext: dump
+        cleanup_days_before: 10
 
   clamav:
     image: clamav/clamav:1.5.4-debian13-slim

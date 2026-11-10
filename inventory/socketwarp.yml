@@ -18,6 +18,18 @@ services:
         drbd:
           size: 3G
           fstype: xfs
+    backup_scripts:
+      - name: scep-db
+        backup_command: >-
+          MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump --user=root
+          --host=127.0.0.1 --single-transaction --routines --events
+          --triggers --set-gtid-purged=OFF --add-drop-database
+          --databases "$MYSQL_DATABASE"
+        restore_command: >-
+          MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --user=root
+          --host=127.0.0.1
+        ext: sql
+        cleanup_days_before: 10
 
   # SCEP Certificate Server
   scep:
@@ -46,6 +58,11 @@ services:
         drbd:
           size: 500M
           fstype: xfs
+    backup_scripts:
+      # Restore後にSocket Warp Listenerサービスの再起動が必要。
+      - name: socket-warp-listener-certs
+        directory: /tmp/swl
+        cleanup_days_before: 10
     ports:
       - "13000:3000"
 

@@ -46,6 +46,17 @@ services:
         available_on:
         - production
         - staging
+    backup_scripts:
+    - name: powerdns-db
+      backup_command: >-
+        MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqldump --user=root
+        --host=127.0.0.1 --single-transaction --routines --events
+        --triggers --add-drop-database --databases "$MYSQL_DATABASE"
+      restore_command: >-
+        MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --user=root
+        --host=127.0.0.1
+      ext: sql
+      cleanup_days_before: 10
   pdnsadmin:
     image:
       from: ngoduykhanh/powerdns-admin:0.2.2
@@ -66,3 +77,17 @@ services:
         available_on:
         - production
         - staging
+    backup_scripts:
+    - name: powerdns-admin
+      backup_command: >-
+        python3 -c "import sqlite3; source=sqlite3.connect(\"/app/data/padmin.sqlite\");
+        target=sqlite3.connect(\"/tmp/padmin-backup.sqlite\"); source.backup(target);
+        target.close(); source.close()"
+      backup_file: /tmp/padmin-backup.sqlite
+      restore_file: /tmp/padmin-restore.sqlite
+      restore_command: >-
+        python3 -c "import sqlite3; source=sqlite3.connect(\"/tmp/padmin-restore.sqlite\");
+        target=sqlite3.connect(\"/app/data/padmin.sqlite\"); source.backup(target);
+        target.close(); source.close()"
+      ext: sqlite
+      cleanup_days_before: 10
