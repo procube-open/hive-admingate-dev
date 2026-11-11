@@ -135,6 +135,13 @@
           target_params: "{{ target_params | combine({'ignore-cert': cs_obj.ignoreCert}) }}"
         when: cs_obj.ignoreCert is defined
       
+      - name: Disable VNC display resize in target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'disable-display-resize': true}) }}"
+        when:
+          - (cs_obj.protocol | default('', true) | trim | lower) == 'vnc'
+          - cs_obj.disableDisplayResize | default(false, true) | bool
+      
       - name: Add socket-warp client IDs to target params.
         set_fact:
           target_params: "{{ target_params | combine({'socket_warp_client_ids': socket_warp_client_ids}) }}"

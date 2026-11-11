@@ -556,6 +556,16 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
+                description: 画面がフリーズする場合はチェックして、接続先の画面リサイズを無効化する
+                displayName: 画面リサイズ無効
+                isArray: false
+                name: disableDisplayResize
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
                 displayName: ブラウザ認証方式
                 isArray: false
                 name: browser_auth_mode
@@ -2507,6 +2517,16 @@ phases_data:
                 hideOnShow: false
                 incrementalSearchFlag: false
                 name: ignoreCert
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
+                name: disableDisplayResize
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: boolean
