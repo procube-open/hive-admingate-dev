@@ -247,6 +247,12 @@ SWCゾーン(swcZone) はsocket warp connector のクライアントIDです。
 |----|----------------|
 |必須|:x:|
 |一意|:x:|
+### 画面リサイズ無効(disableDisplayResize)
+画面リサイズ無効(disableDisplayResize) は画面がフリーズする場合はチェックして、接続先の画面リサイズを無効化するです。
+| データ型|boolean|
+|----|----------------|
+|必須|:x:|
+|一意|:x:|
 ### ブラウザ認証方式(browser_auth_mode)
 | データ型|string|
 |----|----------------|

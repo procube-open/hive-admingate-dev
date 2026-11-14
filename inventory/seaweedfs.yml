@@ -16,6 +16,11 @@ services:
         drbd:
           size: 1G
           fstype: xfs
+    backup_scripts:
+      # Restore後にSeaweedFS master/volumeサービスの再起動が必要。
+      - name: seaweedfs-master-data
+        directory: /data
+        cleanup_days_before: 3
 
   # SeaweedFS Volume: Data storage server
   seaweedfs-volume:
@@ -35,6 +40,35 @@ services:
         drbd:
           size: 5G
           fstype: xfs
+    backup_scripts:
+      # Restore後にSeaweedFS master/volumeサービスの再起動が必要。
+      - name: seaweedfs-volume-data
+        backup_command: >-
+          tmpdir=$(mktemp -d) &&
+          response=$(wget -qO- "http://seaweedfs-master:9333/vol/status?pretty=y") &&
+          ids=$(printf "%s\n" "$response" |
+          grep -o "\"Id\"[[:space:]]*:[[:space:]]*[0-9]*" |
+          sed "s/.*:[[:space:]]*//" | sort -un) &&
+          [ -n "$ids" ] &&
+          for id in $ids; do
+          output=$(weed backup -master=seaweedfs-master:9333 -dir="$tmpdir"
+          -volumeId="$id" 2>&1);
+          status=$?;
+          printf "%s\n" "$output" >&2;
+          if [ "$status" -ne 0 ] ||
+          ! printf "%s\n" "$output" | grep -q "Successfully backed up volume $id";
+          then rm -rf "$tmpdir"; exit 1; fi;
+          done &&
+          tar czf - -C "$tmpdir" .;
+          result=$?;
+          rm -rf "$tmpdir";
+          exit "$result"
+        restore_file: /tmp/seaweedfs-volume-restore.tar.gz
+        restore_command: >-
+          find /data -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
+          tar xzf /tmp/seaweedfs-volume-restore.tar.gz -C /data
+        ext: tar.gz
+        cleanup_days_before: 3
 
   # SeaweedFS Filer (API operations)
   seaweedfs-filer:

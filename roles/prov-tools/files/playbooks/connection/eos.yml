@@ -32,7 +32,7 @@
 
 - name: remote login linux shell admin-exec
   expect:
-    command: ssh -o StrictHostKeyChecking=no -l "{{ login_id }}" "{{ hostname }}"
+    command: ssh -o StrictHostKeyChecking=no -p "{{ ansible_port }}" -l "{{ login_id }}" "{{ hostname }}"
     responses:
       ".*[Pp]assword:.*": "{{ login_password }}"
     timeout: 10

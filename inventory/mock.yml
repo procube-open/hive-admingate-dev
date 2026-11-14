@@ -11,6 +11,16 @@ services:
       USER_PASSWORD: "password"
       USER_NAME: "user"
       SUDO_ACCESS: "true"
+  mock-ssh-key-server:
+    image: lscr.io/linuxserver/openssh-server:latest
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: "Asia/Tokyo"
+      PASSWORD_ACCESS: "false"
+      PUBLIC_KEY: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIErCH6M5ZxqRiLnmRCxzzvQ/YURy/YB4+E67KeHx3cRE mock-ssh-key-server"
+      USER_NAME: "user"
+      SUDO_ACCESS: "true"
   mock-http-server:
     image:
       from: nginx:latest

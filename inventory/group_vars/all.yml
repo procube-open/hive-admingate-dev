@@ -28,6 +28,8 @@ expireSeconds: "900"
 ipWhiteList: []
 pwAvailableDays: 0
 
+virus_scan_enabled: "true"
+
 # DRBD 関連設定
 # hive_kernel_version: "6.12.0-211.20.1.el10_2.x86_64"
 # hive_drbd_download_url: "https://github.com/procube-open/drbd9-rpm/releases/download/Latests/drbd-9.2.15-v9.29.0-6.12.0-211.20.1.el10_2.x86_64.tar.gz"

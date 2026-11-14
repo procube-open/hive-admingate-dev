@@ -20,6 +20,3 @@
 
 - import_role:
     name: selenium-node-docker
-
-- import_role:
-    name: pull-docker-images

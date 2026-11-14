@@ -23,6 +23,32 @@ services:
       drbd:
         fstype: xfs
         size: 1G
+    backup_scripts:
+      - name: idm3-mongodb
+        backup_command: >-
+          mongodump --username "$MONGO_INITDB_ROOT_USERNAME"
+          --password "$MONGO_INITDB_ROOT_PASSWORD"
+          --authenticationDatabase admin --archive --gzip
+        restore_command: >-
+          mongorestore --username "$MONGO_INITDB_ROOT_USERNAME"
+          --password "$MONGO_INITDB_ROOT_PASSWORD"
+          --authenticationDatabase admin --archive --gzip
+          --nsExclude="*.system.users" --nsExclude="*.system.roles"
+          --drop --stopOnError
+          && mongosh --nodb --quiet --eval
+          "fetch(\"http://idm3-bindbroker:8094/BindBroker/Management/restart\", { signal: AbortSignal.timeout(30000) })
+          .then(response => quit(response.status === 200 ? 0 : 1))
+          .catch(() => quit(1));"
+        ext: archive.gz
+        cleanup_days_before: 10
+      - name: idm3-mongodb-configdb
+        backup_command: tar czf - -C /data/configdb .
+        restore_file: /tmp/idm3-mongodb-configdb.tar.gz
+        restore_command: >-
+          find /data/configdb -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
+          tar xzf /tmp/idm3-mongodb-configdb.tar.gz -C /data/configdb
+        ext: tar.gz
+        cleanup_days_before: 10
 
   # BindBroker Service
   idm3-bindbroker:

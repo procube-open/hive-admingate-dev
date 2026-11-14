@@ -72,12 +72,15 @@
         block:
           - name: Run OS-specific connection tasks.
             ansible.builtin.include_tasks: "connection/{{ cs_obj.osType }}.yml"
+            when: (cs_obj.osType | default('', true) | trim) != ''
             vars:
+              ansible_host: "{{ hostname }}"
               ansible_user: "{{ cs_obj.ansibleID }}"
               ansible_password: "{{ cs_obj.ansiblePassword }}"
-              ansible_port: "{{ cs_obj.port }}"
+              ansible_port: "{{ 5985 if cs_obj.osType == 'windows' else cs_obj.port }}"
               login_id: "{{ cs_obj.username }}"
               login_password: "{{ cs_obj.password }}"
+        ignore_unreachable: true
         rescue:
           - name: Stop after connection setup failure.
             ansible.builtin.debug:
@@ -131,6 +134,13 @@
         set_fact:
           target_params: "{{ target_params | combine({'ignore-cert': cs_obj.ignoreCert}) }}"
         when: cs_obj.ignoreCert is defined
+      
+      - name: Disable VNC display resize in target params.
+        set_fact:
+          target_params: "{{ target_params | combine({'disable-display-resize': true}) }}"
+        when:
+          - (cs_obj.protocol | default('', true) | trim | lower) == 'vnc'
+          - cs_obj.disableDisplayResize | default(false, true) | bool
       
       - name: Add socket-warp client IDs to target params.
         set_fact:

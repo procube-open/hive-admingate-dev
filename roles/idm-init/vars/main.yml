@@ -610,6 +610,16 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
+                description: 画面がフリーズする場合はチェックして、接続先の画面リサイズを無効化する
+                displayName: 画面リサイズ無効
+                isArray: false
+                name: disableDisplayResize
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
                 displayName: ブラウザ認証方式
                 isArray: false
                 name: browser_auth_mode
@@ -2570,6 +2580,16 @@ phases_data:
                 hideOnEdit: false
                 hideOnShow: false
                 incrementalSearchFlag: false
+                name: disableDisplayResize
+                radioButtonFlag: false
+                twoColumnFlag: false
+                type: boolean
+            -   className: ''
+                datePickerFlag: false
+                disableUpdate: false
+                hideOnEdit: false
+                hideOnShow: false
+                incrementalSearchFlag: false
                 name: browser_auth_mode
                 radioButtonFlag: false
                 sectionSeparater: opened
@@ -4097,41 +4117,6 @@ phases_data:
             - sn
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
-        -   accessLevel: full
-            className: swConnector
-            database: Sandbox
-            deleteAsUpdate: false
-            displayName: socket warp connector編集IF
-            name: swConnectorEditIF
-            readOnlyProperties:
-            - certificate
-            - certIss
-            - certExp
-            useAESDecryptedResponse: false
-            useCustomBackendDatabase: false
-        -   accessLevel: readOnly
-            className: swConnector
-            database: Sandbox
-            deleteAsUpdate: false
-            displayName: swConnector取得IF
-            name: swConnectorGetIF
-            properties:
-            - uid
-            - password
-            useAESDecryptedResponse: false
-            useCustomBackendDatabase: false
-        -   accessLevel: readWrite
-            className: swConnector
-            database: Sandbox
-            deleteAsUpdate: false
-            displayName: swConnector更新IF
-            name: swConnectorPutIF
-            properties:
-            - certificate
-            - certIss
-            - certExp
-            useAESDecryptedResponse: false
-            useCustomBackendDatabase: false
         -   accessLevel: readWrite
             className: user
             database: Sandbox
@@ -4310,9 +4295,8 @@ phases_data:
         -   adminRoles:
             - IDM_ADMIN
             - IDM_USER_ADMIN
-            authType: none
             clockDaemons:
-            -   clockType: monthly
+            -   clockType: interval
                 day: 30
                 description: 作業申請の承認要求メール送信のクロックデーモン
                 displayName: 作業申請の承認要求メール送信
@@ -4320,7 +4304,7 @@ phases_data:
                 name: approvalRequestDaemon
                 updateBatch:
                 - sendApprovalRequestMail
-            -   clockType: monthly
+            -   clockType: interval
                 day: 30
                 description: 作業申請の承認完了メール送信のクロックデーモン
                 displayName: 作業申請の承認完了メール送信
@@ -4634,91 +4618,4 @@ phases_data:
             team:
             - administorators
             uid: admin
-            userPassword: ''
-        -   accountLock: false
-            cn: 玄哉
-            displayName: 中川路 玄哉
-            email: hiroya@procube.jp
-            idmRole: IDM_ADMIN
-            loginDateTime: '2026-09-14T07:34:03.318Z'
-            sn: 中川路
-            team:
-            - procube
-            uid: hiroya
-            userPassword: ''
-        -   accountLock: false
-            cn: 充
-            displayName: 中川路 充
-            email: mitsuru@procube.jp
-            idmRole: IDM_ADMIN
-            loginDateTime: '2026-10-06T00:06:52.225Z'
-            sn: 中川路
-            team:
-            - procube
-            uid: mitsuru
-            userPassword: ''
-        -   accountLock: false
-            cn: 美保
-            displayName: 上長 美保
-            email: mkaminaga@sidethree.co.jp
-            idmRole: IDM_ADMIN
-            loginDateTime: '2026-10-08T01:01:30.637Z'
-            sn: 上長
-            team:
-            - procube
-            uid: mkaminaga
-            userPassword: ''
-        -   accountLock: false
-            cn: 管理者
-            displayName: ネットワン 管理者
-            email: n-kaimori@netone.co.jp
-            idmRole: IDM_ADMIN
-            loginDateTime: '2026-11-13T00:58:12.769Z'
-            sn: ネットワン
-            team:
-            - netone
-            uid: netone-admin
-            userPassword: ''
-        -   accountLock: false
-            cn: 信
-            displayName: 渡邊 信
-            email: swatanabe@sidethree.co.jp
-            idmRole: IDM_ADMIN
-            sn: 渡邊
-            team:
-            - procube
-            uid: swatanabe
-            userPassword: '{ARGON2}$argon2id$v=19$m=65536,t=3,p=4$rYZYuTNtCLFGJDrRiwzfsg$UVDv+CiZUYCn5cTLkuHG4H5lOH3S2sohVFKSBAhyJhc'
-        -   accountLock: false
-            cn: デモアカウント
-            displayName: ユーザ管理者 デモアカウント
-            email: hiroya@procube.jp
-            idmRole: IDM_USER_ADMIN
-            loginDateTime: '2026-11-12T06:54:47.858Z'
-            sn: ユーザ管理者
-            team:
-            - procube
-            uid: user-admin-demo
-            userPassword: ''
-        -   accountLock: false
-            cn: デモアカウント
-            displayName: 一般ユーザ デモアカウント
-            email: hiroya@procube.jp
-            idmRole: IDM_USER
-            loginDateTime: '2026-11-13T01:58:28.433Z'
-            sn: 一般ユーザ
-            team:
-            - procube
-            uid: user-demo
-            userPassword: ''
-        -   accountLock: false
-            cn: デモアカウント
-            displayName: 業務管理者 デモアカウント
-            email: hiroya@procube.jp
-            idmRole: IDM_USER_LEADER
-            loginDateTime: '2026-11-13T00:49:28.027Z'
-            sn: 業務管理者
-            team:
-            - procube
-            uid: user-leader-demo
-            userPassword: ''
+            userPassword: 'admin'

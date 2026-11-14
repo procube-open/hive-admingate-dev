@@ -7,12 +7,46 @@
   register: scepclient_build_result
   failed_when: scepclient_build_result.rc != 0
 
-- name: Wait for SCEP server to be ready
-  wait_for:
-    host: localhost
-    port: 3000
-    delay: 5
-    timeout: 60
+- name: Wait for SCEP admin API to be ready
+  uri:
+    url: http://localhost:3000/admin/api/ping
+    method: GET
+    return_content: true
+    status_code: 200
+  register: swl_api_health
+  until: >-
+    (swl_api_health.status | default(0)) == 200 and
+    (swl_api_health.content | default('')) == 'pong'
+  retries: 12
+  delay: 5
+  changed_when: false
+
+- name: Get existing SWL client
+  uri:
+    url: http://localhost:3000/api/client/swl
+    method: GET
+    return_content: true
+    status_code: 200
+  register: swl_client_response
+  changed_when: false
+
+- name: Parse existing SWL client
+  set_fact:
+    # Keep null inside a mapping so non-native Jinja does not turn it into an empty string.
+    swl_client_lookup: "{{ {'client': swl_client_response.content | from_json} }}"
+
+- name: Validate existing SWL client response
+  assert:
+    that:
+      - >-
+        swl_client_lookup.client is none or
+        (
+          swl_client_lookup.client is mapping and
+          swl_client_lookup.client.get('uid') == 'swl' and
+          swl_client_lookup.client.get('status') in
+          ['INACTIVE', 'ISSUABLE', 'ISSUED', 'UPDATABLE', 'PENDING']
+        )
+    fail_msg: Unexpected response from the SCEP client API
 
 - name: Revoke existing client via admin API
   uri:
@@ -23,7 +57,12 @@
     body_format: json
     body:
       uid: swl
-    status_code: 200,500
+    status_code: 200
+  when:
+    - swl_client_lookup.client is not none
+    - swl_client_lookup.client.status != 'INACTIVE'
+  changed_when: true
+
 - name: Add client via admin API
   uri:
     url: http://localhost:3000/admin/api/client/add
@@ -35,7 +74,9 @@
       uid: swl
       attributes:
         hoge: fuga
-    status_code: 200,500
+    status_code: 200
+  when: swl_client_lookup.client is none
+  changed_when: true
 
 - name: Create secret via admin API
   uri:
@@ -49,6 +90,7 @@
       target: swl
       available_period: 30m
     status_code: 201
+  changed_when: true
 
 - name: Mkdir for certificate output
   file:

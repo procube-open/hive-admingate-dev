@@ -14,7 +14,7 @@
 - name: Find existing work id.
   set_fact:
     work_id: "{{ item.id }}"
-  when: item.name == name and work_id is not defined
+  when: item.id == id and work_id is not defined
   loop: "{{ admin_works.json | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
@@ -46,6 +46,7 @@
 - name: Build work payload.
   set_fact:
     work_payload:
+      id: "{{ id }}"
       name: "{{ name }}"
       worker_ids: "{{ resultUsers | default([], true) | unique | list }}"
       manager_ids: "{{ manageUsers | default([], true) | unique | list }}"
