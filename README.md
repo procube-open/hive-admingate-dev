@@ -3,6 +3,10 @@
 hive-builder を利用する際のテンプレートレポジトリです。
 hive-builder 本体についての詳細な利用法については[ドキュメント](https://hive-builder.readthedocs.io/ja/latest/)を参照して下さい。
 
+接続記録の SeaweedFS 移行と guacd の複数配置については
+[運用手順](docs/guacd-swarm.md)を参照してください。既存環境では移行・照合前に
+新しいサービス定義を配備しないでください。
+
 # 構築手順
 Github Codespacesでの構築を例に解説します。
 以下に記す手順に従うことで Codespaces の開発コンテナに hive-builder のマザー環境を構築することができます。
