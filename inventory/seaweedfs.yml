@@ -3,12 +3,20 @@ plugin: hive_services
 services:
   # SeaweedFS Master: Metadata server and volume management
   seaweedfs-master:
-    image: chrislusf/seaweedfs:4.23
+    image:
+      from: "{{ seaweedfs_image }}"
+      roles:
+        - python-aptk
+        - put-master-toml
+    environment:
+      WEED_STORAGE_BACKEND_S3_DEFAULT_AWS_ACCESS_KEY_ID: "{{ seaweedfs_aws_access_key_id }}"
+      WEED_STORAGE_BACKEND_S3_DEFAULT_AWS_SECRET_ACCESS_KEY: "{{ seaweedfs_aws_secret_access_key }}"
     command:
       - "master"
       - "-ip=seaweedfs-master"
       - "-mdir=/data"
       - "-defaultReplication=000"
+      - "-volumeSizeLimitMB={{ seaweedfs_volume_size_limit_mb }}"
     volumes:
       - source: seaweedfs_master_data
         target: /data
@@ -24,12 +32,21 @@ services:
 
   # SeaweedFS Volume: Data storage server
   seaweedfs-volume:
-    image: chrislusf/seaweedfs:4.23
+    image:
+      from: "{{ seaweedfs_image }}"
+      roles:
+        - python-aptk
+        - seaweedfs-volume-backup
+    environment:
+      AWS_ACCESS_KEY_ID: "{{ seaweedfs_aws_access_key_id }}"
+      AWS_SECRET_ACCESS_KEY: "{{ seaweedfs_aws_secret_access_key }}"
+      AWS_DEFAULT_REGION: "{{ seaweedfs_s3_region }}"
+      SEAWEEDFS_TIER_BUCKET: "{{ seaweedfs_s3_bucket }}"
     command:
       - "volume"
       - "-mserver=seaweedfs-master:9333"
       - "-dir=/data"
-      - "-max=100"
+      - "-max={{ seaweedfs_volume_max }}"
       - "-ip=seaweedfs-volume"
       - "-port=8080"
       - "-publicUrl=seaweedfs-volume:8080"
@@ -43,26 +60,7 @@ services:
     backup_scripts:
       # Restore後にSeaweedFS master/volumeサービスの再起動が必要。
       - name: seaweedfs-volume-data
-        backup_command: >-
-          tmpdir=$(mktemp -d) &&
-          response=$(wget -qO- "http://seaweedfs-master:9333/vol/status?pretty=y") &&
-          ids=$(printf "%s\n" "$response" |
-          grep -o "\"Id\"[[:space:]]*:[[:space:]]*[0-9]*" |
-          sed "s/.*:[[:space:]]*//" | sort -un) &&
-          [ -n "$ids" ] &&
-          for id in $ids; do
-          output=$(weed backup -master=seaweedfs-master:9333 -dir="$tmpdir"
-          -volumeId="$id" 2>&1);
-          status=$?;
-          printf "%s\n" "$output" >&2;
-          if [ "$status" -ne 0 ] ||
-          ! printf "%s\n" "$output" | grep -q "Successfully backed up volume $id";
-          then rm -rf "$tmpdir"; exit 1; fi;
-          done &&
-          tar czf - -C "$tmpdir" .;
-          result=$?;
-          rm -rf "$tmpdir";
-          exit "$result"
+        backup_command: seaweedfs-volume-backup
         restore_file: /tmp/seaweedfs-volume-restore.tar.gz
         restore_command: >-
           find /data -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
@@ -73,7 +71,7 @@ services:
   # SeaweedFS Filer (API operations)
   seaweedfs-filer:
     image:
-      from: chrislusf/seaweedfs:4.23
+      from: "{{ seaweedfs_image }}"
       roles:
         - python-aptk
         - put-filer-toml
@@ -86,7 +84,7 @@ services:
   # SeaweedFS Filer (FUSE mount dedicated with notification enabled)
   seaweedfs-filer-fuse:
     image:
-      from: chrislusf/seaweedfs:4.23
+      from: "{{ seaweedfs_image }}"
       roles:
         - python-aptk
         - put-filer-toml

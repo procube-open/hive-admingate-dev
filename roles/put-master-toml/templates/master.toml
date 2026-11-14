@@ -1,0 +1,15 @@
+[master.maintenance]
+scripts = """
+  lock
+  volume.tier.upload -dest=s3.default -fullPercent={{ seaweedfs_tiering_full_percent }} -quietFor={{ seaweedfs_tiering_quiet_for }}
+  unlock
+"""
+sleep_minutes = {{ seaweedfs_tiering_interval_minutes }}
+
+[storage.backend.s3.default]
+enabled = true
+aws_access_key_id = ""
+aws_secret_access_key = ""
+region = {{ seaweedfs_s3_region | to_json }}
+bucket = {{ seaweedfs_s3_bucket | to_json }}
+storage_class = {{ seaweedfs_s3_storage_class | to_json }}

@@ -2,5 +2,6 @@
   community.docker.docker_image:
     name: docker-repository.procube.jp/selenium-standalone-custom-weed:latest
     source: pull
+    force_source: true
   vars:
     ansible_python_interpreter: "{{ hive_home_dir }}/docker/bin/python3"

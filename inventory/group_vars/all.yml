@@ -30,6 +30,19 @@ pwAvailableDays: 0
 
 virus_scan_enabled: "true"
 
+# SeaweedFS tiering (credentials are supplied by the current Hive stage)
+seaweedfs_image: "chrislusf/seaweedfs:4.53"
+seaweedfs_aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID', default=undef()) }}"
+seaweedfs_aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY', default=undef()) }}"
+seaweedfs_s3_bucket: "admingate-seaweedfs-tiering-test"
+seaweedfs_s3_region: "ap-northeast-1"
+seaweedfs_s3_storage_class: "STANDARD"
+seaweedfs_volume_size_limit_mb: 256
+seaweedfs_volume_max: 100
+seaweedfs_tiering_full_percent: 95
+seaweedfs_tiering_quiet_for: "24h"
+seaweedfs_tiering_interval_minutes: 17
+
 # DRBD 関連設定
 # hive_kernel_version: "6.12.0-211.20.1.el10_2.x86_64"
 # hive_drbd_download_url: "https://github.com/procube-open/drbd9-rpm/releases/download/Latests/drbd-9.2.15-v9.29.0-6.12.0-211.20.1.el10_2.x86_64.tar.gz"
