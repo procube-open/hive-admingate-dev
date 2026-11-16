@@ -13,6 +13,9 @@ server {
     server_name {{ labels.published_name }}.{{ domain }};
 {% for proxy in labels.webgate.proxies %}
     location {{ proxy.pathPattern | default("/") }} {
+{% if proxy.maxBodySize is defined %}
+        client_max_body_size {{ proxy.maxBodySize }}m;
+{% endif %}
 {% if not (proxy.disableAuthentication is defined and proxy.disableAuthentication) %}
         include /etc/nginx/conflib/oidc-proxy.conf;
 {% endif %}
