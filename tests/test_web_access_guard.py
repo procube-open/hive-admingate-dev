@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from jinja2 import Environment, StrictUndefined
 
 
 ROOT = Path(__file__).parents[1]
@@ -66,6 +67,52 @@ def test_generated_rules_cover_ports_before_dnat_without_accepting_other_traffic
         assert rule[rule.index("--ctstate") + 1] == "NEW"
         assert rule[-2:] == ["-j", "DROP"]
     assert rules[0][rules[0].index("--match-set") + 1] == target
+
+
+@pytest.mark.parametrize(("country", "ddos", "matches"), [
+    (True, False, ["set"]),
+    (False, True, ["connlimit", "hashlimit"]),
+    (True, True, ["set", "connlimit", "hashlimit"]),
+])
+def test_policy_builds_only_enabled_rules(country, ddos, matches):
+    raw = dict(example_policy(), country_enabled=country, ddos_enabled=ddos)
+    if not country:
+        del raw["ipv4_cidrs"]
+        del raw["ipv6_cidrs"]
+    if not ddos:
+        del raw["connections_per_ip"]
+    for version in (4, 6):
+        _, _, target, restore, rules, _ = guard.commands(guard.validate(raw), version, "1234567890")
+        assert bool(target) == bool(restore) == country
+        assert [match for rule in rules for match in ("set", "connlimit", "hashlimit") if match in rule] == matches
+
+
+def test_ddos_only_template_does_not_read_country_files():
+    env = Environment(undefined=StrictUndefined)
+    env.filters["bool"] = bool
+    env.filters["to_json"] = json.dumps
+    template = env.from_string((ROOT / "roles/web-access-guard/templates/policy.json.j2").read_text())
+    policy = example_policy()
+    policy.update(country_enabled=False, ddos_enabled=True)
+    raw = json.loads(template.render(**{"hive_web_access_guard_" + k: v for k, v in policy.items()}))
+    assert "ipv4_cidrs" not in raw and "ipv6_cidrs" not in raw
+    assert guard.validate(raw)["ddos_enabled"]
+
+
+def test_disabling_both_replaces_legacy_policy_without_attaching_hooks(tmp_path, monkeypatch):
+    state = tmp_path / "policy.json"
+    state.write_text(json.dumps(example_policy()))
+    monkeypatch.setattr(guard, "old_hooks", lambda binary: [
+        ["-j", "HWAG{}_1234567890".format(4 if binary == "iptables" else 6)]
+    ])
+    calls = []
+    monkeypatch.setattr(guard, "run", lambda args, **kwargs: calls.append(args))
+    monkeypatch.setattr(guard, "destroy_set_if_present", lambda target: None)
+    disabled = guard.validate({"country_enabled": False, "ddos_enabled": False})
+    assert guard.apply(disabled, state)
+    assert json.loads(state.read_text()) == disabled
+    assert sum(call[4:6] == ["-D", "PREROUTING"] for call in calls) == 2
+    assert not any("-I" in call or "-A" in call for call in calls)
 
 
 def test_failed_second_hook_preserves_old_policy(tmp_path, monkeypatch):
@@ -142,6 +189,8 @@ def test_large_dataset_shrink_is_rejected_before_rule_changes(tmp_path, monkeypa
 def test_removal_touches_only_valid_owned_chains(monkeypatch):
     calls = []
     monkeypatch.setattr(guard, "run", lambda args, **kwargs: calls.append(args))
+    monkeypatch.setattr(guard.shutil, "which", lambda binary: binary)
+    monkeypatch.setattr(guard, "output", lambda args: "hwag4_1234567890\n")
     hook = ["-m", "comment", "--comment", guard.TAG + "1234567890", "-j", "HWAG4_1234567890"]
     guard.remove_hooks(4, [hook])
     assert calls[-1] == ["ipset", "destroy", "hwag4_1234567890"]

@@ -4,8 +4,14 @@
     that:
       - hive_web_access_guard_interfaces | length > 0
       - hive_web_access_guard_ports | length > 0
+  when: hive_web_access_guard_country_enabled | bool or hive_web_access_guard_ddos_enabled | bool
+
+- name: Check that the country filter has both CIDR files
+  assert:
+    that:
       - hive_web_access_guard_ipv4_cidrs_file | length > 0
       - hive_web_access_guard_ipv6_cidrs_file | length > 0
+  when: hive_web_access_guard_country_enabled | bool
 
 - name: Check that firewall services are already active
   command:
@@ -22,6 +28,7 @@
   yum:
     name: ipset
     state: present
+  when: hive_web_access_guard_country_enabled | bool
 
 - name: Install web access guard
   copy:

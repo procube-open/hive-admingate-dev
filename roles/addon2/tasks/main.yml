@@ -11,9 +11,20 @@
 - import_role:
     name: pull-docker-images
 
+- name: Check whether a web access guard policy was applied
+  stat:
+    path: /var/lib/hive-web-access-guard/last-good.json
+    get_checksum: false
+    get_mime: false
+  register: hive_web_access_guard_state
+  when: "'hives' in group_names"
+
 - name: Configure web access guard
   include_role:
     name: web-access-guard
   when:
     - "'hives' in group_names"
-    - hive_web_access_guard_enabled | default(false) | bool
+    - >-
+      hive_web_access_guard_country_enabled | default(false) | bool or
+      hive_web_access_guard_ddos_enabled | default(false) | bool or
+      hive_web_access_guard_state.stat.exists

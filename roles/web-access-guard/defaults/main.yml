@@ -1,4 +1,6 @@
 ---
+hive_web_access_guard_country_enabled: false
+hive_web_access_guard_ddos_enabled: false
 hive_web_access_guard_interfaces: []
 hive_web_access_guard_ports: []
 hive_web_access_guard_ipv4_cidrs_file: ""

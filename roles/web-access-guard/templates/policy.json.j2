@@ -1,12 +1,18 @@
 {
+  "country_enabled": {{ hive_web_access_guard_country_enabled | bool | to_json }},
+  "ddos_enabled": {{ hive_web_access_guard_ddos_enabled | bool | to_json }},
   "interfaces": {{ hive_web_access_guard_interfaces | to_json }},
-  "ports": {{ hive_web_access_guard_ports | to_json }},
+{% if hive_web_access_guard_country_enabled | bool %}
   "ipv4_cidrs": {{ (lookup('file', hive_web_access_guard_ipv4_cidrs_file).split('\n') | map('trim') | reject('equalto', '') | reject('match', '^#') | list) | to_json }},
   "ipv6_cidrs": {{ (lookup('file', hive_web_access_guard_ipv6_cidrs_file).split('\n') | map('trim') | reject('equalto', '') | reject('match', '^#') | list) | to_json }},
   "ipv4_min_networks": {{ hive_web_access_guard_ipv4_min_networks | to_json }},
   "ipv6_min_networks": {{ hive_web_access_guard_ipv6_min_networks | to_json }},
   "min_update_ratio": {{ hive_web_access_guard_min_update_ratio | to_json }},
+{% endif %}
+{% if hive_web_access_guard_ddos_enabled | bool %}
   "new_connections_per_second": {{ hive_web_access_guard_new_connections_per_second | to_json }},
   "new_connections_burst": {{ hive_web_access_guard_new_connections_burst | to_json }},
-  "connections_per_ip": {{ hive_web_access_guard_connections_per_ip | to_json }}
+  "connections_per_ip": {{ hive_web_access_guard_connections_per_ip | to_json }},
+{% endif %}
+  "ports": {{ hive_web_access_guard_ports | to_json }}
 }

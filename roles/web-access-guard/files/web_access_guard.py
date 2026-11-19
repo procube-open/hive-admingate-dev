@@ -8,6 +8,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -21,6 +22,11 @@ SET_PREFIX = "hwag"
 
 
 def validate(raw):
+    result = {key: raw.get(key, True) for key in ("country_enabled", "ddos_enabled")}
+    if not all(isinstance(value, bool) for value in result.values()):
+        raise ValueError("policy switches must be booleans")
+    if not any(result.values()):
+        return result
     interfaces = raw.get("interfaces", [])
     ports = raw.get("ports", [])
     if not isinstance(interfaces, list) or not interfaces or any(
@@ -35,25 +41,22 @@ def validate(raw):
         raise ValueError("one to fifteen valid TCP ports are required")
     if len(set(interfaces)) != len(interfaces) or len(set(ports)) != len(ports):
         raise ValueError("duplicate interfaces or ports")
-    for key in ("new_connections_per_second", "new_connections_burst", "connections_per_ip"):
+    result.update(interfaces=sorted(interfaces), ports=sorted(ports))
+    integer_keys = []
+    if result["ddos_enabled"]:
+        integer_keys.extend(("new_connections_per_second", "new_connections_burst", "connections_per_ip"))
+    if result["country_enabled"]:
+        integer_keys.extend(("ipv4_min_networks", "ipv6_min_networks"))
+    for key in integer_keys:
         if isinstance(raw.get(key), bool) or not isinstance(raw.get(key), int) or raw[key] < 1:
             raise ValueError("{} must be a positive integer".format(key))
-    for key in ("ipv4_min_networks", "ipv6_min_networks"):
-        if isinstance(raw.get(key), bool) or not isinstance(raw.get(key), int) or raw[key] < 1:
-            raise ValueError("{} must be a positive integer".format(key))
+        result[key] = raw[key]
+    if not result["country_enabled"]:
+        return result
     ratio = raw.get("min_update_ratio")
     if isinstance(ratio, bool) or not isinstance(ratio, (int, float)) or not 0 < ratio <= 1:
         raise ValueError("min_update_ratio must be greater than zero and at most one")
-    result = {
-        "interfaces": sorted(interfaces),
-        "ports": sorted(ports),
-        "new_connections_per_second": raw["new_connections_per_second"],
-        "new_connections_burst": raw["new_connections_burst"],
-        "connections_per_ip": raw["connections_per_ip"],
-        "ipv4_min_networks": raw["ipv4_min_networks"],
-        "ipv6_min_networks": raw["ipv6_min_networks"],
-        "min_update_ratio": ratio,
-    }
+    result["min_update_ratio"] = ratio
     for version in (4, 6):
         key = "ipv{}_cidrs".format(version)
         entries = raw.get(key)
@@ -94,12 +97,15 @@ def old_hooks(binary):
 def commands(policy, version, suffix):
     binary = "iptables" if version == 4 else "ip6tables"
     chain = "{}{}_{}".format(CHAIN_PREFIX, version, suffix)
-    target = "{}{}_{}".format(SET_PREFIX, version, suffix)
+    target = None
     family = "inet" if version == 4 else "inet6"
     base = [binary, "-w", "-t", "mangle"]
-    entries = policy["ipv{}_cidrs".format(version)]
-    restore = ["create {} hash:net family {} maxelem {}".format(target, family, max(65536, len(entries) * 2))]
-    restore.extend("add {} {}".format(target, entry) for entry in entries)
+    restore = []
+    if policy["country_enabled"]:
+        target = "{}{}_{}".format(SET_PREFIX, version, suffix)
+        entries = policy["ipv{}_cidrs".format(version)]
+        restore = ["create {} hash:net family {} maxelem {}".format(target, family, max(65536, len(entries) * 2))]
+        restore.extend("add {} {}".format(target, entry) for entry in entries)
     selectors = [
         "-p", "tcp", "-m", "multiport", "--dports",
         ",".join(str(p) for p in policy["ports"]),
@@ -108,7 +114,10 @@ def commands(policy, version, suffix):
     rules = []
     for interface in policy["interfaces"]:
         prefix = ["-i", interface] + selectors + ["-m", "conntrack", "--ctstate", "NEW"]
-        rules.append(prefix + ["-m", "set", "!", "--match-set", target, "src", "-j", "DROP"])
+        if target:
+            rules.append(prefix + ["-m", "set", "!", "--match-set", target, "src", "-j", "DROP"])
+        if not policy["ddos_enabled"]:
+            continue
         syn = prefix + ["--syn"]
         rules.append(syn + [
             "-m", "connlimit", "--connlimit-above", str(policy["connections_per_ip"]),
@@ -154,6 +163,11 @@ def managed_chains(version, hooks):
     return chains
 
 
+def destroy_set_if_present(target):
+    if shutil.which("ipset") and target in output(["ipset", "list", "-name"]).splitlines():
+        run(["ipset", "destroy", target])
+
+
 def remove_hooks(version, hooks):
     binary = "iptables" if version == 4 else "ip6tables"
     base = [binary, "-w", "-t", "mangle"]
@@ -163,7 +177,7 @@ def remove_hooks(version, hooks):
     for chain, target in chains.items():
         run(base + ["-F", chain])
         run(base + ["-X", chain])
-        run(["ipset", "destroy", target])
+        destroy_set_if_present(target)
 
 
 def apply(policy, state_file):
@@ -173,19 +187,23 @@ def apply(policy, state_file):
     attached = []
     detached = []
     suffix = uuid.uuid4().hex[:10]
+    enabled = policy["country_enabled"] or policy["ddos_enabled"]
     try:
         if state_file.exists():
             saved = validate(json.loads(state_file.read_text()))
-            for version in (4, 6):
-                key = "ipv{}_cidrs".format(version)
-                if len(policy[key]) < len(saved[key]) * policy["min_update_ratio"]:
-                    raise ValueError("{} shrank below the configured update ratio".format(key))
+            if policy["country_enabled"] and saved["country_enabled"]:
+                for version in (4, 6):
+                    key = "ipv{}_cidrs".format(version)
+                    if len(policy[key]) < len(saved[key]) * policy["min_update_ratio"]:
+                        raise ValueError("{} shrank below the configured update ratio".format(key))
             if saved == policy:
                 complete = True
                 for version in (4, 6):
                     binary = "iptables" if version == 4 else "ip6tables"
                     hooks = old_hooks(binary)
-                    if len(hooks) != 1:
+                    if not enabled and not hooks:
+                        continue
+                    if not enabled or len(hooks) != 1:
                         complete = False
                         break
                     chain = hooks[0][hooks[0].index("-j") + 1]
@@ -195,25 +213,31 @@ def apply(policy, state_file):
                         break
                     try:
                         output([binary, "-w", "-t", "mangle", "-S", chain])
-                        output(["ipset", "list", "{}{}_{}".format(SET_PREFIX, version, match.group(1))])
+                        if policy["country_enabled"]:
+                            output(["ipset", "list", "{}{}_{}".format(SET_PREFIX, version, match.group(1))])
                     except subprocess.CalledProcessError:
                         complete = False
                         break
                 if complete:
                     return False
         for version in (4, 6):
-            base, chain, target, restore, rules, hook = commands(policy, version, suffix)
-            previous[version] = old_hooks(base[0])
+            binary = "iptables" if version == 4 else "ip6tables"
+            previous[version] = old_hooks(binary)
             old_chains[version] = managed_chains(version, previous[version])
+            if not enabled:
+                continue
+            base, chain, target, restore, rules, hook = commands(policy, version, suffix)
             created.append((base, chain, target))
-            run(["ipset", "restore"], "\n".join(restore) + "\n")
+            if target:
+                run(["ipset", "restore"], "\n".join(restore) + "\n")
             run(base + ["-N", chain])
             for rule in rules:
                 run(base + ["-A", chain] + rule)
-        for version in (4, 6):
-            base, chain, target, restore, rules, hook = commands(policy, version, suffix)
-            run(base + ["-I", "PREROUTING", "1"] + hook)
-            attached.append((base, hook))
+        if enabled:
+            for version in (4, 6):
+                base, _, _, _, _, hook = commands(policy, version, suffix)
+                run(base + ["-I", "PREROUTING", "1"] + hook)
+                attached.append((base, hook))
         for version in (4, 6):
             binary = "iptables" if version == 4 else "ip6tables"
             base = [binary, "-w", "-t", "mangle"]
@@ -232,10 +256,11 @@ def apply(policy, state_file):
                 run(base + ["-X", chain])
             except subprocess.CalledProcessError:
                 pass
-            try:
-                run(["ipset", "destroy", target])
-            except subprocess.CalledProcessError:
-                pass
+            if target:
+                try:
+                    run(["ipset", "destroy", target])
+                except subprocess.CalledProcessError:
+                    pass
         raise
     for version in (4, 6):
         binary = "iptables" if version == 4 else "ip6tables"
@@ -244,7 +269,7 @@ def apply(policy, state_file):
             try:
                 run(base + ["-F", chain])
                 run(base + ["-X", chain])
-                run(["ipset", "destroy", target])
+                destroy_set_if_present(target)
             except subprocess.CalledProcessError as error:
                 print("web-access-guard: unable to clean old chain: {}".format(error), file=sys.stderr)
     return True

@@ -28,6 +28,34 @@ expireSeconds: "900"
 ipWhiteList: []
 pwAvailableDays: 0
 
+# Web アクセス制限（全ステージ共通。検証後、対象ステージで明示的に有効化）
+# TCP のみを制限する。Socket Warp の UDP 443 は対象外。
+hive_web_access_guard_interfaces: [eth0]
+hive_web_access_guard_ports: [80, 443]
+
+# 日本国外からのアクセス制限
+hive_web_access_guard_country_enabled: false
+# 日本向け CIDR ファイルの mother 環境上のパス（IPv4/IPv6 とも必須）
+# 例示パス。実データを配置してから有効化する。
+hive_web_access_guard_ipv4_cidrs_file: /etc/hive/geoip/jp-ipv4.cidrs
+hive_web_access_guard_ipv6_cidrs_file: /etc/hive/geoip/jp-ipv6.cidrs
+hive_web_access_guard_ipv4_min_networks: 1
+hive_web_access_guard_ipv6_min_networks: 1
+hive_web_access_guard_min_update_ratio: 0.8
+# DDoS 緩和（ホストの接続制限と Nginx の補助制限）
+hive_web_access_guard_ddos_enabled: false
+# 接続制限は仮値。共有 NAT や WebSocket の利用状況に応じて調整する。
+hive_web_access_guard_new_connections_per_second: 20
+hive_web_access_guard_new_connections_burst: 40
+hive_web_access_guard_connections_per_ip: 100
+
+# Nginx のインスタンス全体に適用する補助制限（値は仮値）
+hive_nginx_web_guard_requests_per_second: 200
+hive_nginx_web_guard_request_burst: 400
+hive_nginx_web_guard_connections: 1000
+hive_nginx_web_guard_header_timeout_seconds: 30
+hive_nginx_web_guard_body_timeout_seconds: 30
+
 virus_scan_enabled: "true"
 
 # DRBD 関連設定
