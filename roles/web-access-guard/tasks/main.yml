@@ -1,0 +1,90 @@
+---
+- name: Check that the web access guard has explicit inputs
+  assert:
+    that:
+      - hive_web_access_guard_interfaces | length > 0
+      - hive_web_access_guard_ports | length > 0
+      - hive_web_access_guard_ipv4_cidrs_file | length > 0
+      - hive_web_access_guard_ipv6_cidrs_file | length > 0
+
+- name: Check that firewall services are already active
+  command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ item }}"
+  loop:
+    - iptables.service
+    - ip6tables.service
+  changed_when: false
+
+- name: Install ipset
+  yum:
+    name: ipset
+    state: present
+
+- name: Install web access guard
+  copy:
+    src: web_access_guard.py
+    dest: /usr/local/sbin/hive-web-access-guard
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Prepare web access guard state directory
+  file:
+    path: /var/lib/hive-web-access-guard
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Stage candidate policy
+  template:
+    src: policy.json.j2
+    dest: /var/lib/hive-web-access-guard/candidate.json
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Apply validated web access policy
+  command:
+    argv:
+      - /usr/local/sbin/hive-web-access-guard
+      - --config
+      - /var/lib/hive-web-access-guard/candidate.json
+      - --state
+      - /var/lib/hive-web-access-guard/last-good.json
+  register: hive_web_access_guard_apply
+  changed_when: hive_web_access_guard_apply.stdout | trim == 'changed'
+
+- name: Install boot restore service
+  copy:
+    src: hive-web-access-guard.service
+    dest: /etc/systemd/system/hive-web-access-guard.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Prepare Docker service drop-in directory
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Require the restored policy before starting Docker
+  copy:
+    src: docker-web-access-guard.conf
+    dest: /etc/systemd/system/docker.service.d/web-access-guard.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable the boot restore service
+  systemd:
+    name: hive-web-access-guard.service
+    daemon_reload: true
+    enabled: true
+    state: started

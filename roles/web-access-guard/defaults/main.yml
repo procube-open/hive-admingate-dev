@@ -1,0 +1,11 @@
+---
+hive_web_access_guard_interfaces: []
+hive_web_access_guard_ports: []
+hive_web_access_guard_ipv4_cidrs_file: ""
+hive_web_access_guard_ipv6_cidrs_file: ""
+hive_web_access_guard_ipv4_min_networks: 1
+hive_web_access_guard_ipv6_min_networks: 1
+hive_web_access_guard_min_update_ratio: 0.8
+hive_web_access_guard_new_connections_per_second: 20
+hive_web_access_guard_new_connections_burst: 40
+hive_web_access_guard_connections_per_ip: 100

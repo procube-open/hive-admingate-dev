@@ -1,0 +1,12 @@
+map $host $hive_web_access_limit_key {
+    default "web";
+}
+
+limit_req_zone $hive_web_access_limit_key zone=hive_web_rate:10m rate={{ hive_nginx_web_guard_requests_per_second }}r/s;
+limit_conn_zone $hive_web_access_limit_key zone=hive_web_connections:10m;
+limit_req zone=hive_web_rate burst={{ hive_nginx_web_guard_request_burst }} nodelay;
+limit_conn hive_web_connections {{ hive_nginx_web_guard_connections }};
+limit_req_status 429;
+limit_conn_status 429;
+client_header_timeout {{ hive_nginx_web_guard_header_timeout_seconds }}s;
+client_body_timeout {{ hive_nginx_web_guard_body_timeout_seconds }}s;

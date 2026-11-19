@@ -3,11 +3,106 @@
   file:
     path: "/etc/nginx/templates"
     state: directory
+
+- name: Check existing web access guard template
+  stat:
+    path: /etc/nginx/templates/hive-web-access-guard.conf.template
+  register: hive_nginx_web_guard_previous
+
+- name: Check existing rendered web access guard configuration
+  stat:
+    path: /etc/nginx/conf.d/hive-web-access-guard.conf
+  register: hive_nginx_web_guard_previous_conf
+
+- name: Configure guarded templates
+  when: hive_nginx_web_guard_enabled | bool or hive_nginx_web_guard_previous.stat.exists or hive_nginx_web_guard_previous_conf.stat.exists
+  block:
+    - name: Validate web access guard limits
+      assert:
+        that:
+          - hive_nginx_web_guard_requests_per_second | int > 0
+          - hive_nginx_web_guard_request_burst | int > 0
+          - hive_nginx_web_guard_connections | int > 0
+          - hive_nginx_web_guard_header_timeout_seconds | int > 0
+          - hive_nginx_web_guard_body_timeout_seconds | int > 0
+      when: hive_nginx_web_guard_enabled | bool
+
+    - name: Install guarded template application
+      copy:
+        src: apply-web-guard-templates.py
+        dest: /usr/local/bin/apply-web-guard-templates
+        mode: '0755'
+
+    - name: Create temporary template directory
+      tempfile:
+        state: directory
+        prefix: hive-nginx-guard-
+      register: hive_nginx_candidate
+
+    - name: Prepare and apply candidate templates
+      block:
+        - name: Copy existing templates into candidate directory
+          command:
+            argv:
+              - cp
+              - -a
+              - /etc/nginx/templates/.
+              - "{{ hive_nginx_candidate.path }}/"
+          changed_when: false
+
+        - name: Template candidate web access guard configuration
+          template:
+            src: web-access-guard.conf.template.j2
+            dest: "{{ hive_nginx_candidate.path }}/hive-web-access-guard.conf.template"
+          when: hive_nginx_web_guard_enabled | bool
+          changed_when: false
+
+        - name: Remove disabled guard from candidate
+          file:
+            path: "{{ hive_nginx_candidate.path }}/hive-web-access-guard.conf.template"
+            state: absent
+          when: not hive_nginx_web_guard_enabled | bool
+          changed_when: false
+
+        - name: Template candidate resolver configuration
+          template:
+            src: resolver.conf.template.j2
+            dest: "{{ hive_nginx_candidate.path }}/resolver.conf.template"
+          changed_when: false
+
+        - name: Template candidate service configuration
+          template:
+            src: service.conf.template.j2
+            dest: "{{ hive_nginx_candidate.path }}/{{ labels.published_name }}.conf.template"
+          loop: "{{ groups['services'] | intersect(groups[hive_stage]) }}"
+          vars:
+            labels: "{{ hostvars[item].hive_labels | default({}) }}"
+            service_name: "{{ item }}"
+          when: labels.published_name is defined and labels.webgate is defined
+          changed_when: false
+
+        - name: Validate and apply candidate templates
+          command:
+            argv:
+              - /usr/local/bin/apply-web-guard-templates
+              - "{{ 'enable' if hive_nginx_web_guard_enabled | bool else 'disable' }}"
+              - "{{ hive_nginx_candidate.path }}"
+          register: hive_nginx_apply
+          changed_when: "'hive-web-guard: changed' in hive_nginx_apply.stdout"
+      always:
+        - name: Remove temporary template directory
+          file:
+            path: "{{ hive_nginx_candidate.path }}"
+            state: absent
+          changed_when: false
+
 - name: Template resolver configuration
   template:
     src: "resolver.conf.template.j2"
     dest: "/etc/nginx/templates/resolver.conf.template"
+  when: not (hive_nginx_web_guard_enabled | bool or hive_nginx_web_guard_previous.stat.exists or hive_nginx_web_guard_previous_conf.stat.exists)
   notify: apply_template
+
 - name: Template service configuration
   template:
     src: "service.conf.template.j2"
@@ -16,5 +111,7 @@
   vars:
     labels: "{{ hostvars[item].hive_labels | default({}) }}"
     service_name: "{{ item }}"
-  when: labels.published_name is defined and labels.webgate is defined
+  when:
+    - not (hive_nginx_web_guard_enabled | bool or hive_nginx_web_guard_previous.stat.exists or hive_nginx_web_guard_previous_conf.stat.exists)
+    - labels.published_name is defined and labels.webgate is defined
   notify: apply_template

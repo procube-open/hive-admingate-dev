@@ -1,0 +1,14 @@
+[Unit]
+Description=Restore Hive web access policy
+Requires=iptables.service ip6tables.service
+After=iptables.service ip6tables.service
+Before=docker.service
+PartOf=iptables.service ip6tables.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/hive-web-access-guard --config /var/lib/hive-web-access-guard/last-good.json --state /var/lib/hive-web-access-guard/last-good.json
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
