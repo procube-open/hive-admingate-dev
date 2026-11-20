@@ -32,11 +32,7 @@ services:
 
   # SeaweedFS Volume: Data storage server
   seaweedfs-volume:
-    image:
-      from: "{{ seaweedfs_image }}"
-      roles:
-        - python-aptk
-        - seaweedfs-volume-backup
+    image: "{{ seaweedfs_image }}"
     environment:
       AWS_ACCESS_KEY_ID: "{{ seaweedfs_aws_access_key_id }}"
       AWS_SECRET_ACCESS_KEY: "{{ seaweedfs_aws_secret_access_key }}"
@@ -57,16 +53,6 @@ services:
         drbd:
           size: 5G
           fstype: xfs
-    backup_scripts:
-      # Restore後にSeaweedFS master/volumeサービスの再起動が必要。
-      - name: seaweedfs-volume-data
-        backup_command: seaweedfs-volume-backup
-        restore_file: /tmp/seaweedfs-volume-restore.tar.gz
-        restore_command: >-
-          find /data -mindepth 1 -maxdepth 1 -exec rm -rf {} + &&
-          tar xzf /tmp/seaweedfs-volume-restore.tar.gz -C /data
-        ext: tar.gz
-        cleanup_days_before: 3
 
   # SeaweedFS Filer (API operations)
   seaweedfs-filer:
