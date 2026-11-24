@@ -998,8 +998,9 @@ phases_data:
                 -   displayName: 利用者
                     value: IDM_USER
             -   allowAnotherValue: false
-                description: ユーザのパスワード
-                displayName: 初期パスワード
+                derivation: this().AESPassword
+                description: KeyCloakに転送する用のユーザのパスワード
+                displayName: 初期パスワード（KeyCloak転送用）
                 encryption: ARGON2
                 isArray: false
                 name: userPassword
@@ -1009,11 +1010,42 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
+                description: ユーザのパスワード
+                displayName: 初期パスワード
+                encryption: AES
+                isArray: false
+                name: AESPassword
+                outputLdapSchema: false
+                propagations:
+                -   targetProperty: userPassword
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 初期化メール送信フラグ
+                isArray: false
+                name: sendInitMailFlag
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: パスワード有効期限
+                isArray: false
+                name: passwordExpireDate
+                outputLdapSchema: false
+                required: false
+                type: datetime
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
                 displayName: チーム
                 isArray: true
                 name: team
                 outputLdapSchema: false
-                required: false
+                required: true
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
@@ -3322,6 +3354,24 @@ phases_data:
             displayName: ユーザガジェット
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
+            gadgetCommandlet:
+            -   autoCommit: false
+                backToDetail: false
+                commandlet:
+                -   derivation: generatePwd(12)
+                    targetProperty: AESPassword
+                -   derivation: 'false'
+                    targetProperty: sendInitMailFlag
+                -   derivation: Date(Date().getTime() + 2*24*60*60*1000)
+                    targetProperty: passwordExpireDate
+                displayName: パスワード初期化
+                goToEdit: false
+                multiSelect: true
+                name: initPasswordButton
+                onDetailView: true
+                onEditView: false
+                onListView: true
+                showConfirmModal: false
             interfaceName: userEditorInterface
             isSingleton: false
             name: userEditor
@@ -3359,16 +3409,6 @@ phases_data:
                 hideOnShow: false
                 incrementalSearchFlag: false
                 name: idmRole
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: userPassword
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -3839,6 +3879,18 @@ phases_data:
             name: enumWorkIF
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
+        -   accessLevel: readWrite
+            className: user
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: パスワード期限切れIF
+            filterDerivation: '{passwordExpireDate : {"$lt" : Date(), "$ne" : null}}'
+            name: expiredPasswordIF
+            properties:
+            - passwordExpireDate
+            - accountLock
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
         -   accessLevel: readOnly
             className: work
             database: Sandbox
@@ -3859,6 +3911,22 @@ phases_data:
             displayName: IAM Policy編集インターフェース
             name: iamPolicyEditorInterface
             useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readWrite
+            className: user
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: 初期パスワードメール送信IF
+            filter: '{"sendInitMailFlag": false}'
+            name: initPasswordSendMailIF
+            properties:
+            - uid
+            - sn
+            - cn
+            - sendInitMailFlag
+            - email
+            - AESPassword
+            useAESDecryptedResponse: true
             useCustomBackendDatabase: false
         -   ACEs:
             -   allow: true
@@ -4117,6 +4185,41 @@ phases_data:
             - sn
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: swConnector
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: socket warp connector編集IF
+            name: swConnectorEditIF
+            readOnlyProperties:
+            - certificate
+            - certIss
+            - certExp
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readOnly
+            className: swConnector
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: swConnector取得IF
+            name: swConnectorGetIF
+            properties:
+            - uid
+            - password
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readWrite
+            className: swConnector
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: swConnector更新IF
+            name: swConnectorPutIF
+            properties:
+            - certificate
+            - certIss
+            - certExp
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
         -   accessLevel: readWrite
             className: user
             database: Sandbox
@@ -4127,6 +4230,7 @@ phases_data:
             properties:
             - loginDateTime
             - userPassword
+            - initPasswordFlag
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
@@ -4144,6 +4248,19 @@ phases_data:
             deleteAsUpdate: false
             description: ユーザ情報を編集するインタフェース
             displayName: ユーザ情報編集インタフェース
+            initializer:
+            -   derivation: generatePwd(12)
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: AESPassword
+            -   derivation: 'false'
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: sendInitMailFlag
+            -   derivation: Date(Date().getTime() + 2*24*60*60*1000)
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: passwordExpireDate
             name: userEditorInterface
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
@@ -4217,6 +4334,8 @@ phases_data:
                     propertyName: cn
                 -   modifiedOnly: false
                     propertyName: idmRole
+                -   modifiedOnly: false
+                    propertyName: accountLock
                 -   modifiedOnly: false
                     propertyName: email
                 -   modifiedOnly: false
@@ -4297,21 +4416,33 @@ phases_data:
             - IDM_USER_ADMIN
             clockDaemons:
             -   clockType: interval
-                day: 30
                 description: 作業申請の承認要求メール送信のクロックデーモン
                 displayName: 作業申請の承認要求メール送信
                 intervalSeconds: 60
                 name: approvalRequestDaemon
                 updateBatch:
-                - sendApprovalRequestMail
+                - requiredApplovalWorkMail
             -   clockType: interval
-                day: 30
                 description: 作業申請の承認完了メール送信のクロックデーモン
                 displayName: 作業申請の承認完了メール送信
                 intervalSeconds: 60
                 name: approveCompletionDaemon
                 updateBatch:
-                - sendApproveCompletionMail
+                - approvalCompletionMailIF
+            -   clockType: interval
+                description: パスワード初期化メール送信のクロックデーモン
+                displayName: パスワード初期化デーモン
+                intervalSeconds: 60
+                name: initPasswordDaemon
+                updateBatch:
+                - initPasswordSendMail
+            -   clockType: daily
+                displayName: パスワード期限切れデーモン
+                hour: 0
+                minutes: 0
+                name: expiredPasswordDaemon
+                updateBatch:
+                - expiredPassword
             csvApiFileEncoding: UTF-8
             name: SystemSetting
             passphrase: P@ssw0rd123
@@ -4361,6 +4492,9 @@ phases_data:
                 sidebarName: workflowSidebar
                 type: sidebar
             -   align: right
+                logoutUrl: https://idm3.{{ domain }}/logout
+                myPageUrl: https://idp.{{ domain }}/realms/webgate/account
+                openInNewTab: false
                 priority: 10
                 type: username
             -   align: right
@@ -4386,27 +4520,21 @@ phases_data:
                 priority: 1
                 type: logo
             -   align: left
-                displayName: ベース設定
-                priority: 10
-                sidebarName: baseSidebar
-                type: sidebar
-            -   align: left
-                displayName: レイアウト設定
-                priority: 20
-                sidebarName: layoutSidebar
-                type: sidebar
-            -   align: left
                 displayName: 認証設定
+                openInNewTab: false
                 priority: 30
-                sidebarName: userSidebar
+                sidebarName: leaderUserSidebar
                 type: sidebar
             -   align: left
                 displayName: ワークフロー設定
                 openInNewTab: false
                 priority: 40
-                sidebarName: workflowSidebar
+                sidebarName: leaderWorkflowSidebar
                 type: sidebar
             -   align: right
+                logoutUrl: https://idm3.{{ domain }}/logout
+                myPageUrl: https://idp.{{ domain }}/realms/webgate/account/?referrer=webgate-web
+                openInNewTab: false
                 priority: 10
                 type: username
             -   align: right
@@ -4435,6 +4563,9 @@ phases_data:
                 sidebarName: workflowSidebar
                 type: sidebar
             -   align: right
+                logoutUrl: https://idm3.{{ domain }}/logout
+                myPageUrl: https://idp.{{ domain }}/realms/webgate/account/?referrer=webgate-web
+                openInNewTab: false
                 priority: 10
                 type: username
             -   align: right
@@ -4452,27 +4583,15 @@ phases_data:
                 priority: 1
                 type: logo
             -   align: left
-                displayName: ベース設定
-                priority: 10
-                sidebarName: baseSidebar
-                type: sidebar
-            -   align: left
-                displayName: レイアウト設定
-                priority: 20
-                sidebarName: layoutSidebar
-                type: sidebar
-            -   align: left
-                displayName: 認証設定
-                priority: 30
-                sidebarName: userSidebar
-                type: sidebar
-            -   align: left
                 displayName: ワークフロー設定
                 openInNewTab: false
                 priority: 40
-                sidebarName: workflowSidebar
+                sidebarName: userWorkflowSidebar
                 type: sidebar
             -   align: right
+                logoutUrl: https://idm3.{{ domain }}/logout
+                myPageUrl: https://idp.{{ domain }}/realms/webgate/account/?referrer=webgate-web
+                openInNewTab: false
                 priority: 10
                 type: username
             -   align: right
@@ -4572,17 +4691,54 @@ phases_data:
             name: layoutSidebar
         -   children:
             -   displayName: ユーザ編集
+                gadgetName: sameTeamUser_g
+                type: gadget
+            name: leaderUserSidebar
+        -   children:
+            -   displayName: 作業申請
+                gadgetName: applicationWork_g
+                type: gadget
+            -   displayName: 要承認作業
+                gadgetName: requiredApprovalWork_g
+                type: gadget
+            -   displayName: 承認済み作業
+                gadgetName: approvalWork_g
+                type: gadget
+            -   children:
+                -   displayName: 接続先編集
+                    gadgetName: connection_g
+                    type: gadget
+                -   displayName: 接続先グループ編集
+                    gadgetName: connectionGroup_g
+                    type: gadget
+                displayName: 接続先編集
+                type: parent
+            name: leaderWorkflowSidebar
+        -   children:
+            -   displayName: ユーザ編集
                 gadgetName: userEditor
                 type: gadget
             -   displayName: チーム編集
                 gadgetName: userGroup_g
                 type: gadget
-            -   displayName: ログアウト
-                icon: M30 10 L30 15 L40 15 L40 35 L30 35 L30 40 L45 40 L45 10 Z M20
-                    18 L25 22.5 L18 22.5 L18 27.5 L25 27.5 L20 32 L5 25 Z
-                redirectUrl: https://idm3.{{ domain }}/logout
-                type: link
             name: userSidebar
+        -   children:
+            -   displayName: 作業申請
+                gadgetName: applicationWork_g
+                type: gadget
+            -   displayName: 承認済み作業
+                gadgetName: approvalWork_g
+                type: gadget
+            -   children:
+                -   displayName: 接続先編集
+                    gadgetName: connection_g
+                    type: gadget
+                -   displayName: 接続先グループ編集
+                    gadgetName: connectionGroup_g
+                    type: gadget
+                displayName: 接続先編集
+                type: parent
+            name: userWorkflowSidebar
         -   children:
             -   displayName: 作業申請
                 gadgetName: applicationWork_g
@@ -4614,6 +4770,7 @@ phases_data:
             email: admin@{{ domain }}
             idmRole: IDM_ADMIN
             loginDateTime: '2026-06-26T08:18:46.820Z'
+            sendInitMailFlag: true
             sn: idm
             team:
             - administorators

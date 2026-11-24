@@ -2,7 +2,10 @@
 plugin: hive_services
 services:
   idp:
-    image: ghcr.io/procube-open/nsag-keycloak-cr
+    image: 
+      from: ghcr.io/procube-open/nsag-keycloak-cr
+      roles:
+        - keycloak
     # image: procube/keycloak-passwordless:0.0.21-rc.6
     command: ["start", "--import-realm"]
     ports:
@@ -93,6 +96,9 @@ services:
       OIDC_USER_CLAIM: "username"
       OIDC_ROLE1_CLAIM: "IDMRole"
       OIDC_ROLE2_CLAIM: "GrafanaRole"
+      # ログアウト後の "See you again." の代わりにログイン画面へ戻す
+      # (遷移先の named location は oidc-init の vhost テンプレートで定義)
+      OIDC_POSTLOGOUT_CONTENT: "@postlogout_content"
     volumes:
       - source: oidc_templates
         target: /etc/nginx/templates

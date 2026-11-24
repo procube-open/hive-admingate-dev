@@ -26,7 +26,7 @@
         firstName: "{{ cn }}"
         lastName: "{{ sn }}"
         email: "{{ email }}"
-        enabled: true
+        enabled: "{{ not accountLock | default(false) | bool}}"
         emailVerified: false
         required_actions: "{{ 
           ['UPDATE_PASSWORD', 'CONFIGURE_TOTP', 'sync_data_config'] if userPassword is defined and userPassword != '' 
@@ -58,7 +58,7 @@
         firstName: "{{ cn }}"
         lastName: "{{ sn }}"
         email: "{{ email }}"
-        enabled: true
+        enabled: "{{ not accountLock | default(false) | bool }}"
         emailVerified: false
         required_actions: "{{ 
           ['UPDATE_PASSWORD', 'CONFIGURE_TOTP', 'sync_data_config'] if userPassword is defined and userPassword != '' 
