@@ -4520,12 +4520,6 @@ phases_data:
                 priority: 1
                 type: logo
             -   align: left
-                displayName: 認証設定
-                openInNewTab: false
-                priority: 30
-                sidebarName: leaderUserSidebar
-                type: sidebar
-            -   align: left
                 displayName: ワークフロー設定
                 openInNewTab: false
                 priority: 40
