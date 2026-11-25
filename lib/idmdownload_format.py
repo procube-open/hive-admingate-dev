@@ -73,6 +73,13 @@ class IDMDownloadFormat(AnsibleModule):
     return result
     
   def replace_value(self, value, targets, changed_list, stack):
+    for target in targets:
+      if (len(stack) == 5 and stack[0] == 'phases_data'
+          and target.get('interface') == stack[2]
+          and target.get('property') == stack[4]):
+        changed_list.append(".".join(stack))
+        return '{{ ' + target['expression'] + ' }}'
+
     result = str(value)
     changed = False
     for target in targets:

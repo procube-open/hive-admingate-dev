@@ -4483,21 +4483,21 @@ phases_data:
             systemName: 特権ID管理システム
             traceFormula: false
         _sandboxUpdateBatch:
-        -   authPassword: {{ mail_server_auth_password }}
-            authUser: {{ mail_server_auth_user }}
+        -   authPassword: '{{ mail_server_auth_password }}'
+            authUser: '{{ mail_server_auth_user }}'
             autoUpdate:
             -   derivation: Date()
                 onDeleteOnly: false
                 onUpdate: false
                 targetProperty: approveCompletionDate
-            disableStartTls: {{ mail_server_start_tls }}
+            disableStartTls: '{{ mail_server_start_tls }}'
             displayName: 承認完了メール送信
             doAggregate: false
             interfaceName: approvalCompletionMailIF
-            mailFrom: {{ mail_server_auth_user }}
-            mailPort: {{ mail_server_port }}
-            mailSecure: {{ mail_server_secure }}
-            mailServer: {{ mail_server_host }}
+            mailFrom: '{{ mail_server_auth_user }}'
+            mailPort: '{{ mail_server_port }}'
+            mailSecure: '{{ mail_server_secure }}'
+            mailServer: '{{ mail_server_host }}'
             mailSubject: 【Admin Gate】作業申請が承認されました
             mailTemplate: "Admin Gate であなたが申請した作業申請が承認されました。\r\n以下のリンクから作業を開始してください。\r\n\r\nhttps://admingate-core.{{
                 domain }}/works/<%=id %>/targets?pageSize=10&currentPage=1"
@@ -4508,50 +4508,50 @@ phases_data:
                 onDeleteOnly: false
                 onUpdate: false
                 targetProperty: accountLock
-            disableStartTls: {{ mail_server_start_tls }}
+            disableStartTls: '{{ mail_server_start_tls }}'
             displayName: パスワード期限切れ
             doAggregate: false
             interfaceName: expiredPasswordIF
-            mailSecure: {{ mail_server_secure }}
+            mailSecure: '{{ mail_server_secure }}'
             name: expiredPassword
-        -   authPassword: {{ mail_server_auth_password }}
-            authUser: {{ mail_server_auth_user }}
+        -   authPassword: '{{ mail_server_auth_password }}'
+            authUser: '{{ mail_server_auth_user }}'
             autoUpdate:
             -   derivation: 'true'
                 onDeleteOnly: false
                 onUpdate: false
                 targetProperty: sendInitMailFlag
             description: パスワード初期化時に初期パスワードの通知メールを送信する
-            disableStartTls: {{ mail_server_start_tls }}
+            disableStartTls: '{{ mail_server_start_tls }}'
             displayName: 初期パスワードメール送信
             doAggregate: false
             interfaceName: initPasswordSendMailIF
-            mailFrom: {{ mail_server_auth_user }}
-            mailPort: {{ mail_server_port }}
-            mailSecure: {{ mail_server_secure }}
-            mailServer: {{ mail_server_host }}
+            mailFrom: '{{ mail_server_auth_user }}'
+            mailPort: '{{ mail_server_port }}'
+            mailSecure: '{{ mail_server_secure }}'
+            mailServer: '{{ mail_server_host }}'
             mailSubject: 【Admin Gate】初期パスワード発行のお知らせ
             mailTemplate: "<%= sn %> <%=cn %> 様\r\n\r\nAdmin Gate にログインするための初期パスワードが発行されました。\r\nアカウント情報は以下の通りです。\r\n\r\nユーザID：<%=
                 uid %>\r\nパスワード：<%= AESPassword %>\r\n\r\n以下のURLからログインが可能です。\r\nhttps://idm3.{{
                 domain }}/ja"
             mailTo: <%= email %>
             name: initPasswordSendMail
-        -   authPassword: {{ mail_server_auth_password }}
-            authUser: {{ mail_server_auth_user }}
+        -   authPassword: '{{ mail_server_auth_password }}'
+            authUser: '{{ mail_server_auth_user }}'
             autoUpdate:
             -   derivation: Date()
                 onDeleteOnly: false
                 onUpdate: false
                 targetProperty: approveRequestDatetime
             description: 承認要求のメールを送信する自動更新バッチ
-            disableStartTls: {{ mail_server_start_tls }}
+            disableStartTls: '{{ mail_server_start_tls }}'
             displayName: 要承認メール送信
             doAggregate: false
             interfaceName: requiredApprovalWorkMailIF
-            mailFrom: {{ mail_server_auth_user }}
-            mailPort: {{ mail_server_port }}
-            mailSecure: {{ mail_server_secure }}
-            mailServer: {{ mail_server_host }}
+            mailFrom: '{{ mail_server_auth_user }}'
+            mailPort: '{{ mail_server_port }}'
+            mailSecure: '{{ mail_server_secure }}'
+            mailServer: '{{ mail_server_host }}'
             mailSubject: 【Admin Gate】作業申請が申請されました
             mailTemplate: "Admin Gate の作業申請が申請されました。\r\nあなたが承認者に含まれています。\r\n以下のリンクから作業を承認してください。\r\n\r\nhttps://idm3.{{
                 domain }}/ja/gadgets/requiredApprovalWork_g/show/<%=id %>"
