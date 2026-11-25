@@ -34,6 +34,14 @@ virus_scan_enabled: "true"
 # hive_kernel_version: "6.12.0-211.20.1.el10_2.x86_64"
 # hive_drbd_download_url: "https://github.com/procube-open/drbd9-rpm/releases/download/Latests/drbd-9.2.15-v9.29.0-6.12.0-211.20.1.el10_2.x86_64.tar.gz"
 
+# メールサーバ関連情報
+mail_server_auth_user: "example@sample.jp"
+mail_server_auth_password: "secret"
+mail_server_host: "example.com"
+mail_server_port: 587
+mail_server_secure: false
+mail_server_start_tls: false
+
 # MongoDB から復元するデータの定義
 restore_sequence_mongodb:
 - name: definitions
@@ -47,6 +55,8 @@ restore_sequence_mongodb:
   - name: _sandboxGadgets
     key_property: name
   - name: _sandboxProvSettings
+    key_property: name
+  - name: _sandboxUpdateBatch
     key_property: name
 - name: layouts
   interfaces:

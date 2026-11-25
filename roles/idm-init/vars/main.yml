@@ -1587,7 +1587,7 @@ phases_data:
             disableMultiDelete: true
             disableSuspension: false
             disableUpdate: false
-            displayName: 作業申請ガジェット
+            displayName: 作業申請
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: false
             gadgetCommandlet:
@@ -1925,7 +1925,7 @@ phases_data:
             disableMultiDelete: true
             disableSuspension: true
             disableUpdate: true
-            displayName: 承認済み作業ガジェット
+            displayName: 承認済み作業
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: false
             interfaceCommandlet:
@@ -2400,7 +2400,7 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: 接続先グループガジェット
+            displayName: 接続先グループ管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             interfaceName: connectionGroupEditorInterface
@@ -2457,7 +2457,7 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: 接続仕様ガジェット
+            displayName: 接続仕様管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             interfaceName: connectionSpecificationEditIF
@@ -2693,7 +2693,7 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: 接続先ガジェット
+            displayName: 接続先管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             gadgetCommandlet:
@@ -2915,11 +2915,11 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: 要承認作業ガジェット
+            displayName: 要承認作業
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: false
             gadgetCommandlet:
-            -   autoCommit: false
+            -   autoCommit: true
                 backToDetail: false
                 commandlet:
                 -   derivation: user()
@@ -2928,6 +2928,7 @@ phases_data:
                     targetProperty: approvedDatetime
                 -   derivation: '"approved"'
                     targetProperty: status
+                confirmComment: この作業を承認しますか？
                 displayName: 承認
                 goToEdit: false
                 multiSelect: false
@@ -2935,12 +2936,13 @@ phases_data:
                 onDetailView: true
                 onEditView: false
                 onListView: false
-                showConfirmModal: false
-            -   autoCommit: false
+                showConfirmModal: true
+            -   autoCommit: true
                 backToDetail: false
                 commandlet:
                 -   derivation: '"rejected"'
                     targetProperty: status
+                confirmComment: この作業を却下しますか？
                 displayName: 却下
                 goToEdit: false
                 multiSelect: false
@@ -2948,11 +2950,13 @@ phases_data:
                 onDetailView: true
                 onEditView: false
                 onListView: false
-            -   autoCommit: false
+                showConfirmModal: true
+            -   autoCommit: true
                 backToDetail: false
                 commandlet:
                 -   derivation: '"sendBack"'
                     targetProperty: status
+                confirmComment: この作業を差し戻しますか？
                 displayName: 差し戻し
                 goToEdit: true
                 multiSelect: false
@@ -2960,6 +2964,7 @@ phases_data:
                 onDetailView: true
                 onEditView: false
                 onListView: false
+                showConfirmModal: true
             interfaceName: requiredApprovalWorkIF
             isSingleton: false
             name: requiredApprovalWork_g
@@ -3342,7 +3347,7 @@ phases_data:
             uploadCSV: false
             useDisplayNameHeader: false
             withHeader: false
-        -   autoCommit: false
+        -   autoCommit: true
             backToDetail: false
             className: user
             clonable: false
@@ -3351,7 +3356,7 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: ユーザガジェット
+            displayName: ユーザ管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             gadgetCommandlet:
@@ -3495,7 +3500,7 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: チームガジェット
+            displayName: チーム管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             interfaceCommandlet:
@@ -3892,6 +3897,17 @@ phases_data:
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   accessLevel: readOnly
+            className: _provRequest
+            database: System
+            deleteAsUpdate: false
+            displayName: 編集中プロビジョニング要求取得用IF
+            filter: '{"status":"editing", "database":"Sandbox", "creator":{"$nin":["IDM_UPDATEBATCH_mailForNewID","IDM_UPDATEBATCH_mailForNewAccount","IDM_UPDATEBATCH_mailForScepSecret","IDM_UPDATEBATCH_mailAgentForScepSecret","CSN_MANAGER_provAgents","CSN_MANAGER_provTags","CSN_MANAGER_provUsers","CSN_MANAGER_syncTags","CSN_MANAGER_syncUsers","CSN_MANAGER_provScep"]}}'
+            name: getEditingProvRequest
+            properties:
+            - id
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readOnly
             className: work
             database: Sandbox
             deleteAsUpdate: false
@@ -3918,6 +3934,8 @@ phases_data:
             deleteAsUpdate: false
             displayName: 初期パスワードメール送信IF
             filter: '{"sendInitMailFlag": false}'
+            filterDerivation: '(val1 = getResource("/IDManager/getEditingProvRequest"))
+                && val1.length > 0 ? {uid:null} : {uid:{"$ne":null}}'
             name: initPasswordSendMailIF
             properties:
             - uid
@@ -4464,6 +4482,81 @@ phases_data:
             systemIdIf: masterLinkageSystem
             systemName: 特権ID管理システム
             traceFormula: false
+        _sandboxUpdateBatch:
+        -   authPassword: {{ mail_server_auth_password }}
+            authUser: {{ mail_server_auth_user }}
+            autoUpdate:
+            -   derivation: Date()
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: approveCompletionDate
+            disableStartTls: {{ mail_server_start_tls }}
+            displayName: 承認完了メール送信
+            doAggregate: false
+            interfaceName: approvalCompletionMailIF
+            mailFrom: {{ mail_server_auth_user }}
+            mailPort: {{ mail_server_port }}
+            mailSecure: {{ mail_server_secure }}
+            mailServer: {{ mail_server_host }}
+            mailSubject: 【Admin Gate】作業申請が承認されました
+            mailTemplate: "Admin Gate であなたが申請した作業申請が承認されました。\r\n以下のリンクから作業を開始してください。\r\n\r\nhttps://admingate-core.{{
+                domain }}/works/<%=id %>/targets?pageSize=10&currentPage=1"
+            mailTo: <%=applicationMailList %>
+            name: approvalCompletionMailIF
+        -   autoUpdate:
+            -   derivation: 'true'
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: accountLock
+            disableStartTls: {{ mail_server_start_tls }}
+            displayName: パスワード期限切れ
+            doAggregate: false
+            interfaceName: expiredPasswordIF
+            mailSecure: {{ mail_server_secure }}
+            name: expiredPassword
+        -   authPassword: {{ mail_server_auth_password }}
+            authUser: {{ mail_server_auth_user }}
+            autoUpdate:
+            -   derivation: 'true'
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: sendInitMailFlag
+            description: パスワード初期化時に初期パスワードの通知メールを送信する
+            disableStartTls: {{ mail_server_start_tls }}
+            displayName: 初期パスワードメール送信
+            doAggregate: false
+            interfaceName: initPasswordSendMailIF
+            mailFrom: {{ mail_server_auth_user }}
+            mailPort: {{ mail_server_port }}
+            mailSecure: {{ mail_server_secure }}
+            mailServer: {{ mail_server_host }}
+            mailSubject: 【Admin Gate】初期パスワード発行のお知らせ
+            mailTemplate: "<%= sn %> <%=cn %> 様\r\n\r\nAdmin Gate にログインするための初期パスワードが発行されました。\r\nアカウント情報は以下の通りです。\r\n\r\nユーザID：<%=
+                uid %>\r\nパスワード：<%= AESPassword %>\r\n\r\n以下のURLからログインが可能です。\r\nhttps://idm3.{{
+                domain }}/ja"
+            mailTo: <%= email %>
+            name: initPasswordSendMail
+        -   authPassword: {{ mail_server_auth_password }}
+            authUser: {{ mail_server_auth_user }}
+            autoUpdate:
+            -   derivation: Date()
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: approveRequestDatetime
+            description: 承認要求のメールを送信する自動更新バッチ
+            disableStartTls: {{ mail_server_start_tls }}
+            displayName: 要承認メール送信
+            doAggregate: false
+            interfaceName: requiredApprovalWorkMailIF
+            mailFrom: {{ mail_server_auth_user }}
+            mailPort: {{ mail_server_port }}
+            mailSecure: {{ mail_server_secure }}
+            mailServer: {{ mail_server_host }}
+            mailSubject: 【Admin Gate】作業申請が申請されました
+            mailTemplate: "Admin Gate の作業申請が申請されました。\r\nあなたが承認者に含まれています。\r\n以下のリンクから作業を承認してください。\r\n\r\nhttps://idm3.{{
+                domain }}/ja/gadgets/requiredApprovalWork_g/show/<%=id %>"
+            mailTo: <%=approveMailList %>
+            name: requiredApplovalWorkMail
     layouts:
         _sandboxNavbar:
         -   component:
@@ -4506,6 +4599,12 @@ phases_data:
             -   align: right
                 priority: 40
                 type: reload
+            -   align: right
+                displayName: AdminGate
+                openInNewTab: true
+                priority: 50
+                type: link
+                url: https://admingate-core.{{ domain }}/dashboard
             name: adminNavbar
         -   component:
             -   align: right
@@ -4540,6 +4639,12 @@ phases_data:
             -   align: right
                 priority: 40
                 type: reload
+            -   align: right
+                displayName: AdminGate
+                openInNewTab: true
+                priority: 50
+                type: link
+                url: https://admingate-core.{{ domain }}/dashboard
             name: leaderNavbar
         -   component:
             -   align: left
@@ -4571,6 +4676,12 @@ phases_data:
             -   align: right
                 priority: 40
                 type: reload
+            -   align: right
+                displayName: AdminGate
+                openInNewTab: true
+                priority: 50
+                type: link
+                url: https://admingate-core.{{ domain }}/dashboard
             name: userAdminNavbar
         -   component:
             -   align: left
@@ -4597,6 +4708,12 @@ phases_data:
             -   align: right
                 priority: 40
                 type: reload
+            -   align: right
+                displayName: AdminGate
+                openInNewTab: true
+                priority: 50
+                type: link
+                url: https://admingate-core.{{ domain }}/dashboard
             name: userNavbar
         _sandboxRoles:
         -   httpHeader: HTTP_REMOTEGROUP
@@ -4684,7 +4801,7 @@ phases_data:
                 type: gadget
             name: layoutSidebar
         -   children:
-            -   displayName: ユーザ編集
+            -   displayName: ユーザ管理
                 gadgetName: sameTeamUser_g
                 type: gadget
             name: leaderUserSidebar
@@ -4699,20 +4816,20 @@ phases_data:
                 gadgetName: approvalWork_g
                 type: gadget
             -   children:
-                -   displayName: 接続先編集
+                -   displayName: 接続先管理
                     gadgetName: connection_g
                     type: gadget
-                -   displayName: 接続先グループ編集
+                -   displayName: 接続先グループ管理
                     gadgetName: connectionGroup_g
                     type: gadget
                 displayName: 接続先編集
                 type: parent
             name: leaderWorkflowSidebar
         -   children:
-            -   displayName: ユーザ編集
+            -   displayName: ユーザ管理
                 gadgetName: userEditor
                 type: gadget
-            -   displayName: チーム編集
+            -   displayName: チーム管理
                 gadgetName: userGroup_g
                 type: gadget
             name: userSidebar
@@ -4724,10 +4841,10 @@ phases_data:
                 gadgetName: approvalWork_g
                 type: gadget
             -   children:
-                -   displayName: 接続先編集
+                -   displayName: 接続先管理
                     gadgetName: connection_g
                     type: gadget
-                -   displayName: 接続先グループ編集
+                -   displayName: 接続先グループ管理
                     gadgetName: connectionGroup_g
                     type: gadget
                 displayName: 接続先編集
@@ -4744,13 +4861,13 @@ phases_data:
                 gadgetName: approvalWork_g
                 type: gadget
             -   children:
-                -   displayName: 接続先編集
+                -   displayName: 接続先管理
                     gadgetName: connection_g
                     type: gadget
-                -   displayName: 接続先グループ編集
+                -   displayName: 接続先グループ管理
                     gadgetName: connectionGroup_g
                     type: gadget
-                -   displayName: 接続仕様編集
+                -   displayName: 接続仕様管理
                     gadgetName: connectionSpecification_g
                     type: gadget
                 displayName: 接続先編集
