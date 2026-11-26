@@ -16,7 +16,7 @@
       set_fact:
         grafanaRole: "{{ 'Admin' if idmRole == 'IDM_ADMIN' else 'Viewer' }}" 
     - name: Create user in Keycloak
-      community.general.keycloak_user:
+      middleware_automation.keycloak.keycloak_user:
         auth_keycloak_url: "{{ idp_url }}"
         auth_realm: master
         auth_username: "{{ admin_user }}"
@@ -48,7 +48,7 @@
         state: present
       when: prov_operation == 'add'
     - name: Modify user attributes
-      community.general.keycloak_user:
+      middleware_automation.keycloak.keycloak_user:
         auth_keycloak_url: "{{ idp_url }}"
         auth_realm: master
         auth_username: "{{ admin_user }}"
@@ -80,7 +80,7 @@
         state: present
       when: prov_operation == 'modify'
     - name: Mapping realmRole to user in Keycloak
-      community.general.keycloak_user_rolemapping:
+      middleware_automation.keycloak.keycloak_user_rolemapping:
         auth_keycloak_url: "{{ idp_url }}"
         auth_realm: master
         auth_username: "{{ admin_user }}"
@@ -90,6 +90,19 @@
         # roles:
         #   - name: "{{ realm_role_access_aws }}"
         state: present
+      when: prov_operation == 'add' or prov_operation == 'modify'
+    - name: Sync webgate realm administrator role
+      middleware_automation.keycloak.keycloak_user_rolemapping:
+        auth_keycloak_url: "{{ idp_url }}"
+        auth_realm: master
+        auth_username: "{{ admin_user }}"
+        auth_password: "{{ admin_password }}"
+        realm: "{{ realm }}"
+        target_username: "{{ uid }}"
+        client_id: realm-management
+        roles:
+          - name: realm-admin
+        state: "{{ 'present' if idmRole == 'IDM_ADMIN' else 'absent' }}"
       when: prov_operation == 'add' or prov_operation == 'modify'
     - name: Update user password
       block:
@@ -170,7 +183,7 @@
           register: keycloak_update_response
       when: (prov_operation == 'add' or prov_operation == 'modify') and userPassword is defined and userPassword != ''
     - name: Delete user in Keycloak
-      community.general.keycloak_user:
+      middleware_automation.keycloak.keycloak_user:
         auth_keycloak_url: "{{ idp_url }}"
         auth_realm: master
         auth_username: "{{ admin_user }}"

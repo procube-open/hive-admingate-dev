@@ -23,6 +23,11 @@ server {
     listen 443 ssl;
 
     server_name {{ labels.published_name }}.{{ domain }};
+{% for path in labels.webgate.denyPathPrefixes | default([]) %}
+    location ~ "^{{ path | regex_escape }}([/;]|$)" {
+        return 403;
+    }
+{% endfor %}
 {% for proxy in labels.webgate.proxies %}
     location {{ proxy.pathPattern | default("/") }} {
 {% if not (proxy.disableAuthentication is defined and proxy.disableAuthentication) %}

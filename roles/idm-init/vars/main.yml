@@ -4605,6 +4605,12 @@ phases_data:
                 priority: 50
                 type: link
                 url: https://admingate-core.{{ domain }}/dashboard
+            -   align: right
+                displayName: Keycloak管理
+                openInNewTab: true
+                priority: 60
+                type: link
+                url: https://idp.{{ domain }}/admin/webgate/console/#/webgate
             name: adminNavbar
         -   component:
             -   align: right
