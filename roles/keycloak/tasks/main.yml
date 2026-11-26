@@ -1,0 +1,10 @@
+---
+# 修正済み realm.json をコンテナ内のレルムテンプレートへ配置する。
+# docker-entrypoint.py が起動時に /etc/realm-export.json を読み込み、
+# 環境変数を置換して /opt/keycloak/data/import/realm.json を生成する。
+# レルムが DB に存在しない新規構築時のインポートで使用される。
+- name: Put realm-export.json
+  copy:
+    src: realm.json
+    dest: /etc/realm-export.json
+    mode: '0644'

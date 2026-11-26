@@ -1,3 +1,15 @@
+{# 認証付きプロキシを持つ全公開サービスのホスト名を収集（フロントチャネルログアウト用） #}
+{% set ns = namespace(auth_hosts=[]) %}
+{% for svc in groups['services'] | intersect(groups[hive_stage]) | sort %}
+{% set svc_labels = hostvars[svc].hive_labels | default({}) %}
+{% if svc_labels.published_name is defined and svc_labels.webgate is defined %}
+{% for svc_proxy in svc_labels.webgate.proxies | default([]) %}
+{% if not (svc_proxy.disableAuthentication | default(false)) and svc_labels.published_name not in ns.auth_hosts %}
+{% set ns.auth_hosts = ns.auth_hosts + [svc_labels.published_name] %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
 {% for proxy in ( labels.webgate.proxies | unique(attribute='target_port') ) %}
 upstream {{ labels.published_name }}_{{ proxy.target_port }}_upstream {
     zone backend_zone 64k;
@@ -11,6 +23,11 @@ server {
     listen 443 ssl;
 
     server_name {{ labels.published_name }}.{{ domain }};
+{% for path in labels.webgate.denyPathPrefixes | default([]) %}
+    location ~ "^{{ path | regex_escape }}([/;]|$)" {
+        return 403;
+    }
+{% endfor %}
 {% for proxy in labels.webgate.proxies %}
     location {{ proxy.pathPattern | default("/") }} {
 {% if not (proxy.disableAuthentication is defined and proxy.disableAuthentication) %}
@@ -45,6 +62,14 @@ server {
     }
 {% endfor %}
 
+    # Keycloak のフロントチャネルログアウトから iframe で読み込まれ、
+    # 認証付き全 vhost の /auth/postlogout を呼び出してクッキーを一括削除する
+    location = /auth/frontchannel-logout {
+        default_type "text/html; charset=utf-8";
+        add_header Cache-Control "no-store" always;
+        return 200 '<!DOCTYPE html><html><head><title>Logout</title></head><body>{% for auth_host in ns.auth_hosts %}<iframe src="https://{{ auth_host }}.{{ domain }}/auth/postlogout" style="display:none"></iframe>{% endfor %}</body></html>';
+    }
+
     ssl_prefer_server_ciphers  on;
     ssl_protocols TLSv1.2;
     ssl_ciphers  'ECDH !aNULL !eNULL !SSLv2 !DH !RC4 !3DES';
@@ -55,5 +80,15 @@ server {
     access_log /var/log/nginx/access.{{ labels.published_name }}.log json;
 {% if not (labels.disableAuthPath is defined and labels.disableAuthPath) %}
     include /etc/nginx/conflib/oidc-server.conf;
+
+    # /auth/postlogout がクッキー削除後に OIDC_POSTLOGOUT_CONTENT の指定でここへ内部リダイレクトする
+    # （未指定時はデフォルトの @bye が "See you again." を表示する）。
+    # 通常のログアウト（トップレベル表示）ではトップページへ遷移して再度ログイン画面を表示する。
+    # フロントチャネルログアウトの非表示 iframe から呼ばれた場合は何も表示しない。
+    location @postlogout_content {
+        default_type "text/html; charset=utf-8";
+        add_header Cache-Control "no-store" always;
+        return 200 '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Logged out</title></head><body><script>if(window.self===window.top){window.location.replace("/");}</script><noscript><a href="/">ログイン画面へ戻る</a></noscript></body></html>';
+    }
 {% endif %}
 }

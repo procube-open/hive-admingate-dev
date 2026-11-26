@@ -48,6 +48,8 @@ restore_sequence_mongodb:
     key_property: name
   - name: _sandboxProvSettings
     key_property: name
+  - name: _sandboxUpdateBatch
+    key_property: name
 - name: layouts
   interfaces:
   - name:  _sandboxRoles

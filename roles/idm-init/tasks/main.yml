@@ -1,3 +1,6 @@
+- name: load secrets
+  include_vars: "{{ inventory_dir | dirname }}/secrets.yml"
+  no_log: true
 - name: wait for idm3 services starting(1 min)
   pause:
     minutes: 1

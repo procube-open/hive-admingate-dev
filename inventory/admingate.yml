@@ -83,6 +83,7 @@ services:
       ADMINGATE_CLAMAV_ADDR: "clamav:3310"
       ADMINGATE_STATIC_DIR: "/app/dist"
       ADMINGATE_CONNECT_TIMEOUT_SECS: "300"
+      ADMINGATE_MYPAGE_URL: "https://idp.{{ domain }}/realms/webgate/account/?referrer=webgate-web"
       ADMINGATE_LOGOUT_URL: "https://admingate-core.{{ domain }}/logout"
       ADMINGATE_DOCUMENT_URL: "https://admingate-docs.{{ domain }}"
       ADMINGATE_IDM_URL: "https://idm3.{{ domain }}"

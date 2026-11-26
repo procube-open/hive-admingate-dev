@@ -16,6 +16,27 @@
   idmdownload_format:
     mongodb_data: "{{ mongo_dataset.results }}"
     targets:
+    - interface: _sandboxUpdateBatch
+      property: authPassword
+      expression: mail_server_auth_password
+    - interface: _sandboxUpdateBatch
+      property: authUser
+      expression: mail_server_auth_user
+    - interface: _sandboxUpdateBatch
+      property: disableStartTls
+      expression: mail_server_start_tls
+    - interface: _sandboxUpdateBatch
+      property: mailFrom
+      expression: mail_server_auth_user
+    - interface: _sandboxUpdateBatch
+      property: mailPort
+      expression: mail_server_port
+    - interface: _sandboxUpdateBatch
+      property: mailSecure
+      expression: mail_server_secure
+    - interface: _sandboxUpdateBatch
+      property: mailServer
+      expression: mail_server_host
     - regex: "\\{SSHA\\}[0-9a-zA-Z+/=]+"
       expression: "db_password"
     - value: "{{ db_password }}"

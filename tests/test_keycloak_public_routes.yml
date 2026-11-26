@@ -1,0 +1,41 @@
+---
+- name: Check public Keycloak routes
+  hosts: localhost
+  gather_facts: false
+  vars:
+    hive_stage: production
+    domain: example.test
+    service_name: idp
+    labels: "{{ (lookup('file', '../inventory/keycloak.yml') | from_yaml).services.idp.labels }}"
+  tasks:
+    - name: Populate template service groups
+      add_host:
+        name: idp
+        groups:
+          - services
+          - production
+        hive_labels: "{{ labels }}"
+
+    - name: Render the IdP proxy configuration
+      set_fact:
+        rendered: "{{ lookup('template', '../roles/oidc-init/templates/service.conf.template.j2') }}"
+
+    - name: Extract deny locations
+      set_fact:
+        deny_patterns: "{{ rendered | regex_findall('location ~ \"([^\"]+)\"') }}"
+
+    - name: Check master and webgate paths
+      assert:
+        that:
+          - deny_patterns | length == 3
+          - (item.path is match(deny_patterns | join('|'))) == item.denied
+      loop:
+        - {path: /realms/master, denied: true}
+        - {path: /realms/master/protocol/openid-connect/token, denied: true}
+        - {path: /admin/master/console/, denied: true}
+        - {path: /admin/realms/master/users, denied: true}
+        - {path: '/realms/master;foo/bar', denied: true}
+        - {path: /realms/masterly, denied: false}
+        - {path: /realms/webgate/.well-known/openid-configuration, denied: false}
+        - {path: /admin/webgate/console/, denied: false}
+        - {path: /admin/realms/webgate/users, denied: false}

@@ -424,16 +424,70 @@ phases_data:
                     value: linux
                 -   displayName: Windows
                     value: windows
+                -   displayName: Cisco ASA
+                    value: asa
                 -   displayName: Cisco IOS
                     value: ios
                 -   displayName: Cisco IOS XR
                     value: iosxr
+                -   displayName: BIG-IP
+                    value: bigip
                 -   displayName: Juniper
                     value: junos
                 -   displayName: Fortigate
                     value: fortios
                 -   displayName: Arista EOS
                     value: eos
+                -   displayName: ProLiant
+                    value: pro-liant
+                -   displayName: A10
+                    value: a10
+                -   displayName: 検証用
+                    value: test
+                -   displayName: Apresia AMIOS
+                    value: telnet_AP16K
+                -   displayName: Apresia AEOS
+                    value: telnet_AP3448
+                -   displayName: furukawa F70
+                    value: telnet_F70
+                -   displayName: Sei OLT
+                    value: telnet_FSU
+                -   displayName: NEC IX
+                    value: telnet_ix3115
+                -   displayName: NEC NS
+                    value: telnet_ns2480
+                -   displayName: CISCO IOS Telnet
+                    value: telnet_ios
+                -   displayName: Huawei telnet
+                    value: telnet_huawei
+                -   displayName: Alaxala
+                    value: telnet_Alaxala
+                -   displayName: FRM220
+                    value: telnet_FRM220
+                -   displayName: FW7040
+                    value: telnet_FW7040
+                -   displayName: GM3200
+                    value: telnet_GM3200
+                -   displayName: GbE-SLT
+                    value: telnet_GbE-SLT
+                -   displayName: MF-100GMC
+                    value: telnet_MF-100GMC
+                -   displayName: MW0500
+                    value: telnet_MW0500
+                -   displayName: ODN-183
+                    value: telnet_ODN-183
+                -   displayName: XGbE-SLT
+                    value: telnet_xgbe-slt
+                -   displayName: XGMC-2016
+                    value: telnet_XGMC-2016
+                -   displayName: SmartCS
+                    value: sii
+                -   displayName: SmartCS2240
+                    value: sii2240
+                -   displayName: Web Standard
+                    value: web_standard
+                -   displayName: A10 ACOS Telnet
+                    value: telnet_A10
             -   allowAnotherValue: false
                 displayName: プロトコル
                 isArray: false
@@ -944,8 +998,9 @@ phases_data:
                 -   displayName: 利用者
                     value: IDM_USER
             -   allowAnotherValue: false
-                description: ユーザのパスワード
-                displayName: 初期パスワード
+                derivation: this().AESPassword
+                description: KeyCloakに転送する用のユーザのパスワード
+                displayName: 初期パスワード（KeyCloak転送用）
                 encryption: ARGON2
                 isArray: false
                 name: userPassword
@@ -955,11 +1010,42 @@ phases_data:
                 unique: false
                 uniqueIgnoreCase: false
             -   allowAnotherValue: false
+                description: ユーザのパスワード
+                displayName: 初期パスワード
+                encryption: AES
+                isArray: false
+                name: AESPassword
+                outputLdapSchema: false
+                propagations:
+                -   targetProperty: userPassword
+                required: false
+                type: string
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: 初期化メール送信フラグ
+                isArray: false
+                name: sendInitMailFlag
+                outputLdapSchema: false
+                required: false
+                type: boolean
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
+                displayName: パスワード有効期限
+                isArray: false
+                name: passwordExpireDate
+                outputLdapSchema: false
+                required: false
+                type: datetime
+                unique: false
+                uniqueIgnoreCase: false
+            -   allowAnotherValue: false
                 displayName: チーム
                 isArray: true
                 name: team
                 outputLdapSchema: false
-                required: false
+                required: true
                 type: string
                 unique: false
                 uniqueIgnoreCase: false
@@ -1501,7 +1587,7 @@ phases_data:
             disableMultiDelete: true
             disableSuspension: false
             disableUpdate: false
-            displayName: 作業申請ガジェット
+            displayName: 作業申請
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: false
             gadgetCommandlet:
@@ -1839,7 +1925,7 @@ phases_data:
             disableMultiDelete: true
             disableSuspension: true
             disableUpdate: true
-            displayName: 承認済み作業ガジェット
+            displayName: 承認済み作業
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: false
             interfaceCommandlet:
@@ -2314,7 +2400,7 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: 接続先グループガジェット
+            displayName: 接続先グループ管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             interfaceName: connectionGroupEditorInterface
@@ -2371,7 +2457,7 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: 接続仕様ガジェット
+            displayName: 接続仕様管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             interfaceName: connectionSpecificationEditIF
@@ -2607,11 +2693,11 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: 接続先ガジェット
+            displayName: 接続先管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             gadgetCommandlet:
-            -   autoCommit: true
+            -   autoCommit: false
                 backToDetail: false
                 commandlet:
                 -   derivation: Date()
@@ -2623,6 +2709,7 @@ phases_data:
                 onDetailView: true
                 onEditView: false
                 onListView: true
+                showConfirmModal: false
             interfaceName: connectionEditIF
             isSingleton: false
             name: connection_g
@@ -2828,11 +2915,11 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: 要承認作業ガジェット
+            displayName: 要承認作業
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: false
             gadgetCommandlet:
-            -   autoCommit: false
+            -   autoCommit: true
                 backToDetail: false
                 commandlet:
                 -   derivation: user()
@@ -2841,6 +2928,7 @@ phases_data:
                     targetProperty: approvedDatetime
                 -   derivation: '"approved"'
                     targetProperty: status
+                confirmComment: この作業を承認しますか？
                 displayName: 承認
                 goToEdit: false
                 multiSelect: false
@@ -2848,12 +2936,13 @@ phases_data:
                 onDetailView: true
                 onEditView: false
                 onListView: false
-                showConfirmModal: false
-            -   autoCommit: false
+                showConfirmModal: true
+            -   autoCommit: true
                 backToDetail: false
                 commandlet:
                 -   derivation: '"rejected"'
                     targetProperty: status
+                confirmComment: この作業を却下しますか？
                 displayName: 却下
                 goToEdit: false
                 multiSelect: false
@@ -2861,11 +2950,13 @@ phases_data:
                 onDetailView: true
                 onEditView: false
                 onListView: false
-            -   autoCommit: false
+                showConfirmModal: true
+            -   autoCommit: true
                 backToDetail: false
                 commandlet:
                 -   derivation: '"sendBack"'
                     targetProperty: status
+                confirmComment: この作業を差し戻しますか？
                 displayName: 差し戻し
                 goToEdit: true
                 multiSelect: false
@@ -2873,6 +2964,7 @@ phases_data:
                 onDetailView: true
                 onEditView: false
                 onListView: false
+                showConfirmModal: true
             interfaceName: requiredApprovalWorkIF
             isSingleton: false
             name: requiredApprovalWork_g
@@ -3255,7 +3347,7 @@ phases_data:
             uploadCSV: false
             useDisplayNameHeader: false
             withHeader: false
-        -   autoCommit: false
+        -   autoCommit: true
             backToDetail: false
             className: user
             clonable: false
@@ -3264,9 +3356,27 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: ユーザガジェット
+            displayName: ユーザ管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
+            gadgetCommandlet:
+            -   autoCommit: false
+                backToDetail: false
+                commandlet:
+                -   derivation: generatePwd(12)
+                    targetProperty: AESPassword
+                -   derivation: 'false'
+                    targetProperty: sendInitMailFlag
+                -   derivation: Date(Date().getTime() + 2*24*60*60*1000)
+                    targetProperty: passwordExpireDate
+                displayName: パスワード初期化
+                goToEdit: false
+                multiSelect: true
+                name: initPasswordButton
+                onDetailView: true
+                onEditView: false
+                onListView: true
+                showConfirmModal: false
             interfaceName: userEditorInterface
             isSingleton: false
             name: userEditor
@@ -3304,16 +3414,6 @@ phases_data:
                 hideOnShow: false
                 incrementalSearchFlag: false
                 name: idmRole
-                radioButtonFlag: false
-                twoColumnFlag: false
-                type: string
-            -   className: ''
-                datePickerFlag: false
-                disableUpdate: false
-                hideOnEdit: false
-                hideOnShow: false
-                incrementalSearchFlag: false
-                name: userPassword
                 radioButtonFlag: false
                 twoColumnFlag: false
                 type: string
@@ -3400,7 +3500,7 @@ phases_data:
             disableMultiDelete: false
             disableSuspension: false
             disableUpdate: false
-            displayName: チームガジェット
+            displayName: チーム管理
             downloadDisplayFormatCSV: false
             downloadUpdateFormatCSV: true
             interfaceCommandlet:
@@ -3784,6 +3884,29 @@ phases_data:
             name: enumWorkIF
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
+        -   accessLevel: readWrite
+            className: user
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: パスワード期限切れIF
+            filterDerivation: '{passwordExpireDate : {"$lt" : Date(), "$ne" : null}}'
+            name: expiredPasswordIF
+            properties:
+            - passwordExpireDate
+            - accountLock
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readOnly
+            className: _provRequest
+            database: System
+            deleteAsUpdate: false
+            displayName: 編集中プロビジョニング要求取得用IF
+            filter: '{"status":"editing", "database":"Sandbox", "creator":{"$nin":["IDM_UPDATEBATCH_mailForNewID","IDM_UPDATEBATCH_mailForNewAccount","IDM_UPDATEBATCH_mailForScepSecret","IDM_UPDATEBATCH_mailAgentForScepSecret","CSN_MANAGER_provAgents","CSN_MANAGER_provTags","CSN_MANAGER_provUsers","CSN_MANAGER_syncTags","CSN_MANAGER_syncUsers","CSN_MANAGER_provScep"]}}'
+            name: getEditingProvRequest
+            properties:
+            - id
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
         -   accessLevel: readOnly
             className: work
             database: Sandbox
@@ -3804,6 +3927,24 @@ phases_data:
             displayName: IAM Policy編集インターフェース
             name: iamPolicyEditorInterface
             useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readWrite
+            className: user
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: 初期パスワードメール送信IF
+            filter: '{"sendInitMailFlag": false}'
+            filterDerivation: '(val1 = getResource("/IDManager/getEditingProvRequest"))
+                && val1.length > 0 ? {uid:null} : {uid:{"$ne":null}}'
+            name: initPasswordSendMailIF
+            properties:
+            - uid
+            - sn
+            - cn
+            - sendInitMailFlag
+            - email
+            - AESPassword
+            useAESDecryptedResponse: true
             useCustomBackendDatabase: false
         -   ACEs:
             -   allow: true
@@ -4062,6 +4203,41 @@ phases_data:
             - sn
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
+        -   accessLevel: full
+            className: swConnector
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: socket warp connector編集IF
+            name: swConnectorEditIF
+            readOnlyProperties:
+            - certificate
+            - certIss
+            - certExp
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readOnly
+            className: swConnector
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: swConnector取得IF
+            name: swConnectorGetIF
+            properties:
+            - uid
+            - password
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
+        -   accessLevel: readWrite
+            className: swConnector
+            database: Sandbox
+            deleteAsUpdate: false
+            displayName: swConnector更新IF
+            name: swConnectorPutIF
+            properties:
+            - certificate
+            - certIss
+            - certExp
+            useAESDecryptedResponse: false
+            useCustomBackendDatabase: false
         -   accessLevel: readWrite
             className: user
             database: Sandbox
@@ -4072,6 +4248,7 @@ phases_data:
             properties:
             - loginDateTime
             - userPassword
+            - initPasswordFlag
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
         -   ACEs:
@@ -4089,6 +4266,19 @@ phases_data:
             deleteAsUpdate: false
             description: ユーザ情報を編集するインタフェース
             displayName: ユーザ情報編集インタフェース
+            initializer:
+            -   derivation: generatePwd(12)
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: AESPassword
+            -   derivation: 'false'
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: sendInitMailFlag
+            -   derivation: Date(Date().getTime() + 2*24*60*60*1000)
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: passwordExpireDate
             name: userEditorInterface
             useAESDecryptedResponse: false
             useCustomBackendDatabase: false
@@ -4162,6 +4352,8 @@ phases_data:
                     propertyName: cn
                 -   modifiedOnly: false
                     propertyName: idmRole
+                -   modifiedOnly: false
+                    propertyName: accountLock
                 -   modifiedOnly: false
                     propertyName: email
                 -   modifiedOnly: false
@@ -4242,21 +4434,33 @@ phases_data:
             - IDM_USER_ADMIN
             clockDaemons:
             -   clockType: interval
-                day: 30
                 description: 作業申請の承認要求メール送信のクロックデーモン
                 displayName: 作業申請の承認要求メール送信
                 intervalSeconds: 60
                 name: approvalRequestDaemon
                 updateBatch:
-                - sendApprovalRequestMail
+                - requiredApplovalWorkMail
             -   clockType: interval
-                day: 30
                 description: 作業申請の承認完了メール送信のクロックデーモン
                 displayName: 作業申請の承認完了メール送信
                 intervalSeconds: 60
                 name: approveCompletionDaemon
                 updateBatch:
-                - sendApproveCompletionMail
+                - approvalCompletionMailIF
+            -   clockType: interval
+                description: パスワード初期化メール送信のクロックデーモン
+                displayName: パスワード初期化デーモン
+                intervalSeconds: 60
+                name: initPasswordDaemon
+                updateBatch:
+                - initPasswordSendMail
+            -   clockType: daily
+                displayName: パスワード期限切れデーモン
+                hour: 0
+                minutes: 0
+                name: expiredPasswordDaemon
+                updateBatch:
+                - expiredPassword
             csvApiFileEncoding: UTF-8
             name: SystemSetting
             passphrase: P@ssw0rd123
@@ -4278,6 +4482,81 @@ phases_data:
             systemIdIf: masterLinkageSystem
             systemName: 特権ID管理システム
             traceFormula: false
+        _sandboxUpdateBatch:
+        -   authPassword: '{{ mail_server_auth_password }}'
+            authUser: '{{ mail_server_auth_user }}'
+            autoUpdate:
+            -   derivation: Date()
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: approveCompletionDate
+            disableStartTls: '{{ mail_server_start_tls }}'
+            displayName: 承認完了メール送信
+            doAggregate: false
+            interfaceName: approvalCompletionMailIF
+            mailFrom: '{{ mail_server_auth_user }}'
+            mailPort: '{{ mail_server_port }}'
+            mailSecure: '{{ mail_server_secure }}'
+            mailServer: '{{ mail_server_host }}'
+            mailSubject: 【Admin Gate】作業申請が承認されました
+            mailTemplate: "Admin Gate であなたが申請した作業申請が承認されました。\r\n以下のリンクから作業を開始してください。\r\n\r\nhttps://admingate-core.{{
+                domain }}/works/<%=id %>/targets?pageSize=10&currentPage=1"
+            mailTo: <%=applicationMailList %>
+            name: approvalCompletionMailIF
+        -   autoUpdate:
+            -   derivation: 'true'
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: accountLock
+            disableStartTls: '{{ mail_server_start_tls }}'
+            displayName: パスワード期限切れ
+            doAggregate: false
+            interfaceName: expiredPasswordIF
+            mailSecure: '{{ mail_server_secure }}'
+            name: expiredPassword
+        -   authPassword: '{{ mail_server_auth_password }}'
+            authUser: '{{ mail_server_auth_user }}'
+            autoUpdate:
+            -   derivation: 'true'
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: sendInitMailFlag
+            description: パスワード初期化時に初期パスワードの通知メールを送信する
+            disableStartTls: '{{ mail_server_start_tls }}'
+            displayName: 初期パスワードメール送信
+            doAggregate: false
+            interfaceName: initPasswordSendMailIF
+            mailFrom: '{{ mail_server_auth_user }}'
+            mailPort: '{{ mail_server_port }}'
+            mailSecure: '{{ mail_server_secure }}'
+            mailServer: '{{ mail_server_host }}'
+            mailSubject: 【Admin Gate】初期パスワード発行のお知らせ
+            mailTemplate: "<%= sn %> <%=cn %> 様\r\n\r\nAdmin Gate にログインするための初期パスワードが発行されました。\r\nアカウント情報は以下の通りです。\r\n\r\nユーザID：<%=
+                uid %>\r\nパスワード：<%= AESPassword %>\r\n\r\n以下のURLからログインが可能です。\r\nhttps://idm3.{{
+                domain }}/ja"
+            mailTo: <%= email %>
+            name: initPasswordSendMail
+        -   authPassword: '{{ mail_server_auth_password }}'
+            authUser: '{{ mail_server_auth_user }}'
+            autoUpdate:
+            -   derivation: Date()
+                onDeleteOnly: false
+                onUpdate: false
+                targetProperty: approveRequestDatetime
+            description: 承認要求のメールを送信する自動更新バッチ
+            disableStartTls: '{{ mail_server_start_tls }}'
+            displayName: 要承認メール送信
+            doAggregate: false
+            interfaceName: requiredApprovalWorkMailIF
+            mailFrom: '{{ mail_server_auth_user }}'
+            mailPort: '{{ mail_server_port }}'
+            mailSecure: '{{ mail_server_secure }}'
+            mailServer: '{{ mail_server_host }}'
+            mailSubject: 【Admin Gate】作業申請が申請されました
+            mailTemplate: "Admin Gate の作業申請が申請されました。\r\nあなたが承認者に含まれています。\r\n以下のリンクから作業を承認してください。\r\n\r\nhttps://idm3.{{
+                domain }}/ja/gadgets/requiredApprovalWork_g/show/<%=id %>"
+            mailTo: <%=approveMailList %>
+            name: requiredApplovalWorkMail
     layouts:
         _sandboxNavbar:
         -   component:
@@ -4306,6 +4585,9 @@ phases_data:
                 sidebarName: workflowSidebar
                 type: sidebar
             -   align: right
+                logoutUrl: https://idm3.{{ domain }}/logout
+                myPageUrl: https://idp.{{ domain }}/realms/webgate/account
+                openInNewTab: false
                 priority: 10
                 type: username
             -   align: right
@@ -4317,6 +4599,18 @@ phases_data:
             -   align: right
                 priority: 40
                 type: reload
+            -   align: right
+                displayName: AdminGate
+                openInNewTab: true
+                priority: 50
+                type: link
+                url: https://admingate-core.{{ domain }}/dashboard
+            -   align: right
+                displayName: Keycloak管理
+                openInNewTab: true
+                priority: 60
+                type: link
+                url: https://idp.{{ domain }}/admin/webgate/console/#/webgate
             name: adminNavbar
         -   component:
             -   align: right
@@ -4326,6 +4620,107 @@ phases_data:
                 priority: 20
                 type: reload
             name: defaultNavbar
+        -   component:
+            -   align: left
+                priority: 1
+                type: logo
+            -   align: left
+                displayName: ワークフロー設定
+                openInNewTab: false
+                priority: 40
+                sidebarName: leaderWorkflowSidebar
+                type: sidebar
+            -   align: right
+                logoutUrl: https://idm3.{{ domain }}/logout
+                myPageUrl: https://idp.{{ domain }}/realms/webgate/account/?referrer=webgate-web
+                openInNewTab: false
+                priority: 10
+                type: username
+            -   align: right
+                priority: 20
+                type: userProv
+            -   align: right
+                priority: 30
+                type: language
+            -   align: right
+                priority: 40
+                type: reload
+            -   align: right
+                displayName: AdminGate
+                openInNewTab: true
+                priority: 50
+                type: link
+                url: https://admingate-core.{{ domain }}/dashboard
+            name: leaderNavbar
+        -   component:
+            -   align: left
+                priority: 1
+                type: logo
+            -   align: left
+                displayName: 認証設定
+                priority: 30
+                sidebarName: userSidebar
+                type: sidebar
+            -   align: left
+                displayName: ワークフロー設定
+                openInNewTab: false
+                priority: 40
+                sidebarName: workflowSidebar
+                type: sidebar
+            -   align: right
+                logoutUrl: https://idm3.{{ domain }}/logout
+                myPageUrl: https://idp.{{ domain }}/realms/webgate/account/?referrer=webgate-web
+                openInNewTab: false
+                priority: 10
+                type: username
+            -   align: right
+                priority: 20
+                type: userProv
+            -   align: right
+                priority: 30
+                type: language
+            -   align: right
+                priority: 40
+                type: reload
+            -   align: right
+                displayName: AdminGate
+                openInNewTab: true
+                priority: 50
+                type: link
+                url: https://admingate-core.{{ domain }}/dashboard
+            name: userAdminNavbar
+        -   component:
+            -   align: left
+                priority: 1
+                type: logo
+            -   align: left
+                displayName: ワークフロー設定
+                openInNewTab: false
+                priority: 40
+                sidebarName: userWorkflowSidebar
+                type: sidebar
+            -   align: right
+                logoutUrl: https://idm3.{{ domain }}/logout
+                myPageUrl: https://idp.{{ domain }}/realms/webgate/account/?referrer=webgate-web
+                openInNewTab: false
+                priority: 10
+                type: username
+            -   align: right
+                priority: 20
+                type: userProv
+            -   align: right
+                priority: 30
+                type: language
+            -   align: right
+                priority: 40
+                type: reload
+            -   align: right
+                displayName: AdminGate
+                openInNewTab: true
+                priority: 50
+                type: link
+                url: https://admingate-core.{{ domain }}/dashboard
+            name: userNavbar
         _sandboxRoles:
         -   httpHeader: HTTP_REMOTEGROUP
             name: adminRole
@@ -4337,6 +4732,21 @@ phases_data:
             navbar: defaultNavbar
             priority: 100
             testRegex: .*
+        -   httpHeader: HTTP_REMOTEGROUP
+            name: leaderRole
+            navbar: leaderNavbar
+            priority: 30
+            testRegex: (^|.*;) *IDM_USER_LEADER *(;.*|$)
+        -   httpHeader: HTTP_REMOTEGROUP
+            name: userAdminRole
+            navbar: userAdminNavbar
+            priority: 20
+            testRegex: (^|.*;) *IDM_USER_ADMIN *(;.*|$)
+        -   httpHeader: HTTP_REMOTEGROUP
+            name: userRole
+            navbar: userNavbar
+            priority: 40
+            testRegex: (^|.*;) *IDM_USER *(;.*|$)
         _sandboxSidebar:
         -   children:
             -   children:
@@ -4397,18 +4807,10 @@ phases_data:
                 type: gadget
             name: layoutSidebar
         -   children:
-            -   displayName: ユーザ編集
-                gadgetName: userEditor
+            -   displayName: ユーザ管理
+                gadgetName: sameTeamUser_g
                 type: gadget
-            -   displayName: チーム編集
-                gadgetName: userGroup_g
-                type: gadget
-            -   displayName: ログアウト
-                icon: M30 10 L30 15 L40 15 L40 35 L30 35 L30 40 L45 40 L45 10 Z M20
-                    18 L25 22.5 L18 22.5 L18 27.5 L25 27.5 L20 32 L5 25 Z
-                redirectUrl: https://idm3.{{ domain }}/logout
-                type: link
-            name: userSidebar
+            name: leaderUserSidebar
         -   children:
             -   displayName: 作業申請
                 gadgetName: applicationWork_g
@@ -4420,13 +4822,58 @@ phases_data:
                 gadgetName: approvalWork_g
                 type: gadget
             -   children:
-                -   displayName: 接続先編集
+                -   displayName: 接続先管理
                     gadgetName: connection_g
                     type: gadget
-                -   displayName: 接続先グループ編集
+                -   displayName: 接続先グループ管理
                     gadgetName: connectionGroup_g
                     type: gadget
-                -   displayName: 接続仕様編集
+                displayName: 接続先編集
+                type: parent
+            name: leaderWorkflowSidebar
+        -   children:
+            -   displayName: ユーザ管理
+                gadgetName: userEditor
+                type: gadget
+            -   displayName: チーム管理
+                gadgetName: userGroup_g
+                type: gadget
+            name: userSidebar
+        -   children:
+            -   displayName: 作業申請
+                gadgetName: applicationWork_g
+                type: gadget
+            -   displayName: 承認済み作業
+                gadgetName: approvalWork_g
+                type: gadget
+            -   children:
+                -   displayName: 接続先管理
+                    gadgetName: connection_g
+                    type: gadget
+                -   displayName: 接続先グループ管理
+                    gadgetName: connectionGroup_g
+                    type: gadget
+                displayName: 接続先編集
+                type: parent
+            name: userWorkflowSidebar
+        -   children:
+            -   displayName: 作業申請
+                gadgetName: applicationWork_g
+                type: gadget
+            -   displayName: 要承認作業
+                gadgetName: requiredApprovalWork_g
+                type: gadget
+            -   displayName: 承認済み作業
+                gadgetName: approvalWork_g
+                type: gadget
+            -   children:
+                -   displayName: 接続先管理
+                    gadgetName: connection_g
+                    type: gadget
+                -   displayName: 接続先グループ管理
+                    gadgetName: connectionGroup_g
+                    type: gadget
+                -   displayName: 接続仕様管理
                     gadgetName: connectionSpecification_g
                     type: gadget
                 displayName: 接続先編集
@@ -4440,6 +4887,7 @@ phases_data:
             email: admin@{{ domain }}
             idmRole: IDM_ADMIN
             loginDateTime: '2026-06-26T08:18:46.820Z'
+            sendInitMailFlag: true
             sn: idm
             team:
             - administorators

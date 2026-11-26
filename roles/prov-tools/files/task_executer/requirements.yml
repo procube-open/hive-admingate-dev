@@ -2,6 +2,8 @@
 collections:
   - ansible.posix
   - community.general
+  # Keycloak modules are maintained separately from community.general.
+  - middleware_automation.keycloak
   - community.docker
   - community.crypto
   - arista.eos
